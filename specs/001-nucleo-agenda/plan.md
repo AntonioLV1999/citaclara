@@ -36,7 +36,7 @@ El enfoque es una sola aplicación Node, sin dependencias de producción, con HT
 
 | Principio | Cumplimiento | Estado |
 |-----------|--------------|--------|
-| I. Spec primero | Propietario registrado en `specs/MAPA.md`. **La spec sigue en Borrador: su propietario debe aprobarla antes de integrar.** | Cumple para planificar |
+| I. Spec primero | Propietario registrado en `specs/MAPA.md`. Spec aprobada por su propietario el 06/11/2026. | Cumple |
 | II. Números | Céntimos enteros y funciones únicas de formato. Hora local de la clínica; cambio de hora definido en FR-025. | Cumple |
 | III. Solape | Garantía en el almacén, no en la interfaz. Pruebas con reservas simultáneas por proceso, exactas y parciales. La semilla también pasa por el disparador. | Cumple |
 | IV. Simplicidad | Cero dependencias de producción; la única de desarrollo está justificada en [research.md](research.md). Sin API ni aplicación de cliente. | Cumple |

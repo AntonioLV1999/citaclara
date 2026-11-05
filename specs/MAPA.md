@@ -4,4 +4,4 @@ Registro de propietarios exigido por el principio I de la constitución. Cada sp
 
 | Spec | Propietario | Estado |
 |------|-------------|--------|
-| [001-nucleo-agenda](001-nucleo-agenda/spec.md) | AntonioLV1999 | Borrador |
+| [001-nucleo-agenda](001-nucleo-agenda/spec.md) | AntonioLV1999 | Aprobada |

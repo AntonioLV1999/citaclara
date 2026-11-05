@@ -224,3 +224,16 @@ test('FR-024 FR-027 un día mal escrito en la agenda explica el formato', async 
   assert.equal(r.estado, 404);
   assert.ok(textoVisible(r.texto).includes('Escribe la fecha como dd/mm/aaaa'));
 });
+
+test('FR-006 un hueco donde no cabe ningún servicio se ve libre, pero no ofrece reservar', async () => {
+  citaDe('2026-11-12T09:30', 'reservada');
+  const r = await agenda(`?profesional=${e.a.fisio}&dia=2026-11-12`);
+  assert.ok(!r.texto.includes('hora=09:00"'));
+  assert.ok(textoVisible(r.texto).includes('Libre 09:00 a 09:30 No cabe ningún servicio'));
+});
+
+test('FR-006 un hueco justo del servicio más corto sí ofrece reservar', async () => {
+  citaDe('2026-11-12T09:45', 'reservada');
+  const r = await agenda(`?profesional=${e.a.fisio}&dia=2026-11-12`);
+  assert.ok(r.texto.includes('hora=09:00"'));
+});

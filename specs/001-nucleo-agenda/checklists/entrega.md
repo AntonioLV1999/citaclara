@@ -13,13 +13,13 @@ Justificación escrita del principio VI: estos criterios miden el uso real sin f
 - [ ] Datos cargados con `npm run semilla -- --lunes <lunes de la semana en curso>`, y aplicación arrancada con `npm start`.
 - [ ] Al menos **10 personas** sin formación previa en CitaClara y sin manual, para que «9 de cada 10» se pueda medir.
 - [ ] Portátil y cronómetro preparados. Una sola persona observa cada sesión, y no ayuda ni da pistas.
-- [ ] La sesión ya está abierta y se ve la agenda de hoy. Antes de cada persona se repite la carga de datos.
+- [ ] Antes de cada persona se repite la carga de datos, que cierra la sesión. Después se entra con la clave y se deja a la vista la agenda de hoy.
 
 ### Tareas
 
 Se leen en este orden y con estas palabras:
 
-1. **Encontrar un hueco**: «Un paciente llama y quiere hora con Jorge para mañana por la tarde. Dime qué hueco le puedes dar.»
+1. **Encontrar un hueco**: «Un paciente llama y quiere hora con Jorge para el próximo día laborable por la tarde. Dime qué hueco le puedes dar.»
 2. **Reservar**: «Reserva esa hora a un paciente que ya tiene ficha, con una sesión de fisioterapia.» El observador elige un paciente de la semilla y dice su nombre.
 3. **Cancelar**: «El paciente llama de nuevo y anula esa cita. Cancélala.»
 
@@ -54,7 +54,7 @@ Se leen en este orden y con estas palabras:
 
 ## Puertas de calidad de la constitución
 
-- [ ] **I. Spec primero**: el propietario ha aprobado la spec, y `specs/MAPA.md` lo refleja.
+- [x] **I. Spec primero**: el propietario ha aprobado la spec, y `specs/MAPA.md` lo refleja.
 - [ ] **II. Números**: los importes, las fechas y las horas cumplen las reglas de presentación.
 - [ ] **III. Solape**: `npm test` incluye las pruebas de reservas simultáneas, y ninguna ha detectado un solape.
 - [ ] **IV. Simplicidad**: ninguna funcionalidad ni dependencia sin justificar en una spec.

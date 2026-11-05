@@ -26,20 +26,27 @@ Paciente nuevo y cita se escriben en una misma transacción (FR-013). Con 409 o 
 
 ## Mensajes
 
-Los textos son de referencia y deben cumplir FR-027. Ningún mensaje expone errores internos.
+Los textos son literales y deben cumplir FR-027. Ningún mensaje expone errores internos.
 
 | Caso | Código | Mensaje |
 |------|--------|---------|
 | Solape (RN1) | 409 | «{Profesional} ya tiene una cita de {inicio} a {fin} con {paciente}. Elige otra hora.» |
 | Pasado (RN2) | 422 | «Esa hora ya ha pasado. Elige una hora a partir de ahora.» |
 | Fuera de horario (FR-012) | 422 | «La clínica abre de lunes a viernes, de 09:00 a 20:00. Elige una hora dentro de ese horario.» |
-| Día no válido (FR-024) | 422 | «Ese día no es válido. Escribe la fecha como dd/mm/aaaa, por ejemplo 05/11/2026.» |
-| Hora no válida (FR-011) | 422 | «Las citas empiezan en punto, y cuarto, y media o menos cuarto.» |
+| Día no válido (FR-024) | 422; 404 en la agenda | «Ese día no es válido. Escribe la fecha como dd/mm/aaaa, por ejemplo 05/11/2026.» |
+| Hora no válida (FR-011) | 422 | «Las citas empiezan en punto, y cuarto, y media o menos cuarto. Elige una de esas horas.» |
 | Servicio incompatible (RN7) | 422 | «{Profesional} no atiende ese servicio. Elige uno de {especialidad}.» |
 | Cierre antes de hora (RN5) | 409 | «Esta cita todavía no ha empezado. Hasta entonces solo se puede cancelar.» |
 | Estado definitivo (RN4) | 409 | «Esta cita ya está {estado} y no se puede cambiar.» |
 | Clave incorrecta | 401 | «La clave no es correcta. Revísala e inténtalo de nuevo.» |
 | Datos del paciente | 422 | «Escribe el nombre y un teléfono de al menos 9 dígitos.» |
+| Correo del paciente | 422 | «Ese correo no parece válido. Revísalo o déjalo en blanco.» |
+| Faltan datos del alta | 422 | «Falta algún dato de la cita. Elige profesional, servicio, día y hora.» |
+| Sin sesión | 401 | «Para hacer esto hay que entrar con la clave de la clínica.» |
+| No encontrado | 404 | «No encontramos lo que buscas. Vuelve a la agenda y elige de nuevo.» |
+| Fallo interno | 500 | «Algo ha fallado y no se ha podido completar. Inténtalo de nuevo en unos minutos.» |
+
+Avisos de la agenda, que no son rechazos: «La clínica no abre este día.» en sábado y domingo, y en los huecos sin botón de reservar, «Ya ha pasado» o «No cabe ningún servicio» (FR-006, FR-018).
 
 ## Presentación
 

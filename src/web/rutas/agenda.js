@@ -1,4 +1,4 @@
-import { profesionales, profesionalPorId } from '../../datos/catalogo.js';
+import { profesionales, profesionalPorId, serviciosDeEspecialidad } from '../../datos/catalogo.js';
 import { citasDelDia } from '../../datos/citas.js';
 import { accionesPermitidas } from '../../dominio/estados.js';
 import { calcularHuecos } from '../../dominio/huecos.js';
@@ -17,6 +17,7 @@ function agenda({ bd, ahora, clinica, consulta }) {
   if (!esFechaValida(dia)) return paginaMensaje(404, 'Ese día no es válido', MENSAJES.dia, clinica);
 
   const citas = citasDelDia(bd, clinica.id, profesional.id, dia);
+  const servicios = serviciosDeEspecialidad(bd, clinica.id, profesional.especialidad);
   return pagina(vistaAgenda({
     clinica,
     profesionales: lista,
@@ -25,6 +26,7 @@ function agenda({ bd, ahora, clinica, consulta }) {
     hoy,
     citas: citas.map((cita) => ({ ...cita, acciones: accionesPermitidas(cita, momento) })),
     huecos: calcularHuecos({ dia, citas, ahora: momento }),
+    duracionMinima: Math.min(...servicios.map((s) => s.duracion_min)),
   }));
 }
 

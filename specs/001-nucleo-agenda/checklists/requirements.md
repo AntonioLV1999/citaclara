@@ -33,4 +33,4 @@
 
 - Los 3 marcadores se resolvieron el 05/11/2026 (ver «Aclaraciones» en la spec) y la validación se repitió sin incidencias.
 - Los encabezados de la plantilla están traducidos por el principio VIII; ningún script los lee.
-- Propietario registrado en `specs/MAPA.md`; la aprobación sigue pendiente de ese propietario.
+- Propietario registrado en `specs/MAPA.md`; aprobada por ese propietario el 06/11/2026.

@@ -4,7 +4,7 @@
 
 **Creada**: 05/11/2026
 
-**Estado**: Borrador
+**Estado**: Aprobada por su propietario el 06/11/2026
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -117,7 +117,7 @@ Cualquier persona del equipo genera los datos ficticios de Clínica Eleva y obti
 
 ### Casos límite
 
-- **Agenda desactualizada**: recepción tiene abierta una agenda antigua y reserva un hueco que otra persona acaba de ocupar. El sistema rechaza la reserva y recepción ve la agenda al día.
+- **Agenda desactualizada**: recepción tiene abierta una agenda antigua y reserva un hueco que otra persona acaba de ocupar. El sistema rechaza la reserva y recepción ve los huecos actuales de ese día.
 - **Doble pulsación o reintento**: la misma alta llega dos veces. Solo queda una cita, y la segunda petición se rechaza como cualquier solape.
 - **Dos acciones de estado a la vez** sobre la misma cita (por ejemplo, cancelar y completar): solo una prospera; la otra recibe un mensaje con el estado resultante.
 - **El servicio no cabe en el hueco**: una cita de 60 minutos en un hueco libre de 45 se rechaza por solapar la siguiente o por salirse del horario.
@@ -154,14 +154,14 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 **Alta de cita**
 
 - **FR-005**: Recepción DEBE poder crear una cita eligiendo profesional, servicio, paciente, día y hora de inicio.
-- **FR-006**: El alta DEBE poder iniciarse desde un hueco libre de la agenda, con profesional, día y hora ya rellenados.
+- **FR-006**: El alta DEBE poder iniciarse desde un hueco libre de la agenda, con profesional, día y hora ya rellenados. Si en un hueco no cabe ningún servicio del profesional, la agenda lo muestra como libre, pero no ofrece reservar en él.
 - **FR-007**: El sistema DEBE permitir localizar al paciente escribiendo parte de su nombre o de su teléfono.
 - **FR-008**: El alta DEBE ofrecer solo servicios de la especialidad del profesional, y el sistema DEBE rechazar cualquier combinación incompatible (RN7).
 - **FR-009**: El alta DEBE mostrar la duración, el precio y la hora de fin resultante antes de confirmar.
 - **FR-010**: El sistema DEBE aplicar RN1, RN2 y RN3 en el momento de registrar la cita, y si la rechaza, DEBE dejar la agenda intacta.
 - **FR-011**: Las horas de inicio DEBEN caer en múltiplos de 15 minutos.
 - **FR-012**: Una cita DEBE empezar y terminar dentro del horario de la clínica, que en la 001 es único y fijo para todos: de lunes a viernes, de 09:00 a 20:00, en hora local de la clínica.
-- **FR-013**: Durante el alta de una cita, recepción DEBE poder crear la ficha de un paciente nuevo con nombre y teléfono obligatorios y correo electrónico opcional. La ficha y la cita se registran juntas: si la cita se rechaza, no queda ficha y el formulario conserva lo escrito. Fuera del alta de cita no se gestionan pacientes.
+- **FR-013**: Durante el alta de una cita, recepción DEBE poder crear la ficha de un paciente nuevo con nombre y teléfono obligatorios y correo electrónico opcional. El teléfono DEBE tener al menos 9 dígitos, y solo admite dígitos, espacios y un `+` inicial. El correo, si se escribe, DEBE tener forma de correo. La ficha y la cita se registran juntas: si la cita se rechaza, no queda ficha y el formulario conserva lo escrito. Fuera del alta de cita no se gestionan pacientes.
 
 **Agenda del día**
 
@@ -170,7 +170,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-016**: Un hueco libre DEBE ser cualquier tramo continuo dentro del horario que no esté ocupado por una cita reservada o completada.
 - **FR-017**: Las citas canceladas y no asistidas DEBEN seguir visibles y distinguirse de las que ocupan hueco. El estado NO DEBE comunicarse solo por el color.
 - **FR-018**: La agenda NO DEBE ofrecer reservar en tramos ya pasados.
-- **FR-019**: Tras un rechazo por solape, recepción DEBE ver la agenda actualizada.
+- **FR-019**: Tras un rechazo por solape, recepción DEBE ver los huecos actuales de ese día junto al formulario, con lo que había escrito.
 
 **Estados**
 
@@ -235,7 +235,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ## Supuestos
 
-- **Una sola clave por clínica (deuda consciente)**: no hay usuarios individuales, y por tanto no se sabe qué persona hizo cada acción. Tampoco hay en esta versión cambio de clave, recuperación ni límite de intentos. Esta deuda debe resolverse antes de usar el producto con datos reales de pacientes.
+- **Una sola clave por clínica (deuda consciente)**: no hay usuarios individuales, y por tanto no se sabe qué persona hizo cada acción. Tampoco hay en esta versión cambio de clave, recuperación ni límite de intentos. La entrada se decide solo por la clave, así que dos clínicas no deben compartirla: en la 001 no puede ocurrir, porque solo se carga una clínica y no hay pantallas para crear otras, y la spec que lo permita deberá impedirlo. Esta deuda debe resolverse antes de usar el producto con datos reales de pacientes.
 - **Los servicios tienen especialidad**: el encargo no lo cita, pero sin ello se podría reservar una consulta de nutrición con un fisioterapeuta. Es lo mínimo para que RN7 sea posible.
 - **Configuración fija**: en la 001 no hay pantallas para gestionar la clínica, los profesionales ni los servicios. Se cargan con la semilla.
 - **Sin editar citas**: mover o reprogramar queda fuera de esta feature. Para cambiar una cita se cancela y se crea otra. Las transiciones definitivas tampoco tienen deshacer; por eso se pide confirmación.

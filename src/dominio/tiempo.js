@@ -33,6 +33,10 @@ export function sumarMinutos(texto, minutos) {
   return aTexto(aInstante(texto) + minutos * 60_000);
 }
 
+export function minutosEntre(inicio, fin) {
+  return (aInstante(fin) - aInstante(inicio)) / 60_000;
+}
+
 export function sumarDias(dia, dias) {
   return sumarMinutos(`${dia}T00:00`, dias * 1440).slice(0, 10);
 }

@@ -1,6 +1,6 @@
 import { ACCIONES } from '../../dominio/estados.js';
 import { etiquetaEstado, etiquetaZona, fecha, hora, nombreDia } from '../../dominio/formato.js';
-import { diaDeSemana, esDiaLaborable, sumarDias } from '../../dominio/tiempo.js';
+import { diaDeSemana, esDiaLaborable, minutosEntre, sumarDias } from '../../dominio/tiempo.js';
 import { html, layout } from '../plantilla.js';
 
 const ocupa = ({ estado }) => estado === 'reservada' || estado === 'completada';
@@ -40,13 +40,16 @@ function filaCita(cita) {
   </li>`;
 }
 
-function filaHueco(hueco, profesional) {
-  const dia = hueco.inicio.slice(0, 10);
+function accionDeHueco(hueco, profesional, duracionMinima) {
+  if (!hueco.reservable) return html`<p class="hueco__nota">Ya ha pasado</p>`;
+  if (minutosEntre(hueco.inicio, hueco.fin) < duracionMinima) return html`<p class="hueco__nota">No cabe ningún servicio</p>`;
+  return html`<a class="boton" href="/citas/nueva?profesional=${profesional.id}&amp;dia=${hueco.inicio.slice(0, 10)}&amp;hora=${hora(hueco.inicio)}">Reservar</a>`;
+}
+
+function filaHueco(hueco, profesional, duracionMinima) {
   return html`<li class="hueco">
     <p class="hueco__tramo"><span class="hueco__libre">Libre</span> ${hora(hueco.inicio)} a ${hora(hueco.fin)}</p>
-    ${hueco.reservable
-      ? html`<a class="boton" href="/citas/nueva?profesional=${profesional.id}&amp;dia=${dia}&amp;hora=${hora(hueco.inicio)}">Reservar</a>`
-      : html`<p class="hueco__pasado">Ya ha pasado</p>`}
+    ${accionDeHueco(hueco, profesional, duracionMinima)}
   </li>`;
 }
 
@@ -58,7 +61,7 @@ function entradasEnOrden(citas, huecos) {
   return entradas.sort((a, b) => a.inicio.localeCompare(b.inicio) || a.orden - b.orden);
 }
 
-export function vistaAgenda({ clinica, profesionales, profesional, dia, hoy, citas, huecos }) {
+export function vistaAgenda({ clinica, profesionales, profesional, dia, hoy, citas, huecos, duracionMinima }) {
   const contenido = html`<h1>Agenda de ${profesional.nombre}</h1>
     <p class="agenda__dia">${nombreDia(diaDeSemana(dia))} ${fecha(dia)}</p>
     <p>${etiquetaZona(clinica.zona_horaria)}</p>
@@ -68,7 +71,7 @@ export function vistaAgenda({ clinica, profesionales, profesional, dia, hoy, cit
     ${navegacionDias(profesional, dia, hoy)}
     ${!esDiaLaborable(dia) && html`<p class="aviso aviso--info">La clínica no abre este día.</p>`}
     <ul class="agenda lista-simple">
-      ${entradasEnOrden(citas, huecos).map(({ cita, hueco }) => (cita ? filaCita(cita) : filaHueco(hueco, profesional)))}
+      ${entradasEnOrden(citas, huecos).map(({ cita, hueco }) => (cita ? filaCita(cita) : filaHueco(hueco, profesional, duracionMinima)))}
     </ul>`;
   return layout({ titulo: `Agenda de ${profesional.nombre}`, clinica, contenido });
 }

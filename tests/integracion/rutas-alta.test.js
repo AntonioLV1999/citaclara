@@ -140,7 +140,7 @@ test('FR-019 tras el rechazo sigue elegido el paciente existente', async () => {
 const RECHAZOS = [
   ['RN2', { dia: '2026-11-09', hora: '11:30' }, 'Esa hora ya ha pasado. Elige una hora a partir de ahora.'],
   ['FR-012', { dia: '2026-11-14' }, 'La clínica abre de lunes a viernes, de 09:00 a 20:00. Elige una hora dentro de ese horario.'],
-  ['FR-011', { hora: '10:07' }, 'Las citas empiezan en punto, y cuarto, y media o menos cuarto.'],
+  ['FR-011', { hora: '10:07' }, 'Las citas empiezan en punto, y cuarto, y media o menos cuarto. Elige una de esas horas.'],
   ['FR-013', { paciente: '', paciente_nombre: 'Marta', paciente_telefono: '12' }, 'Escribe el nombre y un teléfono de al menos 9 dígitos.'],
 ];
 

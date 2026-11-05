@@ -204,6 +204,7 @@ description: "Lista de tareas de implementación del núcleo de agenda"
 
 - [X] T067 Sustituir `<input type="date">` por campos de texto `dd/mm/aaaa` con `leerDia` y `fechaEscrita`, en src/web/vistas/alta.js y src/web/vistas/agenda.js, y escribir los tests FR-024, incluido tests/e2e/fecha-idioma.spec.js con Chromium en inglés
 - [ ] T068 Hacer las sesiones de SC-002 y SC-003 con al menos 10 personas y registrar los resultados en specs/001-nucleo-agenda/checklists/entrega.md. **Tarea de personas: condición de merge, no la puede hacer un agente.**
+- [X] T069 No ofrecer reservar en huecos donde no cabe ningún servicio del profesional (FR-006), en src/web/rutas/agenda.js y src/web/vistas/agenda.js, con sus tests en tests/integracion/rutas-agenda.test.js
 
 ---
 
@@ -230,7 +231,7 @@ Tests primero y en rojo, después datos y dominio, servicios, vistas y rutas.
 
 ### Condición para integrar
 
-La spec sigue en **Borrador**. Antes del merge, su propietario debe aprobarla (principio I), la suite debe estar en verde (principio VI) y SC-002 y SC-003 deben estar medidos.
+La spec está aprobada por su propietario desde el 06/11/2026 (principio I). Antes del merge, la suite debe estar en verde (principio VI) y SC-002 y SC-003 deben estar medidos (T068).
 
 ### Oportunidades de paralelismo
 

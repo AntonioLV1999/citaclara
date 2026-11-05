@@ -66,7 +66,7 @@ test('FR-012 acepta un fin exacto a las 20:00', () => {
 test('FR-027 los mensajes de reglas son los del contrato', () => {
   assert.equal(MENSAJES.pasado, 'Esa hora ya ha pasado. Elige una hora a partir de ahora.');
   assert.equal(MENSAJES.horario, 'La clínica abre de lunes a viernes, de 09:00 a 20:00. Elige una hora dentro de ese horario.');
-  assert.equal(MENSAJES.horaNoValida, 'Las citas empiezan en punto, y cuarto, y media o menos cuarto.');
+  assert.equal(MENSAJES.horaNoValida, 'Las citas empiezan en punto, y cuarto, y media o menos cuarto. Elige una de esas horas.');
   assert.equal(MENSAJES.paciente, 'Escribe el nombre y un teléfono de al menos 9 dígitos.');
 });
 

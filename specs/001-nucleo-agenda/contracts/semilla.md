@@ -14,7 +14,7 @@ La semilla numérica es fija en el código. Cambiarla es un cambio de datos suje
 
 ## Comportamiento
 
-- Sustituye los datos de Clínica Eleva en una sola transacción: repetir el comando no duplica nada (FR-032). **Borra también las citas creadas a mano en esa clínica.**
+- Sustituye los datos de Clínica Eleva en una sola transacción: repetir el comando no duplica nada (FR-032). **Borra también las citas y las fichas creadas a mano en esa clínica, y cierra sus sesiones abiertas.**
 - Escribe por las tablas normales, de modo que los disparadores de RN1, RN3 y RN7 la vigilan. RN4 no interviene: su disparador actúa al actualizar, y la historia se inserta ya en su estado definitivo (FR-033). Si alguno aborta, no queda nada escrito.
 - Calendario: la historia ocupa las 8 semanas anteriores a `--lunes`, y las reservas futuras, las 2 semanas desde ese lunes, de lunes a viernes.
 - Con el valor por defecto: historia del 07/09/2026 al 30/10/2026 y reservas del 02/11/2026 al 13/11/2026. La historia cruza el cambio de hora del 25/10/2026.
