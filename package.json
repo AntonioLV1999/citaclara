@@ -1,0 +1,19 @@
+{
+  "name": "citaclara",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gestor de citas para clínicas y consultas pequeñas",
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "node src/principal.js",
+    "semilla": "node src/semilla/comando.js",
+    "test": "node --test \"tests/{unit,integracion,concurrencia}/**/*.test.js\"",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

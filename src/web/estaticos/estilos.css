@@ -1,0 +1,338 @@
+:root {
+  --fondo: #f4f6f9;
+  --superficie: #ffffff;
+  --tinta: #1c2733;
+  --tinta-suave: #47566a;
+  --borde: #aab6c4;
+  --marca: #0b5cad;
+  --marca-oscura: #084a8b;
+  --error-fondo: #fdecec;
+  --error-tinta: #8f1d1d;
+  --exito-fondo: #e4f4ea;
+  --exito-tinta: #145c32;
+  --info-fondo: #e3effb;
+  --info-tinta: #0b4a8c;
+  --neutro-fondo: #eceff2;
+  --neutro-tinta: #47525e;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+h2 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--marca-oscura);
+  color: #ffffff;
+}
+
+.marca {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.marca__clinica {
+  margin-left: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+}
+
+.cabecera__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cabecera__menu form {
+  margin: 0;
+}
+
+.contenido {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--marca);
+  border-radius: 0.5rem;
+  background: var(--marca);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.boton:hover {
+  background: var(--marca-oscura);
+}
+
+.boton:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #e0a100;
+  outline-offset: 2px;
+}
+
+.boton--claro,
+.boton--secundario {
+  border-color: var(--marca);
+  background: var(--superficie);
+  color: var(--marca-oscura);
+}
+
+.boton--claro:hover,
+.boton--secundario:hover {
+  background: var(--info-fondo);
+}
+
+.boton--peligro {
+  border-color: var(--error-tinta);
+  background: var(--error-tinta);
+  color: #ffffff;
+}
+
+.boton--peligro:hover {
+  background: #701616;
+}
+
+.aviso {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid currentColor;
+  border-radius: 0.25rem;
+}
+
+.aviso--error {
+  background: var(--error-fondo);
+  color: var(--error-tinta);
+}
+
+.aviso--info {
+  background: var(--info-fondo);
+  color: var(--info-tinta);
+}
+
+.tarjeta {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.5rem;
+  background: var(--superficie);
+}
+
+.tarjeta h2 {
+  margin-top: 0;
+}
+
+.campo {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.campo__etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.campo__ayuda {
+  display: block;
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #66758a;
+  border-radius: 0.5rem;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: inherit;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0 0 1rem;
+  padding: 1rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.5rem;
+}
+
+legend {
+  padding: 0 0.25rem;
+  font-weight: 700;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.acciones form {
+  margin: 0;
+}
+
+.lista-simple {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista-simple li + li {
+  margin-top: 0.5rem;
+}
+
+.agenda__dia {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.ir-a-dia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ir-a-dia__campo {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.agenda {
+  margin-top: 1rem;
+}
+
+.cita,
+.hueco {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.5rem;
+  background: var(--superficie);
+}
+
+.cita p,
+.hueco p {
+  margin: 0;
+}
+
+.cita {
+  border-left: 6px solid var(--marca);
+}
+
+.cita--libera {
+  border-style: dashed;
+  border-left-color: var(--neutro-tinta);
+  background: var(--neutro-fondo);
+}
+
+.cita__hora,
+.hueco__tramo {
+  font-weight: 700;
+}
+
+.cita__servicio,
+.hueco__pasado {
+  color: var(--tinta-suave);
+}
+
+.cita--libera .cita__servicio {
+  color: var(--neutro-tinta);
+}
+
+.estado {
+  display: inline-block;
+  margin-top: 0.25rem !important;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.estado--reservada {
+  background: var(--info-fondo);
+  color: var(--info-tinta);
+}
+
+.estado--completada {
+  background: var(--exito-fondo);
+  color: var(--exito-tinta);
+}
+
+.estado--cancelada {
+  background: #dfe3e8;
+  color: #3b4550;
+}
+
+.estado--no-asistida {
+  background: var(--error-fondo);
+  color: var(--error-tinta);
+}
+
+.hueco {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hueco__libre {
+  color: var(--exito-tinta);
+}
+
+[hidden] {
+  display: none !important;
+}
