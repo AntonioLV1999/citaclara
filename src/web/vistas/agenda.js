@@ -20,8 +20,8 @@ function navegacionDias(profesional, dia, hoy) {
   <form class="ir-a-dia" method="get" action="/agenda">
     <input type="hidden" name="profesional" value="${profesional.id}">
     <label class="ir-a-dia__campo">
-      <span class="campo__etiqueta">Ir a otro día</span>
-      <input type="date" name="dia" value="${dia}">
+      <span class="campo__etiqueta">Ir a otro día (dd/mm/aaaa)</span>
+      <input type="text" name="dia" value="${fecha(dia)}" autocomplete="off">
     </label>
     <button class="boton boton--secundario" type="submit">Ver día</button>
   </form>`;

@@ -137,7 +137,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **RN1 (capital)**: dos citas del mismo profesional se solapan si cada una empieza antes de que acabe la otra. No puede crearse una cita que solape otra reservada o completada del mismo profesional, sea cual sea su origen y aunque las peticiones lleguen a la vez: exactamente una prospera. La garantía la da el sistema y no depende de la interfaz. Las citas canceladas y no asistidas no ocupan el hueco.
 - **RN2**: no se crean citas cuyo inicio sea anterior al momento actual, según la hora local de la clínica. Una cita que empiece en ese mismo minuto se acepta. Los datos de demostración son la única excepción.
 - **RN3**: el fin de una cita es siempre su inicio más la duración del servicio, y no se introduce a mano.
-- **RN4**: una cita nace reservada. Las únicas transiciones son reservada → completada, reservada → cancelada y reservada → no asistida. Los tres estados de llegada son definitivos.
+- **RN4**: una cita nace reservada, salvo la historia de los datos de demostración (FR-033). Las únicas transiciones son reservada → completada, reservada → cancelada y reservada → no asistida. Los tres estados de llegada son definitivos.
 - **RN5**: una cita solo se marca como completada o no asistida cuando ha llegado su hora de inicio. Se puede cancelar en cualquier momento mientras siga reservada.
 - **RN6**: «no asistida» significa exclusivamente que el paciente no se presentó a una cita que seguía reservada.
 - **RN7**: un profesional solo atiende servicios de su especialidad.
@@ -181,7 +181,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 **Fechas, horas e importes** (constitución, principio II)
 
 - **FR-023**: Cada clínica DEBE tener su zona horaria (península o Canarias), y toda hora DEBE mostrarse en la hora local de la clínica, igual desde cualquier dispositivo. La agenda DEBE indicar a qué hora local se refieren sus horas.
-- **FR-024**: Las fechas DEBEN mostrarse como día, mes y año (`dd/mm/aaaa`) y las horas en formato de 24 horas.
+- **FR-024**: Las fechas DEBEN mostrarse como día, mes y año (`dd/mm/aaaa`) y las horas en formato de 24 horas, también en los campos donde se escriben, sea cual sea el idioma del navegador.
 - **FR-025**: **Días de cambio de hora**: una cita conserva su hora local a ambos lados del cambio, de modo que las 10:00 siguen siendo las 10:00. Ninguna cita puede empezar, terminar ni atravesar la hora que no existe o que se repite ese día, y el sistema rechaza el intento con un mensaje claro. Esa hora es de 02:00 a 03:00 en la península y de 01:00 a 02:00 en Canarias.
 - **FR-026**: Los precios DEBEN ser exactos al céntimo y mostrarse con el formato español (`40,00 €`).
 
@@ -202,9 +202,9 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
   | Primera consulta de nutrición | Nutrición | 45 min | 45,00 € |
 
 - **FR-030**: La semilla DEBE generar 8 semanas de historia en estados definitivos, de las que entre el 9 % y el 11 % sean no asistidas, entre el 7 % y el 9 % canceladas y el resto completadas, calculado sobre el total de citas de la historia. Cifras exactas con el lunes por defecto, reproducibles con `npm run semilla`: 40 pacientes; 463 citas de historia, de las que 380 son completadas (82,1 %), 46 no asistidas (9,9 %) y 37 canceladas (8,0 %); y 57 reservas futuras. Resumen de contenido: `f1d7a17b9fa57c74ae6b40814b7f41eacfd084559e412f8a0106857d142b74e8`. Resumen sin fechas: `fc363c0bc66969d7090dac873ba44d69a64482470f5d8f7d0d9dee54fd273d40`.
-- **FR-031**: La semilla DEBE generar 2 semanas futuras solo con citas reservadas, dejando huecos libres cada día laborable.
+- **FR-031**: La semilla DEBE generar 2 semanas futuras solo con citas reservadas, dejando huecos libres cada día laborable. «Futuras» se mide desde el lunes de referencia, no desde el reloj: si ese lunes ya ha pasado, parte de esas citas queda en el pasado y sigue reservada, sin cerrar.
 - **FR-032**: Con los mismos parámetros, la semilla DEBE producir un resultado idéntico, sea quien sea quien la genere y sea cuando sea. Repetirla NO DEBE duplicar datos. Sus parámetros incluyen un lunes de referencia, que por defecto es el 02/11/2026 y marca el inicio de las 2 semanas futuras; las 8 semanas de historia son las anteriores. Pasar otro lunes desplaza toda la historia por semanas completas: mismas citas, horas y cifras, y solo cambian las fechas del calendario. La generación NO DEBE depender del reloj.
-- **FR-033**: La semilla DEBE cumplir todas las reglas de agenda (RN1, RN3 a RN7), salvo RN2 para la historia. Un paciente NO DEBE tener más de una primera visita completada de la misma especialidad.
+- **FR-033**: La semilla DEBE cumplir todas las reglas de agenda (RN1, RN3 a RN7), con dos excepciones: no aplica RN2, y la historia se carga directamente en su estado definitivo, porque registra lo que ya ocurrió. Un paciente NO DEBE tener más de una primera visita completada de la misma especialidad.
 - **FR-034**: Todos los datos DEBEN ser ficticios y en español de España, con teléfonos y correos que no correspondan a personas reales.
 
 **Pruebas** (constitución, principios III y VI)
@@ -230,7 +230,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **SC-005**: Dos generaciones de la semilla con los mismos parámetros, en máquinas y fechas distintas, son idénticas en el 100 % de los registros.
 - **SC-006**: Los datos de demostración contienen cero solapes, y sus porcentajes cumplen FR-030.
 - **SC-007**: El 100 % de las pantallas cumple los umbrales de FR-028 a 360 píxeles de ancho y en el portátil.
-- **SC-008**: El 100 % de las reglas RN1 a RN7 y de los escenarios de aceptación tiene un test que los referencia, y la suite está en verde.
+- **SC-008**: El 100 % de las reglas RN1 a RN7 y de los escenarios de aceptación tiene un test que los referencia, y la suite está en verde. SC-002 y SC-003 no tienen test automático, porque miden el uso real de personas sin formación y un test no puede medirlo: se comprueban a mano con el protocolo de `checklists/entrega.md` (constitución, principio VI).
 - **SC-009**: Una cita se ve a la misma hora local desde dispositivos en zonas horarias distintas y en semanas a ambos lados de un cambio de hora, en el 100 % de los casos comprobados.
 
 ## Supuestos

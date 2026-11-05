@@ -6,6 +6,7 @@ import {
 import { crearServidor } from '../../src/web/servidor.js';
 
 const DIA = '2026-11-11'; // miércoles
+const campoDia = (texto) => texto.match(/<input name="dia" type="text" value="([^"]*)"/)?.[1];
 let e;
 let servidor;
 let cookie;
@@ -43,13 +44,13 @@ test('FR-005 el formulario sin datos ofrece todo lo necesario para crear una cit
 test('FR-006 el formulario llega rellenado desde un hueco', async () => {
   const r = await nueva(`?profesional=${e.a.nutri}&dia=${DIA}&hora=10:30`);
   assert.match(r.texto, new RegExp(`<option value="${e.a.nutri}" selected>Lucía</option>`));
-  assert.match(r.texto, new RegExp(`name="dia"[^>]*value="${DIA}"`));
+  assert.equal(campoDia(r.texto), '11/11/2026');
   assert.match(r.texto, /<option value="10:30" selected>10:30<\/option>/);
 });
 
 test('FR-012 sin datos, el formulario propone el día de hoy según la clínica', async () => {
   const r = await nueva();
-  assert.match(r.texto, /name="dia"[^>]*value="2026-11-09"/);
+  assert.equal(campoDia(r.texto), '09/11/2026');
 });
 
 test('FR-011 el formulario solo ofrece horas en cuartos de hora dentro del horario', async () => {
@@ -124,7 +125,7 @@ test('H1-E11 FR-019 tras el rechazo el formulario conserva lo escrito', async ()
   assert.match(r.texto, /name="paciente_nombre"[^>]*value="Marta Ruiz"/);
   assert.match(r.texto, /name="paciente_telefono"[^>]*value="600 111 222"/);
   assert.match(r.texto, /name="paciente_email"[^>]*value="marta@example.com"/);
-  assert.match(r.texto, new RegExp(`name="dia"[^>]*value="${DIA}"`));
+  assert.equal(campoDia(r.texto), '11/11/2026');
   assert.match(r.texto, /<option value="10:00" selected>/);
   assert.match(r.texto, new RegExp(`<option value="${e.a.sesion}" selected`));
   assert.equal(contar('paciente'), 4);
@@ -220,4 +221,24 @@ test('FR-027 el nombre del paciente se escapa en la búsqueda y en el formulario
   assert.doesNotMatch((await nueva()).texto, /<img/);
   const rechazo = await enviar({ paciente: '', paciente_nombre: nombre, paciente_telefono: '1' });
   assert.doesNotMatch(rechazo.texto, /<img/);
+});
+
+test('FR-024 el campo de día no depende del idioma del navegador', async () => {
+  const r = await nueva(`?dia=${DIA}`);
+  assert.doesNotMatch(r.texto, /type="date"/);
+  assert.ok(r.texto.includes('Día (dd/mm/aaaa)'));
+});
+
+test('FR-024 el día escrito como dd/mm/aaaa registra la cita en ese día', async () => {
+  const r = await enviar({ dia: '11/11/2026' });
+  assert.equal(r.estado, 303);
+  assert.equal(e.bd.prepare('SELECT inicio FROM cita').get().inicio, `${DIA}T10:00`);
+});
+
+test('FR-024 FR-027 un día mal escrito se rechaza, explica el formato y conserva lo escrito', async () => {
+  const r = await enviar({ dia: '31/02/2026' });
+  assert.equal(r.estado, 422);
+  assert.ok(textoVisible(r.texto).includes('Escribe la fecha como dd/mm/aaaa'));
+  assert.equal(campoDia(r.texto), '31/02/2026');
+  assert.equal(contar('cita'), 0);
 });

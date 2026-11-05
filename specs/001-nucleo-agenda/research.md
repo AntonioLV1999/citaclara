@@ -28,6 +28,7 @@ Entorno comprobado: Node 26.13 y npm 11.20 disponibles; sin PostgreSQL ni Python
 - **Razón**: es lo más simple que cumple la spec. No hay estado de cliente que sincronizar, y tras cada rechazo la pantalla refleja la agenda real (FR-019).
 - **Confirmaciones (FR-021)**: una página propia, que funciona sin JavaScript y se prueba igual que el resto.
 - **Alternativa descartada**: aplicación de una sola página. Añade compilación, dependencias y una API que nadie más usa.
+- **Campos de fecha (FR-024)**: de texto, en `dd/mm/aaaa`. `<input type="date">` pinta la fecha según el idioma del navegador, no el de la página: con Chromium en inglés, el 05/11/2026 se ve como `11/05/2026`. A cambio se pierde el calendario nativo.
 - **Seguridad de las vistas**: todo dato se escapa al generar HTML, mediante una única función de plantilla.
 
 ## 4. Representación del tiempo (principio II, FR-023 a FR-025)

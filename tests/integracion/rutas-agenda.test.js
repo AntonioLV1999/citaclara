@@ -210,3 +210,17 @@ test('FR-027 el nombre del paciente se escapa en la agenda', async () => {
   assert.doesNotMatch(r.texto, /<img/);
   assert.match(r.texto, /&lt;img/);
 });
+
+test('FR-024 ir a otro día se escribe como dd/mm/aaaa, sin depender del idioma del navegador', async () => {
+  const r = await agenda('?dia=12/11/2026');
+  assert.equal(r.estado, 200);
+  assert.ok(textoVisible(r.texto).includes('12/11/2026'));
+  assert.doesNotMatch(r.texto, /type="date"/);
+  assert.ok(r.texto.includes('<input type="text" name="dia" value="12/11/2026"'));
+});
+
+test('FR-024 FR-027 un día mal escrito en la agenda explica el formato', async () => {
+  const r = await agenda('?dia=31/02/2026');
+  assert.equal(r.estado, 404);
+  assert.ok(textoVisible(r.texto).includes('Escribe la fecha como dd/mm/aaaa'));
+});

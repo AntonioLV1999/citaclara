@@ -5,7 +5,7 @@ export const MENSAJES = {
   pasado: 'Esa hora ya ha pasado. Elige una hora a partir de ahora.',
   horario: 'La clínica abre de lunes a viernes, de 09:00 a 20:00. Elige una hora dentro de ese horario.',
   horaNoValida: 'Las citas empiezan en punto, y cuarto, y media o menos cuarto.',
-  dia: 'Ese día no es válido. Elige una fecha del calendario.',
+  dia: 'Ese día no es válido. Escribe la fecha como dd/mm/aaaa, por ejemplo 05/11/2026.',
   faltanDatos: 'Falta algún dato de la cita. Elige profesional, servicio, día y hora.',
   paciente: 'Escribe el nombre y un teléfono de al menos 9 dígitos.',
   correo: 'Ese correo no parece válido. Revísalo o déjalo en blanco.',

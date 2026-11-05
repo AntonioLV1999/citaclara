@@ -2,7 +2,7 @@ import { profesionales, profesionalPorId, serviciosDeEspecialidad } from '../../
 import { citasDelDia } from '../../datos/citas.js';
 import { pacientesDeClinica } from '../../datos/pacientes.js';
 import { calcularHuecos } from '../../dominio/huecos.js';
-import { ahoraEnZona, esFechaValida } from '../../dominio/tiempo.js';
+import { ahoraEnZona, esFechaValida, leerDia } from '../../dominio/tiempo.js';
 import { crearCita } from '../../servicios/alta-cita.js';
 import { pagina, paginaNoEncontrada, redireccion } from '../plantilla.js';
 import { vistaAlta } from '../vistas/alta.js';
@@ -41,7 +41,8 @@ function formularioNuevo(contexto) {
 }
 
 function registrarCita(contexto) {
-  const { formulario, clinica } = contexto;
+  const { clinica } = contexto;
+  const formulario = { ...contexto.formulario, dia: leerDia(contexto.formulario.dia) };
   const resultado = crearCita(contexto, formulario);
   if (resultado.ok) {
     return redireccion(`/agenda?profesional=${encodeURIComponent(formulario.profesional)}&dia=${encodeURIComponent(formulario.dia)}`);

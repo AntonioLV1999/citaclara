@@ -202,6 +202,9 @@ description: "Lista de tareas de implementación del núcleo de agenda"
 - [X] T065 Crear specs/001-nucleo-agenda/checklists/entrega.md con el protocolo de SC-002 y SC-003 (tareas, cronómetro, número de personas y umbrales) y las puertas de calidad de la constitución. **Hacer las sesiones con personas queda fuera del alcance de un agente: la lista se entrega sin rellenar esos resultados.**
 - [X] T066 Ejecutar `npm test`, `npm run test:e2e` y la verificación de semilla de [quickstart.md](quickstart.md), y corregir lo que falle sin relajar ningún test (principio VI)
 
+- [X] T067 Sustituir `<input type="date">` por campos de texto `dd/mm/aaaa` con `leerDia` y `fechaEscrita`, en src/web/vistas/alta.js y src/web/vistas/agenda.js, y escribir los tests FR-024, incluido tests/e2e/fecha-idioma.spec.js con Chromium en inglés
+- [ ] T068 Hacer las sesiones de SC-002 y SC-003 con al menos 10 personas y registrar los resultados en specs/001-nucleo-agenda/checklists/entrega.md. **Tarea de personas: condición de merge, no la puede hacer un agente.**
+
 ---
 
 ## Dependencias y orden de ejecución

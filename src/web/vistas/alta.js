@@ -1,4 +1,4 @@
-import { etiquetaZona, euros, fecha, hora } from '../../dominio/formato.js';
+import { etiquetaZona, euros, fecha, fechaEscrita, hora } from '../../dominio/formato.js';
 import { sumarMinutos } from '../../dominio/tiempo.js';
 import { html, layout } from '../plantilla.js';
 
@@ -96,8 +96,8 @@ export function vistaAlta({ clinica, profesionales, profesional, servicios, paci
       </label>
       ${camposPaciente(pacientes, valores)}
       <label class="campo">
-        <span class="campo__etiqueta">Día</span>
-        <input name="dia" type="date" value="${valores.dia}">
+        <span class="campo__etiqueta">Día (dd/mm/aaaa)</span>
+        <input name="dia" type="text" value="${fechaEscrita(valores.dia)}" autocomplete="off">
       </label>
       <label class="campo">
         <span class="campo__etiqueta">Hora</span>

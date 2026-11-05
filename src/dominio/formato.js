@@ -17,6 +17,11 @@ export function fecha(texto) {
   return `${dia}/${mes}/${anio}`;
 }
 
+/** Valor de un campo de día: `dd/mm/aaaa`, o lo escrito tal cual si no tiene forma de fecha. */
+export function fechaEscrita(texto) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(texto) ? fecha(texto) : texto;
+}
+
 export function hora(texto) {
   return texto.slice(11, 16);
 }

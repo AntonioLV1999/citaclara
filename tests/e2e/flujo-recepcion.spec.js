@@ -34,7 +34,7 @@ test('H2-E1 escenario 2: agenda de María, cambio a Jorge y a otro día, con la 
   await expect(page.getByText('Horas en hora peninsular')).toBeVisible();
   await page.getByRole('link', { name: 'Jorge' }).click();
   await expect(page.getByRole('heading', { name: 'Agenda de Jorge' })).toBeVisible();
-  await page.getByLabel('Ir a otro día').fill('2026-10-14');
+  await page.getByLabel('Ir a otro día').fill('14/10/2026');
   await page.getByRole('button', { name: 'Ver día' }).click();
   await expect(page.getByText('Miércoles 14/10/2026')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Agenda de Jorge' })).toBeVisible();

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ahoraEnZona, diaDeSemana, esDiaLaborable, esFechaValida, sumarDias, sumarMinutos,
+  ahoraEnZona, diaDeSemana, esDiaLaborable, esFechaValida, leerDia, sumarDias, sumarMinutos,
 } from '../../src/dominio/tiempo.js';
 
 test('FR-023 ahoraEnZona da la hora local de Madrid en invierno y en verano', () => {
@@ -84,4 +84,12 @@ test('FR-012 esFechaValida rechaza fechas que no existen en el calendario', () =
   assert.equal(esFechaValida('05/11/2026'), false);
   assert.equal(esFechaValida(''), false);
   assert.equal(esFechaValida(undefined), false);
+});
+
+test('FR-024 leerDia convierte dd/mm/aaaa y deja igual lo demás', () => {
+  assert.equal(leerDia('05/11/2026'), '2026-11-05');
+  assert.equal(leerDia(' 5/1/2026 '), '2026-01-05');
+  assert.equal(leerDia('2026-11-05'), '2026-11-05');
+  assert.equal(leerDia('mañana'), 'mañana');
+  assert.equal(leerDia(undefined), undefined);
 });

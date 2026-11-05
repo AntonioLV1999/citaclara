@@ -51,3 +51,12 @@ export function esFechaValida(texto) {
   if (typeof texto !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(texto)) return false;
   return aTexto(aInstante(texto)).startsWith(texto);
 }
+
+/** Convierte el día escrito como `dd/mm/aaaa` a `AAAA-MM-DD`. Lo demás sigue igual, y lo valida `esFechaValida`. */
+export function leerDia(texto) {
+  const limpio = texto?.trim();
+  const partes = limpio?.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!partes) return limpio;
+  const [, dia, mes, anio] = partes;
+  return `${anio}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+}
