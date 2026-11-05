@@ -6,9 +6,18 @@
 
 **Estado**: Borrador
 
-**Propietario**: pendiente de registrar en `specs/MAPA.md` (constitución, principio I: sin propietario registrado esta spec no puede aprobarse)
+**Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
 **Entrada**: descripción de la persona usuaria: «Núcleo de agenda de CitaClara. Clínicas pequeñas (2-5 profesionales); la recepción gestiona la agenda; los pacientes, de momento, solo existen como fichas. Entidades, citas y sus estados, RN1 y RN2, interfaz de recepción, acceso con clave de clínica y semilla determinista de Clínica Eleva. Fuera de alcance: acceso del paciente, recordatorios, analítica y pagos online».
+
+## Aclaraciones
+
+### Sesión del 05/11/2026
+
+- P: ¿Cómo se fijan las fechas de la semilla? → R: lunes de referencia fijo como parte de la semilla, con desplazamiento explícito por semanas completas (FR-032).
+- P: ¿Puede recepción crear fichas de pacientes en la 001? → R: sí, un alta mínima dentro del alta de cita, con correo opcional (FR-013).
+- P: ¿Qué horario aplica? → R: horario único de clínica, de lunes a viernes de 09:00 a 20:00 (FR-012).
+- P: ¿Quién es el propietario de la spec? → R: AntonioLV1999.
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -31,6 +40,8 @@ Recepción atiende una llamada, elige profesional, servicio, paciente, día y ho
 7. **Dadas** dos peticiones simultáneas que se solapan, sean del mismo hueco exacto o solo en parte, **cuando** el sistema las procesa, **entonces** exactamente una queda registrada y la otra recibe un rechazo claro.
 8. **Dado** que son las 12:00, **cuando** recepción intenta reservar hoy a las 11:30 o cualquier día anterior, **entonces** se rechaza con un mensaje que explica que no se pueden crear citas en el pasado.
 9. **Dada** una profesional de nutrición, **cuando** recepción prepara una cita con ella, **entonces** solo puede elegir servicios de nutrición.
+10. **Dado** un paciente sin ficha, **cuando** recepción reserva su primera visita con nombre y teléfono, **entonces** quedan registradas la ficha y la cita.
+11. **Dado** un paciente nuevo cuya cita se rechaza por solape, **cuando** se muestra el rechazo, **entonces** no queda ficha creada y el formulario conserva lo escrito.
 
 ---
 
@@ -149,8 +160,8 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-009**: El alta DEBE mostrar la duración, el precio y la hora de fin resultante antes de confirmar.
 - **FR-010**: El sistema DEBE aplicar RN1, RN2 y RN3 en el momento de registrar la cita, y si la rechaza, DEBE dejar la agenda intacta.
 - **FR-011**: Las horas de inicio DEBEN caer en múltiplos de 15 minutos.
-- **FR-012**: Una cita DEBE empezar y terminar dentro del horario de la clínica: [NEEDS CLARIFICATION: el encargo no define horario, y sin él no se pueden calcular los huecos libres. ¿Horario único fijo de lunes a viernes de 09:00 a 20:00, jornada partida o por profesional?]
-- **FR-013**: Recepción DEBE poder registrar pacientes nuevos: [NEEDS CLARIFICATION: el encargo no incluye alta de pacientes, pero sin ella no se puede reservar una «primera visita» a quien aún no tiene ficha. ¿Alta mínima dentro del alta de cita, o en la 001 solo existen los pacientes de la semilla?]
+- **FR-012**: Una cita DEBE empezar y terminar dentro del horario de la clínica, que en la 001 es único y fijo para todos: de lunes a viernes, de 09:00 a 20:00, en hora local de la clínica.
+- **FR-013**: Durante el alta de una cita, recepción DEBE poder crear la ficha de un paciente nuevo con nombre y teléfono obligatorios y correo electrónico opcional. La ficha y la cita se registran juntas: si la cita se rechaza, no queda ficha y el formulario conserva lo escrito. Fuera del alta de cita no se gestionan pacientes.
 
 **Agenda del día**
 
@@ -192,7 +203,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **FR-030**: La semilla DEBE generar 8 semanas de historia en estados definitivos, de las que entre el 9 % y el 11 % sean no asistidas, entre el 7 % y el 9 % canceladas y el resto completadas, calculado sobre el total de citas de la historia. Las cifras exactas resultantes se anotarán en esta spec.
 - **FR-031**: La semilla DEBE generar 2 semanas futuras solo con citas reservadas, dejando huecos libres cada día laborable.
-- **FR-032**: Con los mismos parámetros, la semilla DEBE producir un resultado idéntico, sea quien sea quien la genere y sea cuando sea, y repetirla NO DEBE duplicar datos. Las fechas se fijan así: [NEEDS CLARIFICATION: «8 semanas de historia y 2 futuras» depende de cuándo se genere, y la constitución exige la misma historia «sea cuando sea». ¿Fecha de referencia fija con desplazamiento explícito por semanas, fechas absolutas sin desplazamiento, o siempre relativas al día de generación?]
+- **FR-032**: Con los mismos parámetros, la semilla DEBE producir un resultado idéntico, sea quien sea quien la genere y sea cuando sea. Repetirla NO DEBE duplicar datos. Sus parámetros incluyen un lunes de referencia, que por defecto es el 02/11/2026 y marca el inicio de las 2 semanas futuras; las 8 semanas de historia son las anteriores. Pasar otro lunes desplaza toda la historia por semanas completas: mismas citas, horas y cifras, y solo cambian las fechas del calendario. La generación NO DEBE depender del reloj.
 - **FR-033**: La semilla DEBE cumplir todas las reglas de agenda (RN1, RN3 a RN7), salvo RN2 para la historia. Un paciente NO DEBE tener más de una primera visita completada de la misma especialidad.
 - **FR-034**: Todos los datos DEBEN ser ficticios y en español de España, con teléfonos y correos que no correspondan a personas reales.
 
@@ -202,10 +213,10 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ### Entidades clave
 
-- **Clínica**: la consulta que usa el producto. Tiene nombre, clave de acceso, zona horaria y horario. Todo lo demás pertenece a una clínica.
+- **Clínica**: la consulta que usa el producto. Tiene nombre, clave de acceso y zona horaria. Todo lo demás pertenece a una clínica.
 - **Profesional**: quien atiende las citas. Tiene nombre y especialidad.
 - **Servicio**: lo que se ofrece. Tiene nombre, especialidad, duración en minutos y precio en euros.
-- **Paciente**: ficha de una persona atendida, sin acceso al producto. Tiene nombre, teléfono y correo electrónico.
+- **Paciente**: ficha de una persona atendida, sin acceso al producto. Tiene nombre, teléfono y, si lo facilita, correo electrónico.
 - **Cita**: une un profesional, un servicio y un paciente de la misma clínica, con inicio, fin y estado (reservada, completada, cancelada o no asistida).
 
 ## Criterios de éxito *(obligatorio)*
@@ -233,5 +244,6 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **Clínica Eleva está en la península**.
 - **Festivos y ausencias fuera de alcance**: la agenda no los modela, y la semilla trata todos los días laborables por igual.
 - **Precio por servicio**: como los servicios no se editan en la 001, la cita toma el precio del servicio. Guardar el precio histórico corresponderá a la spec que permita cambiarlo.
+- **Sin detección de fichas duplicadas**: un teléfono puede repetirse, porque una familia puede compartirlo.
+- **Sin caducidad de sesión**: la sesión dura hasta salir o cerrar el navegador. Forma parte de la deuda de autenticación.
 - **Fuera de alcance de la 001** (specs propias): cualquier acceso del paciente, recordatorios, analítica y pagos online.
-- **Dependencia**: `specs/MAPA.md` aún no existe y debe crearse, con el propietario de esta spec, antes de aprobarla.

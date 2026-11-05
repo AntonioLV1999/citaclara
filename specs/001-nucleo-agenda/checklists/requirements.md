@@ -13,7 +13,7 @@
 
 ## Completitud de los requisitos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION]
+- [x] No quedan marcadores [NEEDS CLARIFICATION]
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -31,7 +31,6 @@
 
 ## Notas
 
-- Quedan 3 marcadores abiertos: FR-012 (horario), FR-013 (alta de pacientes) y FR-032 (fechas de la semilla). Al resolverlos hay que repetir la validación.
+- Los 3 marcadores se resolvieron el 05/11/2026 (ver «Aclaraciones» en la spec) y la validación se repitió sin incidencias.
 - Los encabezados de la plantilla están traducidos por el principio VIII; ningún script los lee.
-- Antes de aprobar la spec hay que crear `specs/MAPA.md` con su propietario (principio I).
-- Los elementos sin marcar requieren actualizar la spec antes de `/speckit-clarify` o `/speckit-plan`.
+- Propietario registrado en `specs/MAPA.md`; la aprobación sigue pendiente de ese propietario.
