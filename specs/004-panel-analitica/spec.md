@@ -4,11 +4,18 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador, pendiente de las dos definiciones de Sara (RA3 y RA4)
+**Estado**: Borrador, pendiente de aprobación por su propietario
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
 **Entrada**: descripción de la persona usuaria: «Panel de analítica para la clínica. Sara lo necesita para las renovaciones: "enseñar a la clínica lo que CitaClara le ahorra". Alcance: una página del panel (misma clave que la agenda), con interfaz moderna y gráficos claros: ocupación semanal por profesional, tasa de no asistencia por profesional, ingresos por servicio (citas completadas; importes exactos, al céntimo), y evolución de las últimas 8 semanas. Solo lectura: esta feature no escribe NADA. Construye los ejemplos de la spec con los números reales de la semilla. Preguntas cerradas para Sara: ¿cómo se define exactamente "tasa de no asistencia" y "ocupación"?».
+
+## Aclaraciones
+
+### Sesión del 06/11/2026
+
+- P: ¿La tasa de no asistencia se calcula solo sobre las citas que debían atenderse, dejando fuera las canceladas? → R: sí, no asistidas ÷ (completadas + no asistidas) (RA3).
+- P: ¿La ocupación cuenta solo el tiempo de las citas completadas, sin el de las no asistidas? → R: sí, tiempo de las citas completadas ÷ capacidad (RA4).
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -121,8 +128,8 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **RA1 (periodo)**: el periodo son las 8 últimas semanas completas, de lunes a domingo, anteriores a la semana en curso según la fecha local de la clínica. La semana en curso nunca cuenta.
 - **RA2 (pertenencia)**: una cita pertenece a la semana y al periodo de su fecha local de inicio.
-- **RA3 (tasa de no asistencia)**: [NEEDS CLARIFICATION: ¿se calcula sobre las citas que debían atenderse (no asistidas ÷ (completadas + no asistidas)) o sobre todas las citas cerradas, incluidas las canceladas (no asistidas ÷ (completadas + no asistidas + canceladas))?]
-- **RA4 (ocupación)**: [NEEDS CLARIFICATION: ¿el tiempo ocupado es solo el de las citas completadas, o también el de las no asistidas?] El resultado se divide entre la capacidad: 55 horas por profesional y semana, y para la clínica, 55 horas por el número de profesionales. El tiempo de una cita es la duración de su servicio.
+- **RA3 (tasa de no asistencia)**: la tasa es no asistidas ÷ (completadas + no asistidas). Las canceladas no cuentan, porque el paciente avisó y el hueco quedó libre. La cifra difiere a propósito del 9,9 % de FR-030 de la 001, que mide la composición de la semilla sobre todas las citas de la historia, canceladas incluidas.
+- **RA4 (ocupación)**: la ocupación es el tiempo de las citas completadas dividido entre la capacidad. Las no asistidas y las canceladas no cuentan, igual que no ocupan el hueco en la agenda (RN1 de la 001). La capacidad es de 55 horas por profesional y semana, y para la clínica, 55 horas por el número de profesionales. El tiempo de una cita es la duración de su servicio.
 - **RA5 (ingresos)**: los ingresos son la suma, en céntimos exactos, del precio del servicio de cada cita completada. Ningún importe se redondea.
 - **RA6 (citas sin cerrar)**: una cita reservada cuyo inicio ya ha pasado no cuenta en ningún numerador ni denominador. Si hay alguna dentro del periodo, el panel indica cuántas son y que las cifras estarán completas cuando recepción las cierre.
 - **RA7 (porcentajes)**: un porcentaje se calcula siempre a partir de los recuentos o minutos exactos de su ámbito, nunca promediando otros porcentajes. Se redondea una sola vez, al mostrarlo, a un decimal y con la mitad hacia arriba (`9,2 %`). Si el denominador es cero, se muestra «Sin datos».
@@ -173,51 +180,51 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ### Cifras de referencia
 
-Se reproducen con `npm run semilla` y el reloj en la semana del 02/11/2026 al 08/11/2026 (constitución, principio V). Resumen de contenido de la semilla: `f1d7a17b9fa57c74ae6b40814b7f41eacfd084559e412f8a0106857d142b74e8`. Si un cambio de la semilla altera estas cifras, ese mismo cambio las actualiza. Cuando Sara decida, se conservará solo la opción elegida.
+Se reproducen con `npm run semilla` y el reloj en la semana del 02/11/2026 al 08/11/2026 (constitución, principio V). Resumen de contenido de la semilla: `f1d7a17b9fa57c74ae6b40814b7f41eacfd084559e412f8a0106857d142b74e8`. Si un cambio de la semilla altera estas cifras, ese mismo cambio las actualiza.
 
 **Tasa de no asistencia del periodo (RA3)**
 
-| Ámbito | Completadas | No asistidas | Canceladas | Opción A: sin canceladas | Opción B: con canceladas |
-|--------|------------:|-------------:|-----------:|-------------------------:|-------------------------:|
-| María | 129 | 13 | 9 | 9,2 % | 8,6 % |
-| Jorge | 131 | 14 | 13 | 9,7 % | 8,9 % |
-| Lucía | 120 | 19 | 15 | 13,7 % | 12,3 % |
-| Clínica | 380 | 46 | 37 | 10,8 % | 9,9 % |
+| Ámbito | Completadas | No asistidas | Canceladas | Tasa |
+|--------|------------:|-------------:|-----------:|-----:|
+| María | 129 | 13 | 9 | 9,2 % |
+| Jorge | 131 | 14 | 13 | 9,7 % |
+| Lucía | 120 | 19 | 15 | 13,7 % |
+| Clínica | 380 | 46 | 37 | 10,8 % |
 
 **Ocupación del periodo (RA4)**
 
-| Ámbito | Capacidad | Horas completadas | Horas no asistidas | Opción A: solo completadas | Opción B: con no asistidas |
-|--------|----------:|------------------:|-------------------:|---------------------------:|---------------------------:|
-| María | 440 h | 103 h | 9,75 h | 23,4 % | 25,6 % |
-| Jorge | 440 h | 102 h | 11 h | 23,2 % | 25,7 % |
-| Lucía | 440 h | 69,5 h | 10,5 h | 15,8 % | 18,2 % |
-| Clínica | 1.320 h | 274,5 h | 31,25 h | 20,8 % | 23,2 % |
+| Ámbito | Capacidad | Horas completadas | Ocupación |
+|--------|----------:|------------------:|----------:|
+| María | 440 h | 103 h | 23,4 % |
+| Jorge | 440 h | 102 h | 23,2 % |
+| Lucía | 440 h | 69,5 h | 15,8 % |
+| Clínica | 1.320 h | 274,5 h | 20,8 % |
 
-**Ocupación semanal por profesional (opción A / opción B de RA4)**
+**Ocupación semanal por profesional (RA4)**
 
 | Semana que empieza | María | Jorge | Lucía |
 |--------------------|------:|------:|------:|
-| 07/09/2026 | 28,6 % / 31,4 % | 21,8 % / 26,8 % | 17,3 % / 20,9 % |
-| 14/09/2026 | 27,3 % / 28,6 % | 27,3 % / 30,0 % | 15,9 % / 19,1 % |
-| 21/09/2026 | 25,5 % / 29,5 % | 24,5 % / 24,5 % | 15,9 % / 17,3 % |
-| 28/09/2026 | 25,0 % / 26,4 % | 20,5 % / 23,2 % | 18,2 % / 20,9 % |
-| 05/10/2026 | 23,6 % / 23,6 % | 28,6 % / 30,0 % | 15,9 % / 16,8 % |
-| 12/10/2026 | 20,5 % / 24,5 % | 21,8 % / 23,2 % | 17,3 % / 19,1 % |
-| 19/10/2026 | 16,4 % / 17,7 % | 20,5 % / 24,5 % | 15,0 % / 17,7 % |
-| 26/10/2026 | 20,5 % / 23,2 % | 20,5 % / 23,2 % | 10,9 % / 13,6 % |
+| 07/09/2026 | 28,6 % | 21,8 % | 17,3 % |
+| 14/09/2026 | 27,3 % | 27,3 % | 15,9 % |
+| 21/09/2026 | 25,5 % | 24,5 % | 15,9 % |
+| 28/09/2026 | 25,0 % | 20,5 % | 18,2 % |
+| 05/10/2026 | 23,6 % | 28,6 % | 15,9 % |
+| 12/10/2026 | 20,5 % | 21,8 % | 17,3 % |
+| 19/10/2026 | 16,4 % | 20,5 % | 15,0 % |
+| 26/10/2026 | 20,5 % | 20,5 % | 10,9 % |
 
 **Evolución de la clínica**
 
-| Semana que empieza | Completadas | No asistidas | Canceladas | Tasa A / B (RA3) | Ocupación A / B (RA4) | Ingresos |
-|--------------------|------------:|-------------:|-----------:|-----------------:|----------------------:|---------:|
-| 07/09/2026 | 42 | 8 | 7 | 16,0 % / 14,0 % | 22,6 % / 26,4 % | 1.975,00 € |
-| 14/09/2026 | 49 | 6 | 3 | 10,9 % / 10,3 % | 23,5 % / 25,9 % | 2.100,00 € |
-| 21/09/2026 | 50 | 4 | 4 | 7,4 % / 6,9 % | 22,0 % / 23,8 % | 2.025,00 € |
-| 28/09/2026 | 51 | 6 | 3 | 10,5 % / 10,0 % | 21,2 % / 23,5 % | 2.000,00 € |
-| 05/10/2026 | 54 | 2 | 5 | 3,6 % / 3,3 % | 22,7 % / 23,5 % | 2.120,00 € |
-| 12/10/2026 | 49 | 6 | 4 | 10,9 % / 10,2 % | 19,8 % / 22,3 % | 1.890,00 € |
-| 19/10/2026 | 43 | 7 | 5 | 14,0 % / 12,7 % | 17,3 % / 20,0 % | 1.650,00 € |
-| 26/10/2026 | 42 | 7 | 6 | 14,3 % / 12,7 % | 17,3 % / 20,0 % | 1.620,00 € |
+| Semana que empieza | Completadas | No asistidas | Canceladas | Tasa (RA3) | Ocupación (RA4) | Ingresos |
+|--------------------|------------:|-------------:|-----------:|-----------:|----------------:|---------:|
+| 07/09/2026 | 42 | 8 | 7 | 16,0 % | 22,6 % | 1.975,00 € |
+| 14/09/2026 | 49 | 6 | 3 | 10,9 % | 23,5 % | 2.100,00 € |
+| 21/09/2026 | 50 | 4 | 4 | 7,4 % | 22,0 % | 2.025,00 € |
+| 28/09/2026 | 51 | 6 | 3 | 10,5 % | 21,2 % | 2.000,00 € |
+| 05/10/2026 | 54 | 2 | 5 | 3,6 % | 22,7 % | 2.120,00 € |
+| 12/10/2026 | 49 | 6 | 4 | 10,9 % | 19,8 % | 1.890,00 € |
+| 19/10/2026 | 43 | 7 | 5 | 14,0 % | 17,3 % | 1.650,00 € |
+| 26/10/2026 | 42 | 7 | 6 | 14,3 % | 17,3 % | 1.620,00 € |
 | **Total** | **380** | **46** | **37** | | | **15.380,00 €** |
 
 ### Entidades clave
