@@ -1,11 +1,12 @@
 import { ACCIONES } from '../../dominio/estados.js';
-import { fecha, hora } from '../../dominio/formato.js';
+import { etiquetaZona, fecha, hora } from '../../dominio/formato.js';
 import { html, layout } from '../plantilla.js';
 
 export function vistaConfirmar({ clinica, cita, accion }) {
   const { titulo } = ACCIONES[accion];
   const dia = cita.inicio.slice(0, 10);
   const contenido = html`<h1>${titulo}</h1>
+    <p>${etiquetaZona(clinica.zona_horaria)}</p>
     <section class="tarjeta">
       <p>${fecha(cita.inicio)}, de ${hora(cita.inicio)} a ${hora(cita.fin)}</p>
       <p>${cita.paciente_nombre}</p>

@@ -80,6 +80,20 @@ test('H1-E9 FR-008 al elegir a Lucía solo se ofrecen servicios de nutrición', 
   await expect(page.getByLabel('Hora')).toHaveValue('10:00');
 });
 
+test('FR-019 tras un rechazo, cambiar de profesional conserva el paciente nuevo escrito', async ({ page }) => {
+  await entrar(page);
+  await page.goto(`/citas/nueva?dia=${HOY}&hora=09:00`);
+  await page.locator('[name="paciente_nombre"]').fill('Rosa Prieto');
+  await page.locator('[name="paciente_telefono"]').fill('000 100 999');
+  await page.getByRole('button', { name: 'Reservar cita' }).click();
+  await expect(page.getByRole('alert')).toBeVisible();
+  await page.getByLabel('Profesional').selectOption({ label: 'Lucía' });
+  await expect(page.getByLabel('Servicio')).toContainText('Consulta de nutrición');
+  await expect(page.locator('[name="paciente_nombre"]')).toHaveValue('Rosa Prieto');
+  await expect(page.locator('[name="paciente_telefono"]')).toHaveValue('000 100 999');
+  await expect(page).not.toHaveURL(/Rosa/);
+});
+
 test('FR-007 la búsqueda encuentra al paciente sin distinguir acentos ni mayúsculas', async ({ page }) => {
   await entrar(page);
   await page.goto('/citas/nueva');

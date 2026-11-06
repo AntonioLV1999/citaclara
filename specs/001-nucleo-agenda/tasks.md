@@ -205,6 +205,10 @@ description: "Lista de tareas de implementación del núcleo de agenda"
 - [X] T067 Sustituir `<input type="date">` por campos de texto `dd/mm/aaaa` con `leerDia` y `fechaEscrita`, en src/web/vistas/alta.js y src/web/vistas/agenda.js, y escribir los tests FR-024, incluido tests/e2e/fecha-idioma.spec.js con Chromium en inglés
 - [ ] T068 Hacer las sesiones de SC-002 y SC-003 con al menos 10 personas y registrar los resultados en specs/001-nucleo-agenda/checklists/entrega.md. **Tarea de personas: condición de merge, no la puede hacer un agente.**
 - [X] T069 No ofrecer reservar en huecos donde no cabe ningún servicio del profesional (FR-006), en src/web/rutas/agenda.js y src/web/vistas/agenda.js, con sus tests en tests/integracion/rutas-agenda.test.js
+- [X] T070 Indicar la hora local en la página de confirmación (FR-023), en src/web/vistas/confirmar.js, con su test en tests/integracion/rutas-estado.test.js
+- [X] T071 Conservar lo escrito al cambiar de profesional en el alta (FR-019), con `POST /citas/nueva`, en src/web/rutas/citas.js, src/web/vistas/alta.js y src/web/estaticos/alta.js, con sus tests en tests/integracion/rutas-alta.test.js y tests/e2e/flujo-recepcion.spec.js
+- [X] T072 Añadir `novalidate` a los formularios de alta y de acceso (FR-027), en src/web/vistas/alta.js y src/web/vistas/acceso.js, con sus tests en tests/integracion/rutas-alta.test.js y tests/e2e/fecha-idioma.spec.js
+- [X] T073 Repetir `npm test`, `npm run test:e2e` y la verificación de semilla tras T067 a T072, y marcar las puertas de calidad en specs/001-nucleo-agenda/checklists/entrega.md (depende de T067, T069, T070, T071, T072)
 
 ---
 
@@ -231,7 +235,7 @@ Tests primero y en rojo, después datos y dominio, servicios, vistas y rutas.
 
 ### Condición para integrar
 
-La spec está aprobada por su propietario desde el 06/11/2026 (principio I). Antes del merge, la suite debe estar en verde (principio VI) y SC-002 y SC-003 deben estar medidos (T068).
+La spec está aprobada por su propietario desde el 06/11/2026 (principio I). Antes del merge, la suite debe estar en verde tras los últimos cambios (principio VI, T073) y SC-002 y SC-003 deben estar medidos (T068).
 
 ### Oportunidades de paralelismo
 

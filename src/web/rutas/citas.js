@@ -40,6 +40,11 @@ function formularioNuevo(contexto) {
   return paginaAlta(contexto, { profesional, servicio, dia, hora });
 }
 
+/** Cambiar de profesional repinta el formulario con lo escrito, sin escribir nada (FR-019). */
+function repintarFormulario(contexto) {
+  return paginaAlta(contexto, { ...contexto.formulario, dia: leerDia(contexto.formulario.dia) });
+}
+
 function registrarCita(contexto) {
   const { clinica } = contexto;
   const formulario = { ...contexto.formulario, dia: leerDia(contexto.formulario.dia) };
@@ -53,5 +58,6 @@ function registrarCita(contexto) {
 
 export const rutasCitas = [
   { metodo: 'GET', patron: '/citas/nueva', manejador: formularioNuevo },
+  { metodo: 'POST', patron: '/citas/nueva', manejador: repintarFormulario },
   { metodo: 'POST', patron: '/citas', manejador: registrarCita },
 ];

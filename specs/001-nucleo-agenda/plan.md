@@ -105,4 +105,4 @@ tests/
 
 - **`node:sqlite` es reciente**: ha funcionado en la prueba, pero el plan fija Node 26 como mínimo.
 - **Un solo servidor**: SQLite encaja con esta escala. Si hicieran falta varios servidores, habría que migrar a PostgreSQL con restricción de exclusión. El disparador y el modelo se trasladan bien, y no se prepara nada por adelantado (principio IV).
-- **Autenticación simplificada**: la deuda de [research.md](research.md) debe resolverse antes de usar datos reales de pacientes.
+- **Autenticación simplificada y conexión sin cifrar**: la deuda de [research.md](research.md) debe resolverse antes de usar datos reales de pacientes.

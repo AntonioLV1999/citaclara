@@ -88,7 +88,7 @@ test('FR-001 solo la pantalla de acceso es pública', () => {
 test('FR-001 están registradas las rutas del contrato', () => {
   const rutas = servidor.rutasRegistradas.map((r) => `${r.metodo} ${r.patron}`);
   for (const ruta of [
-    'GET /acceso', 'POST /acceso', 'POST /salir', 'GET /', 'GET /agenda', 'GET /citas/nueva', 'POST /citas',
+    'GET /acceso', 'POST /acceso', 'POST /salir', 'GET /', 'GET /agenda', 'GET /citas/nueva', 'POST /citas/nueva', 'POST /citas',
     'GET /pacientes/buscar', 'GET /citas/:id/confirmar', 'POST /citas/:id/estado',
   ]) {
     assert.ok(rutas.includes(ruta), ruta);

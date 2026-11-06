@@ -45,6 +45,11 @@ for (const [accion, texto] of [['completar', 'Completada'], ['cancelar', 'Cancel
   });
 }
 
+test('FR-023 la confirmación indica a qué hora local se refieren sus horas', async () => {
+  const r = await confirmar(empezada, 'cancelar');
+  assert.match(textoVisible(r.texto), /Horas en hora peninsular/);
+});
+
 test('FR-021 GET no cambia nada: abrir la confirmación no aplica la acción', async () => {
   await confirmar(empezada, 'cancelar');
   assert.equal(estado(empezada), 'reservada');

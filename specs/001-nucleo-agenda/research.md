@@ -29,6 +29,8 @@ Entorno comprobado: Node 26.13 y npm 11.20 disponibles; sin PostgreSQL ni Python
 - **Confirmaciones (FR-021)**: una página propia, que funciona sin JavaScript y se prueba igual que el resto.
 - **Alternativa descartada**: aplicación de una sola página. Añade compilación, dependencias y una API que nadie más usa.
 - **Campos de fecha (FR-024)**: de texto, en `dd/mm/aaaa`. `<input type="date">` pinta la fecha según el idioma del navegador, no el de la página: con Chromium en inglés, el 05/11/2026 se ve como `11/05/2026`. A cambio se pierde el calendario nativo.
+- **Validación de formularios (FR-027)**: la hace el servidor, con `novalidate` en el HTML. Los avisos nativos salen en el idioma del navegador, no en el de la página.
+- **Cambio de profesional en el alta (FR-019)**: un `POST /citas/nueva` que solo repinta el formulario. Con `GET`, el nombre y el teléfono del paciente quedarían en la URL y en el historial.
 - **Seguridad de las vistas**: todo dato se escapa al generar HTML, mediante una única función de plantilla.
 
 ## 4. Representación del tiempo (principio II, FR-023 a FR-025)
@@ -48,7 +50,7 @@ Entorno comprobado: Node 26.13 y npm 11.20 disponibles; sin PostgreSQL ni Python
 
 - **Decisión**: la clave se guarda con `scrypt` y sal. Al entrar, se compara con la de cada clínica. La sesión es un token aleatorio cuyo hash se guarda en el almacén, en una cookie `HttpOnly`, `SameSite=Strict`, sin `Max-Age`.
 - **Razón**: `SameSite=Strict` cubre los envíos cruzados sin añadir tokens en cada formulario. Comparar con cada clínica es lo más simple con una clínica, y evita pedir un identificador que recepción tendría que recordar.
-- **Deuda consciente**: sin usuarios individuales, sin rotación de clave, sin límite de intentos y sin caducidad de sesión. Comparar clínica a clínica deja de ser viable con muchas clínicas.
+- **Deuda consciente**: sin usuarios individuales, sin rotación de clave, sin límite de intentos, sin caducidad de sesión y sin cifrado de la conexión: el servidor habla HTTP y la cookie no lleva `Secure`. Comparar clínica a clínica deja de ser viable con muchas clínicas.
 
 ## 7. Semilla determinista (principio V, FR-029 a FR-034)
 

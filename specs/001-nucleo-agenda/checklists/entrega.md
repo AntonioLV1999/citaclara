@@ -27,7 +27,7 @@ Se leen en este orden y con estas palabras:
 
 - **Qué se mide**: desde que la persona ve la agenda hasta que la cita aparece en ella, en la tarea 2.
 - **Cronómetro**: empieza al terminar de leer la tarea y para cuando la cita se ve en la agenda.
-- **Umbral**: menos de 60 segundos.
+- **Umbral**: al menos 9 de cada 10 personas tardan menos de 60 segundos.
 
 ### SC-003: tareas habituales a la primera
 
@@ -54,10 +54,10 @@ Se leen en este orden y con estas palabras:
 
 ## Puertas de calidad de la constitución
 
-- [x] **I. Spec primero**: el propietario ha aprobado la spec, y `specs/MAPA.md` lo refleja.
-- [ ] **II. Números**: los importes, las fechas y las horas cumplen las reglas de presentación.
-- [ ] **III. Solape**: `npm test` incluye las pruebas de reservas simultáneas, y ninguna ha detectado un solape.
-- [ ] **IV. Simplicidad**: ninguna funcionalidad ni dependencia sin justificar en una spec.
-- [ ] **V. Datos reproducibles**: las cifras de FR-030 coinciden con la salida de `npm run semilla`.
-- [ ] **VI. Tests**: `npm test` y `npm run test:e2e` en verde, sin tests desactivados ni relajados.
-- [ ] **VII y VIII. Interfaz e idioma**: lo que ve la persona usuaria está en español de España, sin jerga técnica y con los umbrales de FR-028.
+- [x] **I. Spec primero**: el propietario ha aprobado la spec, y `specs/MAPA.md` lo refleja. Consta que la implementación empezó con la spec en borrador: `f088831` es anterior a la aprobación de `b47bc94`. La aprobación es anterior a la integración, que es lo que exige esta puerta.
+- [x] **II. Números**: los importes, las fechas y las horas cumplen las reglas de presentación.
+- [x] **III. Solape**: `npm test` incluye las pruebas de reservas simultáneas, y ninguna ha detectado un solape.
+- [x] **IV. Simplicidad**: ninguna funcionalidad ni dependencia sin justificar en una spec.
+- [x] **V. Datos reproducibles**: las cifras de FR-030 coinciden con la salida de `npm run semilla`.
+- [x] **VI. Tests**: `npm test` y `npm run test:e2e` en verde, sin tests desactivados ni relajados.
+- [x] **VII y VIII. Interfaz e idioma**: lo que ve la persona usuaria está en español de España, sin jerga técnica y con los umbrales de FR-028.

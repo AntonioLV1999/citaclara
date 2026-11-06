@@ -147,7 +147,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 **Acceso**
 
 - **FR-001**: El sistema DEBE exigir la clave de la clínica para cualquier consulta u operación, por cualquier vía, y no solo ocultarlas en pantalla.
-- **FR-002**: Cada clínica DEBE tener una única clave, que NO DEBE mostrarse nunca en pantalla ni guardarse de forma legible.
+- **FR-002**: Cada clínica DEBE tener una única clave, que NO DEBE mostrarse nunca en pantalla ni guardarse de forma legible. La única excepción es la clave de los datos de demostración, ficticia y pública, que aparece en el código y en la documentación y no debe usarse con datos reales.
 - **FR-003**: Recepción DEBE poder salir, tras lo cual hará falta de nuevo la clave.
 - **FR-004**: El sistema DEBE limitar cada sesión a los datos de su clínica.
 
@@ -170,7 +170,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-016**: Un hueco libre DEBE ser cualquier tramo continuo dentro del horario que no esté ocupado por una cita reservada o completada.
 - **FR-017**: Las citas canceladas y no asistidas DEBEN seguir visibles y distinguirse de las que ocupan hueco. El estado NO DEBE comunicarse solo por el color.
 - **FR-018**: La agenda NO DEBE ofrecer reservar en tramos ya pasados.
-- **FR-019**: Tras un rechazo por solape, recepción DEBE ver los huecos actuales de ese día junto al formulario, con lo que había escrito.
+- **FR-019**: Tras un rechazo por solape, recepción DEBE ver los huecos actuales de ese día junto al formulario, con lo que había escrito. Cambiar de profesional durante el alta, tras un rechazo o no, DEBE conservar lo escrito, salvo el servicio si no es de la nueva especialidad.
 
 **Estados**
 
@@ -180,14 +180,14 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 **Fechas, horas e importes** (constitución, principio II)
 
-- **FR-023**: Cada clínica DEBE tener su zona horaria (península o Canarias), y toda hora DEBE mostrarse en la hora local de la clínica, igual desde cualquier dispositivo. La agenda DEBE indicar a qué hora local se refieren sus horas.
+- **FR-023**: Cada clínica DEBE tener su zona horaria (península o Canarias), y toda hora DEBE mostrarse en la hora local de la clínica, igual desde cualquier dispositivo. Toda pantalla que muestre horas de citas DEBE indicar a qué hora local se refieren.
 - **FR-024**: Las fechas DEBEN mostrarse como día, mes y año (`dd/mm/aaaa`) y las horas en formato de 24 horas, también en los campos donde se escriben, sea cual sea el idioma del navegador.
 - **FR-025**: **Días de cambio de hora**: una cita conserva su hora local a ambos lados del cambio, de modo que las 10:00 siguen siendo las 10:00. Ninguna cita puede empezar, terminar ni atravesar la hora que no existe o que se repite ese día, y el sistema rechaza el intento con un mensaje claro. Esa hora es de 02:00 a 03:00 en la península y de 01:00 a 02:00 en Canarias.
 - **FR-026**: Los precios DEBEN ser exactos al céntimo y mostrarse con el formato español (`40,00 €`).
 
 **Mensajes e interfaz** (constitución, principios VII y VIII)
 
-- **FR-027**: Todos los textos DEBEN estar en español de España, sin jerga técnica, y cada error DEBE decir qué ha pasado y qué puede hacer la persona. Los estados se muestran como «Reservada», «Completada», «Cancelada» y «No asistida».
+- **FR-027**: Todos los textos DEBEN estar en español de España, sin jerga técnica, y cada error DEBE decir qué ha pasado y qué puede hacer la persona. Esto incluye los avisos de validación de los formularios, que NO DEBEN depender del idioma del navegador. Los estados se muestran como «Reservada», «Completada», «Cancelada» y «No asistida».
 - **FR-028**: La interfaz DEBE funcionar desde 360 píxeles de ancho hasta el portátil de recepción, sin desplazamiento horizontal, con contraste de al menos 4,5:1 en texto normal, y con controles táctiles de al menos 44 × 44 píxeles.
 
 **Datos de demostración** (constitución, principio V)
@@ -224,7 +224,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 ### Resultados medibles
 
 - **SC-001**: En 1.000 rondas de reservas simultáneas sobre tramos que se solapan, cada ronda termina con exactamente una cita registrada y un rechazo claro para las demás: cero solapes.
-- **SC-002**: Una persona de recepción sin formación previa registra una cita para un paciente existente en menos de 1 minuto desde la agenda.
+- **SC-002**: Al menos 9 de cada 10 personas de recepción sin formación previa registran una cita para un paciente existente en menos de 1 minuto desde la agenda.
 - **SC-003**: Al menos 9 de cada 10 personas sin formación ni manual completan a la primera las tres tareas habituales: encontrar un hueco, reservar y cancelar.
 - **SC-004**: Recepción ve la agenda de un día, o cambia de profesional o de día, en menos de 1 segundo en su uso normal, con el volumen de los datos de demostración.
 - **SC-005**: Dos generaciones de la semilla con los mismos parámetros, en máquinas y fechas distintas, son idénticas en el 100 % de los registros.
@@ -246,4 +246,5 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **Precio por servicio**: como los servicios no se editan en la 001, la cita toma el precio del servicio. Guardar el precio histórico corresponderá a la spec que permita cambiarlo.
 - **Sin detección de fichas duplicadas**: un teléfono puede repetirse, porque una familia puede compartirlo.
 - **Sin caducidad de sesión**: la sesión dura hasta salir o cerrar el navegador. Forma parte de la deuda de autenticación.
+- **Conexión sin cifrar (deuda consciente)**: la 001 no cifra la conexión, y la clave y los datos viajan en claro entre el navegador y el servidor. Sirve para demostraciones con datos ficticios. Forma parte de la deuda de autenticación: antes de usar datos reales de pacientes, la conexión debe ir cifrada y la cookie de sesión debe limitarse a ella.
 - **Fuera de alcance de la 001** (specs propias): cualquier acceso del paciente, recordatorios, analítica y pagos online.

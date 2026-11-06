@@ -2,6 +2,7 @@
 // pacientes completa y el resumen que trae la página. No lee el reloj del dispositivo.
 
 const selectorProfesional = document.getElementById('elegir-profesional');
+const verServicios = document.getElementById('ver-servicios');
 const servicio = document.getElementById('servicio');
 const horaInicio = document.getElementById('hora');
 const paciente = document.getElementById('paciente');
@@ -47,8 +48,8 @@ function elegirPaciente(evento) {
   actualizarPacienteNuevo();
 }
 
-selectorProfesional.addEventListener('change', () => selectorProfesional.form.requestSubmit());
-selectorProfesional.form.querySelector('button').hidden = true;
+selectorProfesional.addEventListener('change', () => selectorProfesional.form.requestSubmit(verServicios));
+verServicios.hidden = true;
 servicio.addEventListener('change', actualizarResumen);
 horaInicio.addEventListener('change', actualizarResumen);
 paciente.addEventListener('change', actualizarPacienteNuevo);

@@ -41,6 +41,66 @@ test('FR-005 el formulario sin datos ofrece todo lo necesario para crear una cit
   }
 });
 
+const cambiarProfesional = (extra = {}) => peticion(servidor, {
+  metodo: 'POST',
+  ruta: '/citas/nueva',
+  cookie,
+  formulario: {
+    profesional: e.a.nutri,
+    servicio: e.a.sesion,
+    paciente: '',
+    paciente_nombre: 'Rosa Prieto',
+    paciente_telefono: '600 111 222',
+    paciente_email: 'rosa@example.com',
+    dia: '11/11/2026',
+    hora: '10:30',
+    ...extra,
+  },
+});
+
+test('FR-019 cambiar de profesional conserva lo escrito y muestra sus servicios', async () => {
+  const r = await cambiarProfesional();
+  assert.equal(r.estado, 200);
+  assert.match(r.texto, new RegExp(`<option value="${e.a.nutri}" selected>Lucía</option>`));
+  assert.match(r.texto, /name="paciente_nombre" value="Rosa Prieto"/);
+  assert.match(r.texto, /name="paciente_telefono" value="600 111 222"/);
+  assert.match(r.texto, /name="paciente_email" value="rosa@example.com"/);
+  assert.equal(campoDia(r.texto), '11/11/2026');
+  assert.match(r.texto, /<option value="10:30" selected>10:30<\/option>/);
+  assert.match(r.texto, /Consulta de nutrición/);
+  assert.doesNotMatch(r.texto, /Sesión de fisioterapia/);
+});
+
+test('FR-019 cambiar de profesional conserva el paciente elegido', async () => {
+  const r = await cambiarProfesional({ paciente: e.a.pacientes[0] });
+  assert.match(r.texto, new RegExp(`<option value="${e.a.pacientes[0]}" selected>`));
+});
+
+test('FR-019 cambiar de profesional no escribe nada', async () => {
+  const antes = [contar('cita'), contar('paciente')];
+  await cambiarProfesional();
+  assert.deepEqual([contar('cita'), contar('paciente')], antes);
+});
+
+test('FR-019 los datos del paciente no pasan por la URL al cambiar de profesional', async () => {
+  const r = await nueva();
+  assert.doesNotMatch(r.texto, /\saction="\/citas\/nueva"/);
+  assert.match(r.texto, /formaction="\/citas\/nueva"/);
+  assert.match(r.texto, /<form method="post" action="\/citas" id="formulario-alta"/);
+});
+
+test('FR-004 cambiar a un profesional de otra clínica da 404', async () => {
+  const r = await cambiarProfesional({ profesional: e.b.fisio });
+  assert.equal(r.estado, 404);
+});
+
+test('FR-027 los formularios no usan los avisos del navegador, que van en su idioma', async () => {
+  const alta = await nueva();
+  assert.match(alta.texto, /id="formulario-alta" novalidate/);
+  const acceso = await peticion(servidor, { ruta: '/acceso' });
+  assert.match(acceso.texto, /action="\/acceso" novalidate/);
+});
+
 test('FR-006 el formulario llega rellenado desde un hueco', async () => {
   const r = await nueva(`?profesional=${e.a.nutri}&dia=${DIA}&hora=10:30`);
   assert.match(r.texto, new RegExp(`<option value="${e.a.nutri}" selected>Lucía</option>`));

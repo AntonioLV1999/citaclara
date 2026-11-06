@@ -13,6 +13,7 @@ Páginas HTML generadas en el servidor. Salvo `/acceso` y los estáticos, toda r
 | `POST /salir` | Cerrar la sesión | 303 a `/acceso` |
 | `GET /agenda?profesional=&dia=` | Agenda del día; sin `dia`, hoy; sin `profesional`, el primero. `dia` admite `dd/mm/aaaa` y `AAAA-MM-DD` | 200; 404 con mensaje si el día no es válido |
 | `GET /citas/nueva?profesional=&dia=&hora=` | Formulario de alta, opcionalmente rellenado desde un hueco | 200 |
+| `POST /citas/nueva` | Repintar el formulario al cambiar de profesional, conservando lo escrito (FR-019). No escribe nada, y es POST para que los datos del paciente no pasen por la URL | 200 |
 | `POST /citas` | Crear la cita, y la ficha si el paciente es nuevo | 303 a la agenda del día; 409 o 422 con el formulario |
 | `GET /pacientes/buscar?q=` | Fragmento HTML con coincidencias por nombre o teléfono, sin distinguir acentos ni mayúsculas | 200 |
 | `GET /citas/:id/confirmar?accion=` | Página de confirmación; `accion` es `completar`, `cancelar` o `no-asistio` | 200; 404 |
@@ -50,7 +51,8 @@ Avisos de la agenda, que no son rechazos: «La clínica no abre este día.» en 
 
 ## Presentación
 
-- **Fechas y horas**: `dd/mm/aaaa` y 24 horas, también en los campos, que son de texto para no depender del idioma del navegador. La agenda indica «Horas en hora peninsular» o «Horas en hora de Canarias» (FR-023, FR-024).
+- **Fechas y horas**: `dd/mm/aaaa` y 24 horas, también en los campos, que son de texto para no depender del idioma del navegador. Toda pantalla con horas de citas indica «Horas en hora peninsular» o «Horas en hora de Canarias» (FR-023, FR-024).
+- **Validación**: los formularios llevan `novalidate`, para que los avisos sean siempre los de este contrato y no los del navegador (FR-027).
 - **Importes**: `40,00 €` (FR-026).
 - **Estados**: «Reservada», «Completada», «Cancelada» y «No asistida», siempre con texto además de color (FR-017, FR-027).
 - **Accesibilidad**: contraste de 4,5:1, controles de 44 × 44 píxeles y sin desplazamiento horizontal desde 360 píxeles (FR-028).

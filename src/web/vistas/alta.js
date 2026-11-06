@@ -11,16 +11,13 @@ function opcion(valor, texto, elegido, atributos = '') {
   return html`<option value="${valor}"${String(valor) === String(elegido) ? html` selected` : ''}${atributos}>${texto}</option>`;
 }
 
-function selectorProfesional(profesionales, profesional, valores) {
-  return html`<form method="get" action="/citas/nueva" id="cambiar-profesional" class="campo">
-    <label class="campo__etiqueta" for="elegir-profesional">Profesional</label>
+function campoProfesional(profesionales, profesional) {
+  return html`<label class="campo">
+    <span class="campo__etiqueta">Profesional</span>
     <select id="elegir-profesional" name="profesional">
       ${profesionales.map((p) => opcion(p.id, p.nombre, profesional.id))}
     </select>
-    <input type="hidden" name="dia" value="${valores.dia}">
-    <input type="hidden" name="hora" value="${valores.hora}">
-    <div class="acciones"><button class="boton boton--secundario" type="submit">Ver sus servicios</button></div>
-  </form>`;
+  </label>`;
 }
 
 function resumen(servicio, valores) {
@@ -80,9 +77,8 @@ export function vistaAlta({ clinica, profesionales, profesional, servicios, paci
     <p>${etiquetaZona(clinica.zona_horaria)}</p>
     ${mensaje && html`<p class="aviso aviso--error" role="alert">${mensaje}</p>`}
     ${huecos && huecosActuales({ profesional, valores, huecos })}
-    ${selectorProfesional(profesionales, profesional, valores)}
-    <form method="post" action="/citas" id="formulario-alta">
-      <input type="hidden" name="profesional" value="${profesional.id}">
+    <form method="post" action="/citas" id="formulario-alta" novalidate>
+      ${campoProfesional(profesionales, profesional)}
       <label class="campo">
         <span class="campo__etiqueta">Servicio</span>
         <select name="servicio" id="servicio">
@@ -106,6 +102,7 @@ export function vistaAlta({ clinica, profesionales, profesional, servicios, paci
       ${elegido && resumen(elegido, valores)}
       <div class="acciones">
         <button class="boton" type="submit">Reservar cita</button>
+        <button class="boton boton--secundario" type="submit" id="ver-servicios" formaction="/citas/nueva">Ver sus servicios</button>
         <a class="boton boton--secundario" href="/agenda?profesional=${profesional.id}&amp;dia=${valores.dia}">Volver a la agenda</a>
       </div>
     </form>`;
