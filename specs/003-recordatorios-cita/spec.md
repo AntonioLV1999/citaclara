@@ -4,11 +4,19 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador, pendiente de las 3 preguntas para Sara
+**Estado**: Borrador, con las 3 preguntas para Sara respondidas
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
 **Entrada**: descripción de la persona usuaria: «Recordatorios de cita. El dolor número uno del cliente piloto: la no asistencia. Alcance: un proceso diario genera un recordatorio por email para cada cita reservada de las próximas 24-48 horas, sin duplicar envíos; el email incluye los datos de la cita y una forma de que el paciente cancele si no va a ir (mejor un hueco libre que un no-show). Correo en modo simulado sin SMTP configurado: se escriben ficheros .eml en datos/salida-correo/. Preguntas cerradas para Sara: antelación exacta, qué pasa si el paciente cancela desde el email y con cuánta antelación puede, y si el recordatorio se reenvía cuando la cita se mueve. Fuera de alcance v1: SMS y WhatsApp».
+
+## Aclaraciones
+
+### Sesión del 06/11/2026
+
+- P: ¿Cuándo debe recibir el paciente el recordatorio de su cita? → R: el proceso sale cada día a las 08:00 y avisa de las citas de mañana, entre 25 y 36 horas antes (RR3).
+- P: ¿Qué ocurre cuando el paciente cancela desde el correo y hasta cuándo puede hacerlo? → R: la cita se cancela al momento, hasta 2 horas antes del inicio; después, el paciente debe contactar con la clínica (RR4).
+- P: ¿Qué debe pasar con el recordatorio cuando una cita cambia de hora? → R: la cita nueva se trata como cualquier otra y tiene su recordatorio si aún le toca (RR5).
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -30,7 +38,8 @@ Cada día, sin que nadie de la clínica intervenga, el sistema envía un correo 
 6. **Dada** una cita de un paciente sin correo, **cuando** se ejecuta el proceso, **entonces** no se envía nada, el proceso sigue con las demás y el resumen la cuenta como omitida.
 7. **Dado** un paciente con dos citas dentro de la ventana, **cuando** se ejecuta el proceso, **entonces** recibe un recordatorio por cada cita.
 8. **Dado** un envío que falla, **cuando** el proceso continúa, **entonces** las demás citas se procesan, el resumen cuenta el fallo y esa cita puede recordarse en otra ejecución mientras siga dentro de la ventana.
-9. **Dada** una clínica de Canarias, **cuando** el paciente lee el correo, **entonces** la hora es la local de la clínica e indica a qué hora local se refiere.
+9. **Dada** una cita recordada que recepción cancela para crear otra de pasado mañana, **cuando** el proceso se ejecuta mañana, **entonces** se envía el recordatorio de la cita nueva.
+10. **Dada** una clínica de Canarias, **cuando** el paciente lee el correo, **entonces** la hora es la local de la clínica e indica a qué hora local se refiere.
 
 ---
 
@@ -45,11 +54,11 @@ El paciente que sabe que no irá abre el enlace del recordatorio, ve qué cita v
 **Escenarios de aceptación**:
 
 1. **Dado** un recordatorio de una cita reservada dentro del plazo de cancelación, **cuando** el paciente abre el enlace, **entonces** ve los datos de la cita y un botón de confirmar, y la cita aún no ha cambiado.
-2. **Dada** esa pantalla, **cuando** el paciente confirma, **entonces** se aplica el efecto que fije RR4 y el paciente ve un mensaje que lo confirma.
+2. **Dada** esa pantalla, **cuando** el paciente confirma, **entonces** la cita queda cancelada al momento, su tramo queda libre y el paciente ve un mensaje que lo confirma.
 3. **Dada** una cita cancelada desde el correo, **cuando** recepción reserva ese tramo, **entonces** se acepta (RN1 de la 001).
 4. **Dada** una cita ya cancelada, **cuando** el paciente vuelve a abrir el enlace, **entonces** ve que ya está cancelada y no se le ofrece ninguna acción.
 5. **Dada** una cita completada o no asistida, **cuando** se abre su enlace, **entonces** se indica el estado en que está y no se ofrece cancelar.
-6. **Dada** una cita fuera del plazo de cancelación, **cuando** se abre su enlace, **entonces** un mensaje llano explica que ya no puede cancelarse por esta vía y que debe contactar con la clínica, y la cita no cambia.
+6. **Dada** una cita de las 10:00 y siendo las 08:01 de ese día, **cuando** se abre su enlace, **entonces** un mensaje llano explica que ya no puede cancelarse por esta vía y que debe contactar con la clínica, y la cita no cambia.
 7. **Dado** un enlace alterado o inventado, **cuando** se abre, **entonces** un mensaje llano dice que no es válido y no se revela ningún dato.
 8. **Dado** un filtro de correo que abre el enlace de forma automática, **cuando** termina, **entonces** la cita sigue reservada, porque cancelar exige la confirmación expresa.
 9. **Dado** un móvil de 360 píxeles de ancho, **cuando** se abre el enlace, **entonces** se lee y se maneja sin desplazamiento horizontal.
@@ -90,14 +99,17 @@ Recepción abre la agenda y distingue las citas que el paciente canceló desde e
 
 ### Casos límite
 
-- **Días de cambio de hora**: la ventana se calcula en hora local de la clínica, de modo que ningún día de 23 o 25 horas deja citas sin recordar ni las recuerda dos veces.
-- **Fines de semana y festivos**: el proceso se ejecuta todos los días naturales, porque las citas del lunes también necesitan su aviso.
-- **Un día sin ejecución**: las citas que salen de la ventana sin recordatorio se quedan sin él. El proceso no envía avisos fuera de la ventana.
-- **Cita creada cuando su ventana ya ha pasado**: no recibe recordatorio; el paciente acaba de reservar.
+- **Días de cambio de hora**: la ventana se cuenta por días naturales en hora local de la clínica, de modo que ningún día de 23 o 25 horas deja citas sin recordar ni las recuerda dos veces.
+- **Fines de semana y festivos**: el proceso se ejecuta todos los días naturales, porque las citas del lunes se avisan el domingo.
+- **Ejecución retrasada**: si el proceso sale más tarde de las 08:00, avisa de las mismas citas, las de mañana, y ninguna se pierde.
+- **Un día sin ejecución**: las citas del día siguiente se quedan sin recordatorio, salvo que el proceso se lance a mano ese mismo día. El proceso no envía avisos fuera de la ventana.
+- **Cita creada después de la ejecución, para hoy o para mañana**: no recibe recordatorio, porque el paciente acaba de reservar. Si alguien lanza el proceso a mano ese día, las de mañana sí se avisan.
 - **Cita cancelada justo antes del envío**: el estado se comprueba al enviar, y si ya no está reservada no sale el recordatorio.
 - **Fallo a mitad de ejecución**: al reanudar, las citas ya enviadas no se repiten y las pendientes se envían.
 - **Paciente y recepción cancelan a la vez**: solo una acción prospera; la otra ve que la cita ya está cancelada.
 - **Paciente cancela mientras recepción marca otro estado**: solo una prospera (RN4), y quien pierde ve el estado resultante.
+- **Pantalla abierta mientras vence el plazo**: si el paciente confirma a las 08:01 una cita de las 10:00 que abrió a las 07:55, se rechaza con el mensaje de fuera de plazo y la cita no cambia.
+- **Justo en el límite**: confirmar a las 08:00 una cita de las 10:00 se acepta.
 - **Doble pulsación al confirmar**: la cita se cancela una vez y la segunda pulsación ve el mensaje de cita ya cancelada.
 - **Hueco cancelado y vuelto a ocupar**: el enlace de la cita antigua solo actúa sobre esa cita y nunca sobre la nueva.
 - **Correo compartido en una familia**: cada cita tiene su recordatorio, y el enlace solo sirve para esa cita.
@@ -111,16 +123,16 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **RR1**: una cita recibe como máximo un recordatorio, sea cual sea el número de ejecuciones del proceso y aunque coincidan en el tiempo. La garantía la da el sistema.
 - **RR2**: solo se recuerdan citas en estado reservada en el momento del envío, dentro de la ventana de recordatorio y de pacientes con correo.
-- **RR3**: la ventana de recordatorio es [NEEDS CLARIFICATION: antelación exacta del recordatorio, pregunta 1 para Sara].
-- **RR4**: la cancelación desde el correo tiene este efecto y este plazo: [NEEDS CLARIFICATION: efecto de la cancelación y antelación mínima, pregunta 2 para Sara].
-- **RR5**: cuando una cita cambia de hora, el recordatorio se trata así: [NEEDS CLARIFICATION: reenvío al mover una cita, pregunta 3 para Sara].
+- **RR3**: la ventana de recordatorio de una ejecución son las citas cuyo inicio cae en el día natural siguiente al de la ejecución, en hora local de la clínica. Con la ejecución de las 08:00 y el horario de 09:00 a 20:00, el aviso llega entre 25 y 36 horas antes.
+- **RR4**: al confirmar desde el correo, la cita queda cancelada al momento y su tramo libre, sin intervención de recepción. El paciente puede hacerlo hasta 2 horas antes del inicio, incluido ese minuto exacto. Pasado ese plazo, solo recepción puede cancelarla (RN5 de la 001).
+- **RR5**: cambiar una cita de hora es cancelarla y crear otra (001). La cita nueva se trata como cualquier otra: tiene su recordatorio si cumple RR2 y RR3, aunque la cancelada ya lo tuviera. No hay correo específico de cambio.
 - **RR6**: un enlace de cancelación solo da acceso a la cita para la que se generó, no se puede deducir a partir de otro y nunca cancela sin confirmación expresa.
 
 ### Requisitos funcionales
 
 **Proceso diario**
 
-- **FR-001**: El sistema DEBE ejecutar el proceso de recordatorios una vez al día, todos los días naturales, sin intervención de la clínica.
+- **FR-001**: El sistema DEBE ejecutar el proceso de recordatorios una vez al día, a las 08:00 en hora local de cada clínica, todos los días naturales, sin intervención de la clínica.
 - **FR-002**: El proceso DEBE poder lanzarse también a mano, y repetirlo NO DEBE producir duplicados (RR1).
 - **FR-003**: El proceso DEBE poder ejecutarse indicando el momento que toma como «ahora», para que la demostración no dependa del reloj (constitución, principio V).
 - **FR-004**: El proceso DEBE calcular la ventana de cada clínica en su hora local, y DEBE cumplir RR3 también los días de cambio de hora.
@@ -153,7 +165,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 **Datos de demostración** (constitución, principio V)
 
 - **FR-021**: Los datos de demostración DEBEN permitir ver las tres situaciones: citas recordadas, citas omitidas por no tener correo y citas fuera de la ventana. La semilla actual ya las cubre, porque 10 de sus 40 pacientes no tienen correo, y esta feature NO DEBE alterar sus cifras ni sus resúmenes de contenido (FR-030 de la 001).
-- **FR-022**: Cerrada RR3, esta spec DEBE citar el número exacto de recordatorios que genera la semilla por defecto en un momento de referencia fijo.
+- **FR-022**: Con la semilla por defecto y «ahora» el 02/11/2026 a las 08:00, el proceso DEBE recordar las 5 citas reservadas del 03/11/2026: 4 recordatorios enviados y 1 cita omitida por no tener correo. De las 57 reservas futuras, 43 son de pacientes con correo y 14 de pacientes sin él.
 
 **Pruebas** (constitución, principios III y VI)
 
@@ -182,7 +194,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **Propietario**: se registra a AntonioLV1999, como en la 001, hasta que se indique otra cosa.
 - **Objetivo del 30 %**: es una propuesta para SC-001, porque el encargo no fija cifra y no conocemos la tasa real del piloto. La clínica debe aportar esa tasa de partida.
-- **Hoy no se mueven citas**: la 001 no tiene esa operación y cambiar una cita es cancelarla y crear otra. La pregunta 3 se plantea sobre esa realidad.
+- **Hoy no se mueven citas**: la 001 no tiene esa operación y cambiar una cita es cancelarla y crear otra. Si otra spec crea esa operación, deberá revisar RR5.
 - **Un único correo**: no hay confirmación de asistencia, ni segundo aviso, ni correo de confirmación tras cancelar. La pantalla de confirmación es el acuse.
 - **Sin correo no hay aviso**: recepción no recibe una lista para llamar a esos pacientes; el resumen solo los cuenta. El correo sigue siendo opcional en la ficha.
 - **Sin aviso en la agenda de si se envió el recordatorio**: el encargo no lo pide.
