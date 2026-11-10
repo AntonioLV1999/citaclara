@@ -4,7 +4,7 @@
 
 **Creada**: 05/11/2026
 
-**Estado**: Aprobada por su propietario el 06/11/2026. El primer cambio del 10/11/2026 (S-01 a S-06, S-08 y S-18) lo aprobó también su propietario el 10/11/2026. El **segundo cambio del 10/11/2026** (S-13 a S-17, S-22, S-24 y S-25, y el matiz de S-18; ver [Historial de cambios](#historial-de-cambios)) está **pendiente de aprobación** del propietario. Hasta que lo apruebe, la versión vigente es la del primer cambio.
+**Estado**: Aprobada por su propietario el 06/11/2026. El primer cambio del 10/11/2026 (S-01 a S-06, S-08 y S-18) lo aprobó también su propietario el 10/11/2026. El **segundo cambio del 10/11/2026** (S-13 a S-17, S-22, S-24 y S-25, y el matiz de S-18; ver [Historial de cambios](#historial-de-cambios)) lo **aprobó también su propietario el 10/11/2026**. La versión vigente es la que incluye los dos cambios.
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -416,9 +416,9 @@ La 002, la 003 y la 004 ya citaban estos dos conceptos, y la 001 no los definía
 
 - FR-030 llama a sus cifras «porcentajes de composición de la semilla» y remite a 004/RA3 como única definición de la tasa de no asistencia. HU5 escenario 3 usa el mismo nombre. No cambian los márgenes, las cifras ni los resúmenes.
 
-### 10/11/2026: segundo cambio de la revisión cruzada (pendiente de aprobación)
+### 10/11/2026: segundo cambio de la revisión cruzada (aprobado el 10/11/2026)
 
-Aplica lo que la cuarta pasada del informe `specs/000-revision-cruzada-nov2026.md` asigna a la 001, con las decisiones D6 y D7 tomadas por Sara (002) el 10/11/2026, que aceptó las dos recomendaciones del informe, igual que la de D3, que no afecta a esta spec. **Lo propone el agente de la 001 y está pendiente de que lo apruebe su propietario, AntonioLV1999.** No cambia la semilla, sus cifras ni sus resúmenes.
+Aplica lo que la cuarta pasada del informe `specs/000-revision-cruzada-nov2026.md` asigna a la 001, con las decisiones D6 y D7 tomadas por Sara (002) el 10/11/2026, que aceptó las dos recomendaciones del informe, igual que la de D3, que no afecta a esta spec. Lo propuso el agente de la 001, y lo **aprobó su propietario, AntonioLV1999, el 10/11/2026**: ya se puede implementar (principio I). No cambia la semilla, sus cifras ni sus resúmenes.
 
 | Hallazgo | Decisión | Cambios en esta spec |
 |----------|----------|----------------------|
