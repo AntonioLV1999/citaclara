@@ -269,9 +269,9 @@ La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos ca
 
 ## Historial de cambios
 
-### 10/11/2026, rebase sobre la 001 aprobada: S-05 y S-08
+### 10/11/2026, rebase sobre la 001 aprobada: S-05 y S-08 (aprobado por Sara el 10/11/2026)
 
-Propuesta para Sara, sin aprobar. Rebasa la rama sobre el cambio de la 001 del 10/11/2026, ya aprobado, y sustituye las referencias genéricas por sus identificadores. No cambia ningún comportamiento ni toca las preguntas abiertas.
+Aprobado por Sara, propietaria de esta spec, el 10/11/2026. La aprobación cubre solo este cambio: la spec sigue en Borrador, con las preguntas abiertas y los puntos pendientes de «Cambios que se piden a la 001». Rebasa la rama sobre el cambio de la 001 del 10/11/2026, ya aprobado, y sustituye las referencias genéricas por sus identificadores. No cambia ningún comportamiento ni toca las preguntas abiertas.
 
 - **S-05**: RP4, FR-015, FR-017 y los escenarios 6 y 7 de la historia 3 citan FR-038 de la 001 en lugar de «la operación única de cancelar». Los cuatro casos de FR-017 corresponden a los cuatro resultados de FR-038: «cancelada ahora», «ya estaba cancelada» (con el origen previo, que separa la doble pulsación del paciente de la cancelación de recepción), «fuera de plazo» (con el límite) y «no cancelable» (con el estado). El último caso, antes «cualquier otro rechazo», pasa a nombrar «no cancelable». La fila de la tabla pasa a recogida (FR-038 y FR-020 de la 001).
 - **S-08**: FR-006 cita FR-039 de la 001, y su fila de la tabla pasa a recogida.
