@@ -4,7 +4,8 @@
 export const SEMILLA = 20261102;
 export const LUNES_POR_DEFECTO = '2026-11-02';
 
-export const CLINICA = { nombre: 'Clínica Eleva', zona_horaria: 'Europe/Madrid' };
+// El orden de los campos forma parte de los resúmenes de FR-030 (historial, D4).
+export const CLINICA = { nombre: 'Clínica Eleva', zona_horaria: 'Europe/Madrid', telefono: '000 200 000' };
 
 // Clave ficticia y pública. No debe usarse con datos reales.
 export const CLAVE = 'eleva-demo';

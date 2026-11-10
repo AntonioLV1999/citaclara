@@ -71,7 +71,9 @@ function huecosActuales({ profesional, valores, huecos }) {
   </section>`;
 }
 
-export function vistaAlta({ clinica, profesionales, profesional, servicios, pacientes, valores, mensaje, huecos }) {
+export function vistaAlta({
+  clinica, profesionales, profesional, servicios, pacientes, valores, mensaje, huecos, momentoFijado,
+}) {
   const elegido = servicios.find((s) => String(s.id) === String(valores.servicio)) ?? servicios[0];
   const contenido = html`<h1>Nueva cita</h1>
     <p>${etiquetaZona(clinica.zona_horaria)}</p>
@@ -106,7 +108,7 @@ export function vistaAlta({ clinica, profesionales, profesional, servicios, paci
         <a class="boton boton--secundario" href="/agenda?profesional=${profesional.id}&amp;dia=${valores.dia}">Volver a la agenda</a>
       </div>
     </form>`;
-  return layout({ titulo: 'Nueva cita', clinica, contenido, scripts: ['alta.js'] });
+  return layout({ titulo: 'Nueva cita', clinica, contenido, scripts: ['alta.js'], momentoFijado });
 }
 
 export function vistaResultadosPaciente(pacientes) {

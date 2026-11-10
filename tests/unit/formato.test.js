@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora,
+  avisoRelojFijado, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora,
 } from '../../src/dominio/formato.js';
 
 test('FR-024 las fechas se muestran como dd/mm/aaaa', () => {
@@ -67,4 +67,15 @@ test('FR-027 la etiqueta de una cita nunca es «Pendiente de confirmar por la cl
     ...['recepcion', 'portal', 'correo'].map((origen) => etiquetaCita(cancelada(origen))),
   ];
   for (const etiqueta of etiquetas) assert.doesNotMatch(etiqueta, /Pendiente de confirmar/);
+});
+
+test('FR-043 el aviso del reloj fijado lleva el día de la semana en minúscula, la fecha y la hora', () => {
+  assert.equal(
+    avisoRelojFijado('2026-11-04T12:00'),
+    'Reloj de demostración: la hora está fijada en el miércoles 04/11/2026 a las 12:00 y no avanza.',
+  );
+  assert.equal(
+    avisoRelojFijado('2027-03-29T07:05'),
+    'Reloj de demostración: la hora está fijada en el lunes 29/03/2027 a las 07:05 y no avanza.',
+  );
 });

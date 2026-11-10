@@ -60,14 +60,14 @@ function enviar(res, { estado, cuerpo = '', ubicacion, cookie }) {
   res.end(cuerpo);
 }
 
-async function servirEstatico(camino, res, clinica) {
+async function servirEstatico(camino, res, clinica, momentoFijado) {
   const [, nombre, extension] = camino.match(ESTATICO) ?? [];
-  if (!nombre) return enviar(res, paginaNoEncontrada(clinica));
+  if (!nombre) return enviar(res, paginaNoEncontrada(clinica, momentoFijado));
   try {
     const cuerpo = await readFile(new URL(`${nombre}.${extension}`, CARPETA_ESTATICOS));
     return res.writeHead(200, { 'content-type': TIPOS_ESTATICOS[extension] }).end(cuerpo);
   } catch (error) {
-    if (error.code === 'ENOENT') return enviar(res, paginaNoEncontrada(clinica));
+    if (error.code === 'ENOENT') return enviar(res, paginaNoEncontrada(clinica, momentoFijado));
     throw error;
   }
 }
@@ -77,15 +77,15 @@ async function atender({ bd, ahora, momentoFijado, rutas }, req, res) {
   const token = leerCookie(req, 'sesion');
   const clinica = token ? clinicaDeSesion(bd, token) : undefined;
 
-  if (camino.startsWith('/estaticos/')) return servirEstatico(camino, res, clinica);
+  if (camino.startsWith('/estaticos/')) return servirEstatico(camino, res, clinica, momentoFijado);
 
   const encontrada = buscarRuta(rutas, req.method, camino);
 
   // requerirSesion: se aplica a todo, salvo lo que una ruta declare público.
   if (!clinica && !encontrada?.ruta.publica) {
-    return enviar(res, req.method === 'GET' ? redireccion('/acceso') : paginaSinSesion());
+    return enviar(res, req.method === 'GET' ? redireccion('/acceso') : paginaSinSesion(momentoFijado));
   }
-  if (!encontrada) return enviar(res, paginaNoEncontrada(clinica));
+  if (!encontrada) return enviar(res, paginaNoEncontrada(clinica, momentoFijado));
 
   const formulario = req.method === 'POST' ? await leerFormulario(req) : {};
   const respuesta = await encontrada.ruta.manejador({
@@ -107,10 +107,10 @@ export function crearServidor({ bd, ahora, momentoFijado = null, rutasExtra = []
   ].map(compilarRuta);
   const servidor = createServer((req, res) => {
     atender({ bd, ahora, momentoFijado, rutas }, req, res).catch((error) => {
-      if (error instanceof FormularioDemasiadoGrande) return enviar(res, paginaDemasiadoGrande());
+      if (error instanceof FormularioDemasiadoGrande) return enviar(res, paginaDemasiadoGrande(momentoFijado));
       console.error(error);
       if (res.headersSent) return res.destroy();
-      return enviar(res, paginaFallo());
+      return enviar(res, paginaFallo(momentoFijado));
     });
   });
   servidor.momentoFijado = momentoFijado;

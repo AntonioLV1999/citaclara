@@ -1,3 +1,5 @@
+import { diaDeSemana } from './tiempo.js';
+
 const ETIQUETAS_ESTADO = {
   reservada: 'Reservada',
   completada: 'Completada',
@@ -55,4 +57,10 @@ export function etiquetaZona(zona) {
 
 export function nombreDia(numero) {
   return NOMBRES_DIA[numero];
+}
+
+/** FR-043, HU5-E5: aviso de las pantallas de recepción mientras el reloj está fijado. */
+export function avisoRelojFijado(momento) {
+  const dia = nombreDia(diaDeSemana(momento)).toLowerCase();
+  return `Reloj de demostración: la hora está fijada en el ${dia} ${fecha(momento)} a las ${hora(momento)} y no avanza.`;
 }

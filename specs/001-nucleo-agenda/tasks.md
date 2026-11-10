@@ -363,18 +363,18 @@ Cualquier otro fallo es una regresión.
 
 ### Tests de la historia 5 (primero, deben fallar)
 
-- [ ] T098 [P] [US5] Ampliar tests/unit/semilla-generador.test.js:
+- [X] T098 [P] [US5] Ampliar tests/unit/semilla-generador.test.js:
   - `H5-E4 FR-029`, clínica: las claves en este orden exacto, `['nombre', 'zona_horaria', 'telefono', 'clave_hash', 'clave_sal']`, con `telefono` `000 200 000`.
   - Pacientes: claves `['nombre', 'telefono', 'email', 'enlace']`. Los 40 enlaces cumplen `/^[0-9a-f]{32}$/` y son distintos. El del paciente *n* es igual a los 32 primeros caracteres del SHA-256 de `citaclara-enlace-20261102-<n>`. El primero, de David Gil, es `c73f5e835397826416bda7b3e5323d02`. Con otro lunes, los enlaces no cambian.
   - Las 37 canceladas llevan, justo tras `fin`, `origen_cancelacion: 'recepcion'` y `momento_cancelacion` igual a `inicio`. Ninguna otra cita tiene esas claves (`Object.hasOwn`).
   - `FR-030 SC-005`, con el lunes por defecto: 463 citas de historia (380, 46 y 37), 57 futuras y 40 pacientes. Resumen de contenido `ae3ce97082c1ccf185b546cb8665f7267d56768f330d5f23a92ed5492e30334f` y resumen sin fechas `0937418925ee10348d05a9541c24107a5098ea82a585ce8c57f5f6b5b85a3329`, escritos literalmente en el test.
   - `FR-032`: con `2026-11-09` y `2027-01-04`, el resumen sin fechas es el mismo.
-- [ ] T099 [P] [US5] Ampliar tests/integracion/semilla-carga.test.js:
+- [X] T099 [P] [US5] Ampliar tests/integracion/semilla-carga.test.js:
   - `H5-E4 SC-011`: en la base, la clínica tiene teléfono, los 40 pacientes tienen enlace y las 37 canceladas tienen origen `recepcion` y momento igual a su inicio. Ninguna cancelada queda sin origen.
   - `FR-032`: repetir la carga borra las sesiones de paciente de los pacientes de Clínica Eleva, creadas con `sesionPacienteDePrueba`, y no las de otra clínica.
   - `H6-E7`: la agenda muestra esas canceladas como «Cancelada».
   - `FR-032`: `node src/semilla/comando.js` con `cwd` en una carpeta temporal cuyo `datos/citaclara.db` tiene el esquema antiguo termina con código 1, explica que hay que borrarlo, y deja el archivo intacto.
-- [ ] T100 [P] [US5] Escribir tests/integracion/reloj-fijado.test.js con la semilla cargada y `crearServidor({ momentoFijado: '2026-11-04T12:00', ahora: relojFijo('2026-11-20T09:00:00+01:00') })`:
+- [X] T100 [P] [US5] Escribir tests/integracion/reloj-fijado.test.js con la semilla cargada y `crearServidor({ momentoFijado: '2026-11-04T12:00', ahora: relojFijo('2026-11-20T09:00:00+01:00') })`:
   - `H5-E5`: `GET /agenda` se abre el 04/11/2026; los huecos anteriores a las 12:00 no ofrecen reservar; `POST /citas` a las 11:45 da 422 con el mensaje de RN2, y a las 12:00 se acepta.
   - El aviso «Reloj de demostración: la hora está fijada en el miércoles 04/11/2026 a las 12:00 y no avanza.» aparece en `/acceso`, `/agenda`, `/citas/nueva`, la confirmación y la página 404.
   - Sin `momentoFijado`, el aviso no aparece.
@@ -383,26 +383,26 @@ Cualquier otro fallo es una regresión.
 
 ### Implementación de la historia 5
 
-- [ ] T101 [P] [US5] Añadir `telefono: '000 200 000'` a `CLINICA` en src/semilla/datos-base.js, justo tras `zona_horaria`
-- [ ] T102 [US5] En src/semilla/generador.js:
+- [X] T101 [P] [US5] Añadir `telefono: '000 200 000'` a `CLINICA` en src/semilla/datos-base.js, justo tras `zona_horaria`
+- [X] T102 [US5] En src/semilla/generador.js:
   - Añadir `enlace` a cada paciente, tras `email`, derivado como dice FR-029, con `node:crypto` y la `semilla` de los parámetros.
   - Al convertir las citas de la historia en fechas, añadir a las canceladas, justo tras `fin`, `origen_cancelacion: 'recepcion'` y `momento_cancelacion` igual a su `inicio`.
   - Comprobar que la clínica conserva el orden `nombre`, `zona_horaria`, `telefono`, `clave_hash`, `clave_sal`.
   - (depende de T101)
-- [ ] T103 [US5] Ampliar `crearPaciente` de src/datos/pacientes.js con `enlace = null`, e `insertarCita` de src/datos/citas.js con `origenCancelacion = null` y `momentoCancelacion = null`, en el mismo `INSERT` (depende de T093)
-- [ ] T104 [US5] En src/semilla/carga.js:
+- [X] T103 [US5] Ampliar `crearPaciente` de src/datos/pacientes.js con `enlace = null`, e `insertarCita` de src/datos/citas.js con `origenCancelacion = null` y `momentoCancelacion = null`, en el mismo `INSERT` (depende de T093)
+- [X] T104 [US5] En src/semilla/carga.js:
   - Insertar `telefono` en `clinica`, `enlace` en `paciente`, y el origen y el momento en el `INSERT` de la cita, porque `cita_rn4` rechazaría un `UPDATE`.
   - En `borrarClinica`, borrar antes de `paciente` las filas de `sesion_paciente` de sus pacientes.
   - En `resumen`, quitar `momento_cancelacion` del resumen sin fechas, además de `inicio` y `fin`.
   - (depende de T102, T103)
-- [ ] T105 [US5] En src/semilla/comando.js, ante `EsquemaAntiguo`, escribir su mensaje sin traza y terminar con código 1 sin escribir nada (depende de T079)
-- [ ] T106 [US5] Añadir `avisoRelojFijado(momento)` a src/dominio/formato.js, que devuelve «Reloj de demostración: la hora está fijada en el {día de la semana} {dd/mm/aaaa} a las {HH:MM} y no avanza.», con el día en minúscula a partir de `nombreDia(diaDeSemana(…))` (depende de T092, por el mismo archivo)
-- [ ] T107 [US5] Pintar el aviso en todas las pantallas de recepción (depende de T081, T106):
+- [X] T105 [US5] En src/semilla/comando.js, ante `EsquemaAntiguo`, escribir su mensaje sin traza y terminar con código 1 sin escribir nada (depende de T079)
+- [X] T106 [US5] Añadir `avisoRelojFijado(momento)` a src/dominio/formato.js, que devuelve «Reloj de demostración: la hora está fijada en el {día de la semana} {dd/mm/aaaa} a las {HH:MM} y no avanza.», con el día en minúscula a partir de `nombreDia(diaDeSemana(…))` (depende de T092, por el mismo archivo)
+- [X] T107 [US5] Pintar el aviso en todas las pantallas de recepción (depende de T081, T106):
   - En src/web/plantilla.js, `layout` acepta `momentoFijado` y, si existe, pinta `avisoRelojFijado` bajo la cabecera, en un bloque con texto, no solo color, y contraste de al menos 4,5:1.
   - Pasar `momentoFijado` a `paginaMensaje`, `paginaNoEncontrada`, `paginaSinSesion` y `paginaFallo`.
   - Pasar `contexto.momentoFijado` desde src/web/vistas/acceso.js, src/web/vistas/agenda.js, src/web/vistas/alta.js, src/web/vistas/confirmar.js y las páginas genéricas de src/web/servidor.js.
   - Estilo del bloque en src/web/estaticos/estilos.css.
-- [ ] T108 [US5] Ejecutar `npm run semilla` y comprobar que las cifras y los dos resúmenes coinciden con FR-030 de specs/001-nucleo-agenda/spec.md. Si no coinciden, corregir la implementación (orden y nombre de los campos), **nunca la spec** (historial, D4) (depende de T104)
+- [X] T108 [US5] Ejecutar `npm run semilla` y comprobar que las cifras y los dos resúmenes coinciden con FR-030 de specs/001-nucleo-agenda/spec.md. Si no coinciden, corregir la implementación (orden y nombre de los campos), **nunca la spec** (historial, D4) (depende de T104)
 
 **Punto de control**: T098 a T100 en verde, y vuelven a verde los tests que cargan la semilla. En la trazabilidad ya solo faltan H2-E6, H4-E5 y SC-012.
 

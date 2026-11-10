@@ -2,7 +2,7 @@ import { ACCIONES } from '../../dominio/estados.js';
 import { etiquetaZona, fecha, hora } from '../../dominio/formato.js';
 import { html, layout } from '../plantilla.js';
 
-export function vistaConfirmar({ clinica, cita, accion }) {
+export function vistaConfirmar({ clinica, cita, accion, momentoFijado }) {
   const { titulo } = ACCIONES[accion];
   const dia = cita.inicio.slice(0, 10);
   const contenido = html`<h1>${titulo}</h1>
@@ -18,5 +18,5 @@ export function vistaConfirmar({ clinica, cita, accion }) {
       <button class="boton boton--peligro" type="submit">Sí, confirmar</button>
       <a class="boton boton--secundario" href="/agenda?profesional=${cita.profesional_id}&amp;dia=${dia}">No, volver a la agenda</a>
     </form>`;
-  return layout({ titulo, clinica, contenido });
+  return layout({ titulo, clinica, contenido, momentoFijado });
 }

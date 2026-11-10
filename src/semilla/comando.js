@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { abrirBd } from '../datos/bd.js';
+import { abrirBd, EsquemaAntiguo } from '../datos/bd.js';
 import { fecha } from '../dominio/formato.js';
 import { diaDeSemana, esFechaValida } from '../dominio/tiempo.js';
 import { cargar, resumen } from './carga.js';
@@ -42,7 +42,15 @@ if (error) {
 } else {
   const datos = generar({ semilla: SEMILLA, lunes });
   mkdirSync('datos', { recursive: true });
-  const bd = abrirBd('datos/citaclara.db');
+  let bd;
+  try {
+    bd = abrirBd('datos/citaclara.db');
+  } catch (error) {
+    if (!(error instanceof EsquemaAntiguo)) throw error;
+    // Un archivo de otra versión no se toca: se explica cómo regenerarlo, sin traza.
+    console.error(error.message);
+    process.exit(1);
+  }
   cargar(bd, datos);
   bd.close();
   imprimir(lunes, resumen(datos));

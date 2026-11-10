@@ -10,12 +10,12 @@ import { vistaAlta } from '../vistas/alta.js';
 const ESTADO_DE_RECHAZO = { solape: 409, invalido: 422 };
 
 function paginaAlta(contexto, valores, rechazo) {
-  const { bd, clinica } = contexto;
+  const { bd, clinica, momentoFijado } = contexto;
   const lista = profesionales(bd, clinica.id);
   const profesional = valores.profesional
     ? profesionalPorId(bd, clinica.id, valores.profesional)
     : lista[0];
-  if (!profesional) return paginaNoEncontrada(clinica);
+  if (!profesional) return paginaNoEncontrada(clinica, momentoFijado);
 
   const momento = ahoraLocal(contexto, clinica.zona_horaria);
   const dia = valores.dia || momento.slice(0, 10);
@@ -33,6 +33,7 @@ function paginaAlta(contexto, valores, rechazo) {
     valores: conDia,
     mensaje: rechazo?.mensaje,
     huecos,
+    momentoFijado,
   }), rechazo ? ESTADO_DE_RECHAZO[rechazo.motivo] : 200);
 }
 
@@ -47,13 +48,13 @@ function repintarFormulario(contexto) {
 }
 
 function registrarCita(contexto) {
-  const { clinica } = contexto;
+  const { clinica, momentoFijado } = contexto;
   const formulario = { ...contexto.formulario, dia: leerDia(contexto.formulario.dia) };
   const resultado = crearCita(contexto, formulario);
   if (resultado.ok) {
     return redireccion(`/agenda?profesional=${encodeURIComponent(formulario.profesional)}&dia=${encodeURIComponent(formulario.dia)}`);
   }
-  if (resultado.motivo === 'no_encontrado') return paginaNoEncontrada(clinica);
+  if (resultado.motivo === 'no_encontrado') return paginaNoEncontrada(clinica, momentoFijado);
   return paginaAlta(contexto, formulario, resultado);
 }
 

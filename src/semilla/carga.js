@@ -5,6 +5,8 @@ import { crearPaciente } from '../datos/pacientes.js';
 
 function borrarClinica(bd, nombre) {
   for (const { id } of bd.prepare('SELECT id FROM clinica WHERE nombre = ?').all(nombre)) {
+    // También se cierran las sesiones de paciente de sus pacientes (FR-032, FR-037).
+    bd.prepare('DELETE FROM sesion_paciente WHERE paciente_id IN (SELECT id FROM paciente WHERE clinica_id = ?)').run(id);
     for (const tabla of ['cita', 'sesion', 'paciente', 'servicio', 'profesional']) {
       bd.prepare(`DELETE FROM ${tabla} WHERE clinica_id = ?`).run(id);
     }
@@ -23,11 +25,12 @@ export function cargar(bd, datos) {
     borrarClinica(bd, clinica.nombre);
     const clinicaId = insertarFila(
       bd,
-      'INSERT INTO clinica (nombre, clave_hash, clave_sal, zona_horaria) VALUES (?, ?, ?, ?)',
+      'INSERT INTO clinica (nombre, clave_hash, clave_sal, zona_horaria, telefono) VALUES (?, ?, ?, ?, ?)',
       clinica.nombre,
       clinica.clave_hash,
       clinica.clave_sal,
       clinica.zona_horaria,
+      clinica.telefono,
     );
     const profesionales = datos.profesionales.map(({ nombre, especialidad }) => insertarFila(
       bd,
@@ -46,15 +49,18 @@ export function cargar(bd, datos) {
       s.precio_centimos,
     ));
     const pacientes = datos.pacientes.map((p) => crearPaciente(bd, { clinicaId, ...p }));
-    for (const { profesional, servicio, paciente, inicio, fin, estado } of datos.citas) {
+    // El origen y el momento van en el mismo INSERT: cita_rn4 rechazaría un UPDATE posterior.
+    for (const cita of datos.citas) {
       insertarCita(bd, {
         clinicaId,
-        profesionalId: profesionales[profesional],
-        servicioId: servicios[servicio],
-        pacienteId: pacientes[paciente],
-        inicio,
-        fin,
-        estado,
+        profesionalId: profesionales[cita.profesional],
+        servicioId: servicios[cita.servicio],
+        pacienteId: pacientes[cita.paciente],
+        inicio: cita.inicio,
+        fin: cita.fin,
+        estado: cita.estado,
+        origenCancelacion: cita.origen_cancelacion,
+        momentoCancelacion: cita.momento_cancelacion,
       });
     }
   });
@@ -67,7 +73,8 @@ export function resumen(datos) {
   const historia = datos.citas.filter((c) => c.semana < 0);
   const contar = (estado) => historia.filter((c) => c.estado === estado).length;
   const { lunes, citas, ...resto } = datos;
-  const citasSinFechas = citas.map(({ inicio, fin, ...cita }) => cita);
+  // El momento de la cancelación también es una fecha: si se quedara, cambiaría con el lunes (FR-032).
+  const citasSinFechas = citas.map(({ inicio, fin, momento_cancelacion: momento, ...cita }) => cita);
   return {
     pacientes: datos.pacientes.length,
     historia: historia.length,

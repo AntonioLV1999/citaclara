@@ -14,6 +14,8 @@
   --info-tinta: #0b4a8c;
   --neutro-fondo: #eceff2;
   --neutro-tinta: #47525e;
+  --reloj-fondo: #fff4d6;
+  --reloj-tinta: #5a3b00;
 }
 
 *,
@@ -335,4 +337,15 @@ legend {
 
 [hidden] {
   display: none !important;
+}
+
+/* FR-043: aviso del reloj fijado, bajo la cabecera de todas las pantallas. Texto, borde y contraste alto. */
+.reloj-fijado {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-bottom: 3px solid var(--reloj-tinta);
+  background: var(--reloj-fondo);
+  color: var(--reloj-tinta);
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }

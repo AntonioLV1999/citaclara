@@ -61,7 +61,9 @@ function entradasEnOrden(citas, huecos) {
   return entradas.sort((a, b) => a.inicio.localeCompare(b.inicio) || a.orden - b.orden);
 }
 
-export function vistaAgenda({ clinica, profesionales, profesional, dia, hoy, citas, huecos, duracionMinima }) {
+export function vistaAgenda({
+  clinica, profesionales, profesional, dia, hoy, citas, huecos, duracionMinima, momentoFijado,
+}) {
   const contenido = html`<h1>Agenda de ${profesional.nombre}</h1>
     <p class="agenda__dia">${nombreDia(diaDeSemana(dia))} ${fecha(dia)}</p>
     <p>${etiquetaZona(clinica.zona_horaria)}</p>
@@ -73,5 +75,5 @@ export function vistaAgenda({ clinica, profesionales, profesional, dia, hoy, cit
     <ul class="agenda lista-simple">
       ${entradasEnOrden(citas, huecos).map(({ cita, hueco }) => (cita ? filaCita(cita) : filaHueco(hueco, profesional, duracionMinima)))}
     </ul>`;
-  return layout({ titulo: `Agenda de ${profesional.nombre}`, clinica, contenido });
+  return layout({ titulo: `Agenda de ${profesional.nombre}`, clinica, contenido, momentoFijado });
 }

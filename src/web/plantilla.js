@@ -1,3 +1,5 @@
+import { avisoRelojFijado } from '../dominio/formato.js';
+
 class Seguro {
   constructor(texto) {
     this.texto = texto;
@@ -27,7 +29,12 @@ export function html(trozos, ...valores) {
   return new Seguro(trozos.reduce((acumulado, trozo, i) => acumulado + aHtml(valores[i - 1]) + trozo));
 }
 
-export function layout({ titulo, clinica, contenido, scripts = [] }) {
+/** FR-043: mientras el reloj está fijado, todas las pantallas lo dicen, con texto y no solo color. */
+function avisoReloj(momentoFijado) {
+  return momentoFijado && html`<p class="reloj-fijado" role="status">${avisoRelojFijado(momentoFijado)}</p>`;
+}
+
+export function layout({ titulo, clinica, contenido, scripts = [], momentoFijado = null }) {
   return html`<!DOCTYPE html>
 <html lang="es-ES">
 <head>
@@ -46,6 +53,7 @@ export function layout({ titulo, clinica, contenido, scripts = [] }) {
       <form method="post" action="/salir"><button class="boton boton--claro" type="submit">Salir</button></form>
     </nav>`}
   </header>
+  ${avisoReloj(momentoFijado)}
   <main class="contenido">
     ${contenido}
   </main>
@@ -63,25 +71,28 @@ export function redireccion(ubicacion, cookie) {
 
 const VOLVER_A_AGENDA = { ruta: '/agenda', texto: 'Volver a la agenda' };
 
-export function paginaMensaje(estado, titulo, mensaje, clinica, destino = VOLVER_A_AGENDA) {
+export function paginaMensaje(estado, titulo, mensaje, clinica, { destino = VOLVER_A_AGENDA, momentoFijado } = {}) {
   const contenido = html`<h1>${titulo}</h1>
     <p class="aviso aviso--error" role="alert">${mensaje}</p>
     <p><a class="boton" href="${destino.ruta}">${destino.texto}</a></p>`;
-  return pagina(layout({ titulo, clinica, contenido }), estado);
+  return pagina(layout({ titulo, clinica, contenido, momentoFijado }), estado);
 }
 
-export function paginaNoEncontrada(clinica) {
-  return paginaMensaje(404, 'No encontramos esta página', 'No encontramos lo que buscas. Vuelve a la agenda y elige de nuevo.', clinica);
+export function paginaNoEncontrada(clinica, momentoFijado) {
+  return paginaMensaje(404, 'No encontramos esta página', 'No encontramos lo que buscas. Vuelve a la agenda y elige de nuevo.', clinica, { momentoFijado });
 }
 
-export function paginaSinSesion() {
-  return paginaMensaje(401, 'Necesitas entrar', 'Para hacer esto hay que entrar con la clave de la clínica.', null, { ruta: '/acceso', texto: 'Ir a la pantalla de acceso' });
+export function paginaSinSesion(momentoFijado) {
+  return paginaMensaje(401, 'Necesitas entrar', 'Para hacer esto hay que entrar con la clave de la clínica.', null, {
+    destino: { ruta: '/acceso', texto: 'Ir a la pantalla de acceso' },
+    momentoFijado,
+  });
 }
 
-export function paginaFallo() {
-  return paginaMensaje(500, 'Algo ha fallado', 'Algo ha fallado y no se ha podido completar. Inténtalo de nuevo en unos minutos.', null);
+export function paginaFallo(momentoFijado) {
+  return paginaMensaje(500, 'Algo ha fallado', 'Algo ha fallado y no se ha podido completar. Inténtalo de nuevo en unos minutos.', null, { momentoFijado });
 }
 
-export function paginaDemasiadoGrande() {
-  return paginaMensaje(413, 'Demasiado texto', 'El formulario lleva demasiado texto. Acórtalo e inténtalo de nuevo.', null);
+export function paginaDemasiadoGrande(momentoFijado) {
+  return paginaMensaje(413, 'Demasiado texto', 'El formulario lleva demasiado texto. Acórtalo e inténtalo de nuevo.', null, { momentoFijado });
 }

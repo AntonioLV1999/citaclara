@@ -5,11 +5,16 @@ const CITA_COMPLETA = `
   JOIN servicio ON servicio.id = cita.servicio_id
 `;
 
-export function insertarCita(bd, { clinicaId, profesionalId, servicioId, pacienteId, inicio, fin, estado = 'reservada' }) {
+/** Una cancelada solo se inserta así desde la semilla, que carga la historia en su estado definitivo. */
+export function insertarCita(bd, {
+  clinicaId, profesionalId, servicioId, pacienteId, inicio, fin, estado = 'reservada',
+  origenCancelacion = null, momentoCancelacion = null,
+}) {
   const { lastInsertRowid } = bd.prepare(`
-    INSERT INTO cita (clinica_id, profesional_id, servicio_id, paciente_id, inicio, fin, estado)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(clinicaId, profesionalId, servicioId, pacienteId, inicio, fin, estado);
+    INSERT INTO cita (clinica_id, profesional_id, servicio_id, paciente_id, inicio, fin, estado,
+      origen_cancelacion, momento_cancelacion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(clinicaId, profesionalId, servicioId, pacienteId, inicio, fin, estado, origenCancelacion, momentoCancelacion);
   return Number(lastInsertRowid);
 }
 

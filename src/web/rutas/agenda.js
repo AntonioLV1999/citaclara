@@ -8,14 +8,14 @@ import { pagina, paginaMensaje, paginaNoEncontrada, redireccion } from '../plant
 import { vistaAgenda } from '../vistas/agenda.js';
 
 function agenda(contexto) {
-  const { bd, clinica, consulta } = contexto;
+  const { bd, clinica, consulta, momentoFijado } = contexto;
   const lista = profesionales(bd, clinica.id);
   const profesional = consulta.profesional ? profesionalPorId(bd, clinica.id, consulta.profesional) : lista[0];
   const momento = ahoraLocal(contexto, clinica.zona_horaria);
   const hoy = momento.slice(0, 10);
   const dia = leerDia(consulta.dia) || hoy;
-  if (!profesional) return paginaNoEncontrada(clinica);
-  if (!esFechaValida(dia)) return paginaMensaje(404, 'Ese día no es válido', MENSAJES.dia, clinica);
+  if (!profesional) return paginaNoEncontrada(clinica, momentoFijado);
+  if (!esFechaValida(dia)) return paginaMensaje(404, 'Ese día no es válido', MENSAJES.dia, clinica, { momentoFijado });
 
   const citas = citasDelDia(bd, clinica.id, profesional.id, dia);
   const servicios = serviciosDeEspecialidad(bd, clinica.id, profesional.especialidad);
@@ -28,6 +28,7 @@ function agenda(contexto) {
     citas: citas.map((cita) => ({ ...cita, acciones: accionesPermitidas(cita, momento) })),
     huecos: calcularHuecos({ dia, citas, ahora: momento }),
     duracionMinima: Math.min(...servicios.map((s) => s.duracion_min)),
+    momentoFijado,
   }));
 }
 

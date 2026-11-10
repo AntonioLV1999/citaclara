@@ -4,10 +4,11 @@ function normalizar(texto) {
 
 const sinEspacios = (texto) => texto.replace(/\s/g, '');
 
-export function crearPaciente(bd, { clinicaId, nombre, telefono, email }) {
+/** Las fichas del alta nacen sin enlace: generarlo es de la 002. La semilla sí lo trae (FR-029). */
+export function crearPaciente(bd, { clinicaId, nombre, telefono, email, enlace = null }) {
   const { lastInsertRowid } = bd
-    .prepare('INSERT INTO paciente (clinica_id, nombre, telefono, email) VALUES (?, ?, ?, ?)')
-    .run(clinicaId, nombre, telefono, email);
+    .prepare('INSERT INTO paciente (clinica_id, nombre, telefono, email, enlace) VALUES (?, ?, ?, ?, ?)')
+    .run(clinicaId, nombre, telefono, email, enlace);
   return Number(lastInsertRowid);
 }
 

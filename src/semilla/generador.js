@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { sumarDias, sumarMinutos } from '../dominio/tiempo.js';
 import { hashClave } from '../servicios/acceso.js';
 import { crearAzar } from './azar.js';
@@ -13,7 +14,12 @@ const BLOQUES_DE_UNA_HORA = 11; // De 09:00 a 20:00. Ningún servicio dura más 
 
 const sinAcentos = (texto) => texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
-function generarPacientes(azar) {
+/** FR-029: enlace personal de demostración del paciente n, de 1 a 40. Ficticio y público, como la clave. */
+function enlaceDe(semilla, numero) {
+  return createHash('sha256').update(`citaclara-enlace-${semilla}-${numero}`).digest('hex').slice(0, 32);
+}
+
+function generarPacientes(azar, semilla) {
   const combinaciones = NOMBRES.flatMap((nombre) => APELLIDOS.map((apellido) => [nombre, apellido]));
   const elegidas = azar.barajar(combinaciones).slice(0, NUMERO_PACIENTES);
   return elegidas.map(([nombre, apellido], i) => ({
@@ -21,6 +27,7 @@ function generarPacientes(azar) {
     // Ningún número nacional español empieza por 0: no puede ser de una persona real (FR-034).
     telefono: `000 100 ${String(i + 1).padStart(3, '0')}`,
     email: i % 4 === 3 ? null : `${sinAcentos(nombre)}.${sinAcentos(apellido)}@example.com`,
+    enlace: enlaceDe(semilla, i + 1),
   }));
 }
 
@@ -76,18 +83,23 @@ function asignarPacientesYServicios(azar, tramos) {
 function ponerFechas(cita, lunes) {
   const dia = sumarDias(lunes, cita.semana * 7 + cita.dia);
   const inicio = sumarMinutos(`${dia}T00:00`, cita.minuto);
-  return { ...cita, inicio, fin: sumarMinutos(inicio, SERVICIOS[cita.servicio].duracion_min) };
+  const conFechas = { ...cita, inicio, fin: sumarMinutos(inicio, SERVICIOS[cita.servicio].duracion_min) };
+  // FR-029, FR-036: las canceladas de la historia nacen canceladas por recepción en su inicio.
+  // Las demás no llevan estos campos, ni siquiera vacíos: lo exigen los resúmenes de FR-030.
+  if (cita.estado !== 'cancelada') return conFechas;
+  return { ...conFechas, origen_cancelacion: 'recepcion', momento_cancelacion: inicio };
 }
 
 /** Función pura: todo sale de la semilla y del lunes, nunca del reloj ni del azar del sistema. */
 export function generar({ semilla, lunes }) {
   const azar = crearAzar(semilla);
-  const pacientes = generarPacientes(azar);
+  const pacientes = generarPacientes(azar, semilla);
   const tramos = asignarEstados(azar, generarTramos(azar));
   const citas = asignarPacientesYServicios(azar, tramos).map((cita) => ponerFechas(cita, lunes));
   const claveSal = `citaclara-semilla-${semilla}`;
   return {
     lunes,
+    // Orden: nombre, zona_horaria, telefono, clave_hash, clave_sal (FR-030, historial D4).
     clinica: { ...CLINICA, clave_hash: hashClave(CLAVE, claveSal), clave_sal: claveSal },
     profesionales: PROFESIONALES.map((p) => ({ ...p })),
     servicios: SERVICIOS.map((s) => ({ ...s })),

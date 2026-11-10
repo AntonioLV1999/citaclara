@@ -1,5 +1,6 @@
 import { before, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { generar } from '../../src/semilla/generador.js';
 import { resumen } from '../../src/semilla/carga.js';
@@ -283,5 +284,70 @@ test('SC-005 entero respeta sus límites y elegir devuelve un elemento', () => {
     const n = azar.entero(3, 5);
     assert.ok(n >= 3 && n <= 5 && Number.isInteger(n));
     assert.ok(['a', 'b'].includes(azar.elegir(['a', 'b'])));
+  }
+});
+
+// FR-030 es la única fuente de estos valores: se copian aquí literalmente para compararlos.
+const RESUMEN_DE_CONTENIDO = 'ae3ce97082c1ccf185b546cb8665f7267d56768f330d5f23a92ed5492e30334f';
+const RESUMEN_SIN_FECHAS = '0937418925ee10348d05a9541c24107a5098ea82a585ce8c57f5f6b5b85a3329';
+
+test('H5-E4 FR-029 la clínica tiene teléfono, con sus campos en el orden de los resúmenes', () => {
+  assert.deepEqual(Object.keys(datos.clinica), ['nombre', 'zona_horaria', 'telefono', 'clave_hash', 'clave_sal']);
+  assert.equal(datos.clinica.telefono, '000 200 000');
+});
+
+test('H5-E4 FR-029 cada paciente tiene su enlace personal de demostración, distinto y con la forma del token', () => {
+  for (const paciente of datos.pacientes) {
+    assert.deepEqual(Object.keys(paciente), ['nombre', 'telefono', 'email', 'enlace']);
+    assert.match(paciente.enlace, /^[0-9a-f]{32}$/);
+  }
+  assert.equal(new Set(datos.pacientes.map((p) => p.enlace)).size, 40);
+});
+
+test('FR-029 el enlace del paciente n sale del SHA-256 de citaclara-enlace-<semilla>-<n>', () => {
+  datos.pacientes.forEach((paciente, i) => {
+    const esperado = createHash('sha256').update(`citaclara-enlace-20261102-${i + 1}`).digest('hex').slice(0, 32);
+    assert.equal(paciente.enlace, esperado);
+  });
+  assert.equal(datos.pacientes[0].nombre, 'David Gil');
+  assert.equal(datos.pacientes[0].enlace, 'c73f5e835397826416bda7b3e5323d02');
+});
+
+test('FR-029 FR-032 los enlaces no cambian con el lunes de referencia', () => {
+  const otra = generar({ semilla: SEMILLA, lunes: '2027-01-04' });
+  assert.deepEqual(otra.pacientes.map((p) => p.enlace), datos.pacientes.map((p) => p.enlace));
+});
+
+test('H5-E4 FR-036 las 37 canceladas llevan origen recepcion y su inicio como momento, justo tras el fin', () => {
+  const canceladas = historia.filter((c) => c.estado === 'cancelada');
+  assert.equal(canceladas.length, 37);
+  for (const cita of canceladas) {
+    const claves = Object.keys(cita);
+    assert.deepEqual(claves.slice(claves.indexOf('fin') + 1), ['origen_cancelacion', 'momento_cancelacion']);
+    assert.equal(cita.origen_cancelacion, 'recepcion');
+    assert.equal(cita.momento_cancelacion, cita.inicio);
+  }
+});
+
+test('FR-036 las citas que no están canceladas no llevan origen ni momento, ni siquiera vacíos', () => {
+  for (const cita of datos.citas.filter((c) => c.estado !== 'cancelada')) {
+    assert.equal(Object.hasOwn(cita, 'origen_cancelacion'), false);
+    assert.equal(Object.hasOwn(cita, 'momento_cancelacion'), false);
+  }
+});
+
+test('FR-030 SC-005 con el lunes por defecto, las cifras y los dos resúmenes son los de FR-030', () => {
+  const r = resumen(datos);
+  assert.deepEqual(
+    [r.pacientes, r.historia, r.completadas, r.noAsistidas, r.canceladas, r.futuras],
+    [40, 463, 380, 46, 37, 57],
+  );
+  assert.equal(r.contenido, RESUMEN_DE_CONTENIDO);
+  assert.equal(r.sinFechas, RESUMEN_SIN_FECHAS);
+});
+
+test('FR-032 con otros lunes, el resumen sin fechas sigue siendo el de FR-030', () => {
+  for (const lunes of ['2026-11-09', '2027-01-04']) {
+    assert.equal(resumen(generar({ semilla: SEMILLA, lunes })).sinFechas, RESUMEN_SIN_FECHAS, lunes);
   }
 });
