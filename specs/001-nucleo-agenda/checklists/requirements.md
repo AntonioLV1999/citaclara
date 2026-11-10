@@ -13,7 +13,7 @@
 
 ## Completitud de los requisitos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION] (cambio del 10/11/2026: quedan 2 en FR-030, los dos resúmenes)
+- [x] No quedan marcadores [NEEDS CLARIFICATION] (cambio del 10/11/2026: los dos resúmenes de FR-030 se calcularon con D4)
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -47,3 +47,8 @@
 - FR-038 define los cuatro resultados de la operación de cancelar sin fijar ningún texto: el mensaje lo elige cada canal (HU3-E5, 002/FR-017 y 003/FR-014), así que la spec sigue sin detalles de interfaz de otras features.
 - FR-039 nombra la conexión cifrada y la cookie limitada a ella. Es un detalle técnico que se mantiene a propósito, porque ya estaba en el supuesto de conexión sin cifrar y sin él la puerta no se puede comprobar.
 - Requisitos nuevos o cambiados: FR-020, FR-038, FR-039; HU3-E5, HU6-E9; SC-013; caso límite «Dos acciones de estado a la vez»; supuestos «Conexión sin cifrar (deuda consciente)» y «Fuera de alcance de la 001».
+
+### Revalidación del 10/11/2026 (mismo cambio pendiente: S-18, decisión D4)
+
+- Pasan todos los puntos. Los dos resúmenes de FR-030 se calcularon en un worktree desechable (D4), con las cifras de citas sin cambios y con el mismo resultado en dos ejecuciones. Ya no queda ningún marcador [NEEDS CLARIFICATION] en la spec.
+- El historial fija lo que la implementación debe reproducir: los campos y su orden, y la forma del enlace de demostración. Es un detalle técnico que se mantiene a propósito, porque sin él los resúmenes no se pueden reproducir.
