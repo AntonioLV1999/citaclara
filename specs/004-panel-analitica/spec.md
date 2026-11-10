@@ -4,7 +4,7 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador, pendiente de aprobación por su propietario
+**Estado**: Borrador
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -16,6 +16,15 @@
 
 - P: ¿La tasa de no asistencia se calcula solo sobre las citas que debían atenderse, dejando fuera las canceladas? → R: sí, no asistidas ÷ (completadas + no asistidas) (RA3).
 - P: ¿La ocupación cuenta solo el tiempo de las citas completadas, sin el de las no asistidas? → R: sí, tiempo de las citas completadas ÷ capacidad (RA4).
+
+## Notas de cambios
+
+### 10/11/2026: revisión cruzada (`specs/000-revision-cruzada-nov2026.md`)
+
+- **S-03 (bloqueante)**: FR-018 protege las cifras de citas de FR-030 de la 001, no su resumen de contenido. «Cifras de referencia» deja de copiar el resumen y remite al vigente en FR-030 de la 001.
+- **S-03, comprobación**: ninguna cifra del panel depende del teléfono de la clínica, de los enlaces de paciente ni del origen de la cancelación. RA3 deja fuera todas las canceladas sea cual sea su origen, RA4 y RA5 no las usan, y FR-012 excluye los datos de pacientes, enlaces incluidos.
+- **S-04, verificación**: FR-001 no cambia. El escenario 8 de la historia 5 comprueba que una sesión de paciente no abre el panel.
+- Quedan para otra pasada S-06, S-07 y S-09, que afectan a RA3 y a RA4.
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -104,6 +113,7 @@ El panel solo se abre con la clave de la clínica, que es la misma de la agenda,
 5. **Dado** el panel, **cuando** se revisa lo que ofrece, **entonces** no hay ninguna acción que cree, cambie o borre datos, y cualquier intento de escribir a través de él se rechaza.
 6. **Dado** el panel, **cuando** se revisa todo lo que muestra, **entonces** no aparece ningún dato de un paciente concreto.
 7. **Dado** un móvil con pantalla de 360 píxeles de ancho, **cuando** se abre el panel, **entonces** todos los gráficos y sus cifras se leen sin desplazamiento horizontal de la página.
+8. **Dada** una sesión de paciente, **cuando** intenta abrir el panel o sus datos por cualquier vía, **entonces** se rechaza igual que sin acceso y no se revela ninguna cifra, porque solo la clave de la clínica abre el panel (FR-001 de la 001 y FR-001 de esta spec).
 
 ---
 
@@ -165,7 +175,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 **Solo lectura**
 
-- **FR-018**: El panel NO DEBE ofrecer ninguna acción de escritura ni aceptar ninguna, y DEBE cumplir RA8. Esta feature NO DEBE añadir ni modificar datos, tablas o semilla, de modo que los resúmenes de contenido de FR-030 de la 001 sigan siendo los mismos.
+- **FR-018**: El panel NO DEBE ofrecer ninguna acción de escritura ni aceptar ninguna, y DEBE cumplir RA8. Esta feature NO DEBE añadir ni modificar datos, tablas o semilla, de modo que no altera las cifras de citas de la semilla de FR-030 de la 001: 463 citas de historia (380 completadas, 46 no asistidas y 37 canceladas) y 57 reservas futuras. Lo que protege son esas cifras, y no los resúmenes de contenido de FR-030, que pertenecen a la 001 y cambiarán cuando otras features añadan datos a la semilla.
 
 **Interfaz** (constitución, principios VII y VIII)
 
@@ -180,7 +190,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ### Cifras de referencia
 
-Se reproducen con `npm run semilla` y el reloj en la semana del 02/11/2026 al 08/11/2026 (constitución, principio V). Resumen de contenido de la semilla: `f1d7a17b9fa57c74ae6b40814b7f41eacfd084559e412f8a0106857d142b74e8`. Si un cambio de la semilla altera estas cifras, ese mismo cambio las actualiza.
+Se reproducen con `npm run semilla` y el reloj en la semana del 02/11/2026 al 08/11/2026 (constitución, principio V). Salen de las cifras de citas de FR-030 de la 001. Para comprobar que la semilla es la esperada vale el resumen de contenido vigente en FR-030 de la 001; esta spec no lo copia, porque cambia con datos que no afectan a ninguna cifra del panel. Si un cambio de la semilla altera las cifras de citas, ese mismo cambio actualiza estas tablas.
 
 **Tasa de no asistencia del periodo (RA3)**
 

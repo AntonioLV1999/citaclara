@@ -31,5 +31,5 @@
 
 ## Notas
 
-- Pendientes: 2 marcadores, RA3 (tasa de no asistencia) y RA4 (ocupación), reservados a Sara. Al resolverlos hay que dejar solo la opción elegida en «Cifras de referencia» y volver a validar.
+- 10/11/2026: revalidada tras resolver S-03 de la revisión cruzada. No quedan marcadores; RA3 y RA4 se cerraron el 06/11/2026. S-06, S-07 y S-09 quedan para otra pasada.
 - La mención a `npm run semilla` en «Cifras de referencia» es la vía de reproducción que exige el principio V, igual que en FR-030 de la 001; no es una decisión de implementación.
