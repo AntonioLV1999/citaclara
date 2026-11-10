@@ -29,15 +29,26 @@
 ### 10/11/2026: segunda pasada de la revisión cruzada
 
 - **Base**: rama actualizada desde `master` (S-19). RN8, FR-037 y FR-039 pertenecen al cambio de la 001 del 10/11/2026, que su propietario **aprobó** el 10/11/2026 y es la versión vigente de la 001.
-- **S-06, cerrado en la 004**: RA3 es la única definición de «tasa de no asistencia» del producto, y explica la diferencia con el porcentaje de composición de la semilla de FR-030. La 001 ya llama a esa cifra «porcentaje de composición de la semilla» en FR-030 y remite a RA3 (cambio aprobado el 10/11/2026). Falta que la 003 cite RA3 en SC-001, cambio que corresponde a su propietario.
-- **S-07, cerrado en la 004**: RA3 se justifica por definición, y ya no dice «el paciente avisó y el hueco quedó libre». Se añade el aviso de lectura sobre RN8 y la ocupación. «Dependencias» sustituye a «No depende de las features 002 ni 003». Falta la doble condición de SC-001 en la 003, que es la propietaria de esa medida.
+- **S-06, cerrado en la 004**: RA3 es la única definición de «tasa de no asistencia» del producto, y explica la diferencia con el porcentaje de composición de la semilla de FR-030. La 001 ya llama a esa cifra «porcentaje de composición de la semilla» en FR-030 y remite a RA3 (cambio aprobado el 10/11/2026).
+- **S-07, cerrado en la 004**: RA3 se justifica por definición, y ya no dice «el paciente avisó y el hueco quedó libre». Se añade el aviso de lectura sobre RN8 y la ocupación. «Dependencias» sustituye a «No depende de las features 002 ni 003».
 - **S-08, cerrado**: el supuesto «Misma clave, mismas cifras» cita FR-039 de la 001, la puerta de uso con datos reales, en lugar del supuesto «Conexión sin cifrar» de la 001.
 - **S-09, cerrado**: RA4 deja de decir «igual que no ocupan el hueco», excluye expresamente las reservadas y saca la capacidad de FR-012 de la 001. Las cifras de referencia no cambian.
 - **S-22, cerrado**: el escenario 8 de la historia 5 cita FR-037 de la 001, y el aviso de lectura de RA3 cita RN8 de la 001 sin repetir su plazo.
 
+### 10/11/2026: segundo cambio de la 001 (cuarta pasada de la revisión cruzada)
+
+- **Base**: rama rebasada sobre `master` (`4b45dd1`), que contiene el segundo cambio de la 001 del 10/11/2026, **pendiente de aprobación** por su propietario. La versión vigente de la 001 sigue siendo la del primer cambio. Esta spec sigue en borrador, y no se planifica ni se implementa hasta que `master` esté en verde (S-18).
+- **S-14**: FR-023 y SC-008 adoptan la convención de identificadores de FR-035 de la 001. Las reglas van como `RA1`, `RA2` y siguientes, y los requisitos, criterios, escenarios y casos límite propios como `004/FR-nnn`, `004/SC-nnn`, `004/Hx-Ey` y `004/CL`. La cobertura de la 004 solo la dan los tests que empiezan por uno de ellos.
+- **S-15**: RA6 y el caso límite «Citas sin cerrar dentro del periodo» citan FR-040 de la 001 (`inicio <= ahora`), en lugar de «cuyo inicio ya ha pasado».
+  - **Comprobación de las 31 citas sin cerrar**: en un worktree desechable sacado de `master` (`4b45dd1`), sin tocar `src/`, se ejecutó `npm run semilla` (40 pacientes; 463 citas de historia, con 380 completadas, 46 no asistidas y 37 canceladas; y 57 futuras), y se contaron en la base las citas reservadas del periodo con `inicio < ahora` y con `inicio <= ahora`. Con el reloj en el lunes 09/11/2026 a las 09:00, en el miércoles 11/11/2026 a las 12:00 y en el domingo 15/11/2026 a las 23:59, las dos fronteras dan 31 (8 + 5 + 5 + 7 + 6, del lunes 02/11 al viernes 06/11). Con el reloj en el miércoles 04/11/2026 a las 12:00, las dos dan 0 dentro del periodo. Después se descartó el worktree.
+  - **Por qué no cambia**: el periodo de RA1 acaba antes de la semana en curso, así que todas sus citas empiezan antes de cualquier «ahora» de esa semana. La frontera solo decide sobre citas de la semana en curso, que no entran en el periodo.
+- **S-17**: «Cifras de referencia» y los escenarios expresan el reloj con el momento de referencia de FR-043 de la 001: el miércoles 04/11/2026 a las 12:00 para las cifras, el mismo de la historia 5, escenario 5, de la 001, y el miércoles 11/11/2026 a las 12:00 para el aviso de 31 citas sin cerrar. FR-016, FR-017 y FR-023 lo citan. El supuesto nuevo «Reloj fijado» deja el aviso de FR-043 a la cabecera común de recepción, sin requisito propio. Las cifras de referencia no cambian.
+- **S-22**: se quitan de las notas de S-06 y de S-07 las dos frases que daban por pendiente la 003, que ya cita RA3 en SC-001 y tiene la doble condición.
+- **Dependencias**: se añaden FR-035, FR-040 y FR-043 del segundo cambio de la 001, pendiente de aprobación.
+
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
-Todas las cifras salen de la semilla por defecto (lunes de referencia 02/11/2026), con el reloj en la semana del 02/11/2026 al 08/11/2026. El periodo analizado es entonces del 07/09/2026 al 01/11/2026, es decir, las 8 semanas de historia. Las cifras que dependen de RA3 o de RA4 están en [Cifras de referencia](#cifras-de-referencia).
+Todas las cifras salen de la semilla por defecto (lunes de referencia 02/11/2026), con el reloj fijado en el miércoles 04/11/2026 a las 12:00, hora peninsular, mediante el momento de referencia de la demostración (FR-043 de la 001). Es el mismo momento de la historia 5, escenario 5, de la 001. El periodo analizado es entonces del 07/09/2026 al 01/11/2026, es decir, las 8 semanas de historia. Las cifras que dependen de RA3 o de RA4 están en [Cifras de referencia](#cifras-de-referencia).
 
 ### Historia de usuario 1 - Ver los ingresos por servicio (Prioridad: P1)
 
@@ -128,8 +139,8 @@ El panel solo se abre con la clave de la clínica, que es la misma de la agenda,
 
 ### Casos límite
 
-- **Citas reservadas sin cerrar dentro del periodo**: no cuentan en ninguna cifra, porque no se sabe qué pasó, y el panel avisa de cuántas hay (RA6). Con la semilla por defecto y el reloj en la semana del 09/11/2026, la semana del 02/11/2026 entra en el periodo y el aviso indica 31 citas sin cerrar. Esa semana tiene 0 completadas, 0,00 € y «Sin datos» de no asistencia.
-- **Demostración en otra fecha**: el periodo sigue al reloj. Para que el panel enseñe la historia completa, se regenera la semilla con el lunes de la semana actual; las cifras son idénticas y solo cambian las fechas (FR-032 de la 001).
+- **Citas sin cerrar dentro del periodo** (FR-040 de la 001): no cuentan en ninguna cifra, porque no se sabe qué pasó, y el panel avisa de cuántas hay (RA6). Con la semilla por defecto y el reloj fijado en el miércoles 11/11/2026 a las 12:00 (FR-043 de la 001), la semana del 02/11/2026 entra en el periodo y el aviso indica 31 citas sin cerrar. Esa semana tiene 0 completadas, 0,00 € y «Sin datos» de no asistencia. La frontera `inicio <= ahora` no cambia la cifra: el periodo acaba antes de la semana en curso, así que todas sus citas empiezan antes de cualquier momento de esa semana.
+- **Demostración en otra fecha**: el periodo sigue al reloj, el real o el fijado con FR-043 de la 001. Para que el panel enseñe la historia completa, se regenera la semilla con el lunes de la semana actual; las cifras son idénticas y solo cambian las fechas (FR-032 de la 001).
 - **Semana sin nada que medir**: la tasa muestra «Sin datos» y no 0 % (RA7). Una tasa de 0,0 % real es otra cosa: la semana del 21/09/2026, Jorge tiene citas y ninguna no asistida.
 - **Clínica con menos de 8 semanas de datos**: las 8 semanas se muestran igualmente, y las vacías indican «Sin datos» de no asistencia y 0,00 € de ingresos.
 - **Cita cerrada tarde**: si recepción cierra hoy una cita de una semana ya analizada, las cifras de esa semana cambian al volver a abrir el panel. Es lo correcto: el panel refleja el estado actual.
@@ -143,7 +154,7 @@ El panel solo se abre con la clave de la clínica, que es la misma de la agenda,
 
 ### Reglas de negocio
 
-Los tests de esta feature referencian estos identificadores (constitución, principio VI). Se llaman RA para no confundirlos con las RN de la 001.
+Los tests de esta feature referencian estos identificadores (constitución, principio VI). Se llaman RA, la letra propia de la 004 en la convención de FR-035 de la 001, para no confundirlos con las RN de la 001.
 
 - **RA1 (periodo)**: el periodo son las 8 últimas semanas completas, de lunes a domingo, anteriores a la semana en curso según la fecha local de la clínica. La semana en curso nunca cuenta.
 - **RA2 (pertenencia)**: una cita pertenece a la semana y al periodo de su fecha local de inicio.
@@ -153,7 +164,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
   - **Aviso de lectura**: el plazo de cancelación del paciente (RN8 de la 001) permite que una cita que antes habría acabado como no asistida pase a cancelada. Eso baja la tasa sin que se atienda ninguna cita más: si 10 de las 46 no asistidas de la semilla fueran canceladas, la tasa pasaría del 10,8 % al 8,7 %. Por eso la tasa se lee siempre junto a la ocupación (RA4), que solo sube si se atiende más tiempo.
 - **RA4 (ocupación)**: la ocupación es el tiempo de las citas completadas dividido entre la capacidad. No cuentan las no asistidas, ni las canceladas, ni las reservadas, aunque en la agenda una reservada sí ocupe su tramo. «Ocupación» mide tiempo atendido, no tramos ocupados de la agenda (FR-016 de la 001). La capacidad de un profesional en una semana es el tiempo del horario de la clínica de FR-012 de la 001 en esa semana, y la de la clínica es esa capacidad por el número de profesionales. El tiempo de una cita es la duración de su servicio.
 - **RA5 (ingresos)**: los ingresos son la suma, en céntimos exactos, del precio del servicio de cada cita completada. Ningún importe se redondea.
-- **RA6 (citas sin cerrar)**: una cita reservada cuyo inicio ya ha pasado no cuenta en ningún numerador ni denominador. Si hay alguna dentro del periodo, el panel indica cuántas son y que las cifras estarán completas cuando recepción las cierre.
+- **RA6 (citas sin cerrar)**: una cita sin cerrar, tal como la define FR-040 de la 001 (sigue reservada y `inicio <= ahora`), no cuenta en ningún numerador ni denominador. Si hay alguna dentro del periodo, el panel indica cuántas son y que las cifras estarán completas cuando recepción las cierre.
 - **RA7 (porcentajes)**: un porcentaje se calcula siempre a partir de los recuentos o minutos exactos de su ámbito, nunca promediando otros porcentajes. Se redondea una sola vez, al mostrarlo, a un decimal y con la mitad hacia arriba (`9,2 %`). Si el denominador es cero, se muestra «Sin datos».
 - **RA8 (solo lectura)**: esta feature no crea, cambia ni borra ningún dato, ni guarda nada propio: ni cifras calculadas, ni registros de consulta, ni preferencias.
 
@@ -182,8 +193,8 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-013**: Cada total de importes DEBE coincidir exactamente con la suma de las partes que se muestran: el total del periodo es igual a la suma por servicio y a la suma por semana.
 - **FR-014**: Los importes DEBEN mostrarse con el formato español (`1.234,56 €`), y las fechas como `dd/mm/aaaa`. Un gráfico NO DEBE redondear ni abreviar un importe, ni siquiera en sus etiquetas.
 - **FR-015**: Todas las cifras de una misma apertura DEBEN corresponder a un único instante de los datos.
-- **FR-016**: «Hoy» y la semana en curso DEBEN fijarse con la fecha local de la clínica y nunca con el reloj del dispositivo (FR-023 de la 001).
-- **FR-017**: Con la semilla regenerada para otro lunes y el reloj en esa misma semana, el panel DEBE mostrar las mismas cifras, y solo DEBEN cambiar las fechas.
+- **FR-016**: «Hoy» y la semana en curso DEBEN fijarse con la fecha local de la clínica y nunca con el reloj del dispositivo (FR-023 de la 001). Salen del «ahora» del sistema, que en la demostración puede fijarse con FR-043 de la 001.
+- **FR-017**: Con la semilla regenerada para otro lunes y el reloj en esa misma semana, real o fijado con FR-043 de la 001, el panel DEBE mostrar las mismas cifras, y solo DEBEN cambiar las fechas.
 
 **Solo lectura**
 
@@ -198,11 +209,13 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 **Pruebas** (constitución, principio VI)
 
-- **FR-023**: Cada regla RA, cada escenario de aceptación y cada criterio de éxito DEBE tener un test que lo referencie, salvo SC-006, que se comprueba a mano. Las cifras de esta spec DEBEN comprobarse contra la semilla con el reloj fijado.
+- **FR-023**: Cada regla RA, cada escenario de aceptación y cada criterio de éxito DEBE tener un test que lo referencie, salvo SC-006, que se comprueba a mano. Las cifras de esta spec DEBEN comprobarse contra la semilla con el reloj fijado mediante el momento de referencia de FR-043 de la 001.
+  - **Identificadores**: los tests siguen la convención de FR-035 de la 001, y cada uno empieza por el identificador que comprueba. Las reglas van sin prefijo, con su letra propia: `RA1`, `RA2` y siguientes. Los requisitos, criterios, escenarios y casos límite de esta spec llevan delante `004/`: `004/FR-nnn`, `004/SC-nnn`, `004/Hx-Ey` (por ejemplo, `004/H5-E8`) y `004/CL`.
+  - **Cobertura**: solo la dan los tests que empiezan por un identificador de esta spec. Un test que empiece por `FR-001` o `SC-001`, sin prefijo, es de la 001 y no cuenta para la 004.
 
 ### Cifras de referencia
 
-Se reproducen con `npm run semilla` y el reloj en la semana del 02/11/2026 al 08/11/2026 (constitución, principio V). Salen de las cifras de citas de FR-030 de la 001. Para comprobar que la semilla es la esperada vale el resumen de contenido vigente en FR-030 de la 001; esta spec no lo copia, porque cambia con datos que no afectan a ninguna cifra del panel. Si un cambio de la semilla altera las cifras de citas, ese mismo cambio actualiza estas tablas.
+Se reproducen con `npm run semilla` y el servidor arrancado con el momento de referencia de FR-043 de la 001 en el miércoles 04/11/2026 a las 12:00, hora peninsular (constitución, principio V). Cualquier otro momento de la semana del 02/11/2026 al 08/11/2026 da las mismas cifras, porque el periodo de RA1 solo depende de la semana en curso. Salen de las cifras de citas de FR-030 de la 001. Para comprobar que la semilla es la esperada vale el resumen de contenido vigente en FR-030 de la 001; esta spec no lo copia, porque cambia con datos que no afectan a ninguna cifra del panel. Si un cambio de la semilla altera las cifras de citas, ese mismo cambio actualiza estas tablas.
 
 **Tasa de no asistencia del periodo (RA3)**
 
@@ -268,7 +281,7 @@ Esta feature no añade entidades. Lee las de la 001 y deriva de ellas, en cada a
 - **SC-005**: Con la semilla regenerada para otro lunes, el 100 % de las cifras coincide, y solo cambian las fechas.
 - **SC-006**: Al menos 9 de cada 10 personas sin formación encuentran en menos de 1 minuto, solo con lo que ve en pantalla, los ingresos de un servicio y la tasa de no asistencia de un profesional. No tiene test automático, porque mide el uso real de personas: se comprueba a mano.
 - **SC-007**: El panel cumple los umbrales de FR-020 y FR-022 a 360 píxeles de ancho y en el portátil.
-- **SC-008**: El 100 % de las reglas RA, de los escenarios de aceptación y de los criterios tiene un test que los referencia, salvo SC-006, y la suite está en verde.
+- **SC-008**: El 100 % de las reglas RA1 a RA8, de los escenarios de aceptación y de los criterios tiene un test que empieza por su identificador según la convención de FR-035 de la 001 (`RA1`, `004/H1-E1`, `004/SC-001`), salvo SC-006, y la suite está en verde.
 
 ## Supuestos
 
@@ -281,4 +294,5 @@ Esta feature no añade entidades. Lee las de la 001 y deriva de ellas, en cada a
 - **Precio actual del servicio**: los ingresos usan el precio del servicio, como la cita de la 001. La spec que permita cambiar precios deberá guardar el precio histórico, o los ingresos pasados cambiarían.
 - **Ingresos no son cobros**: la 001 no registra pagos. «Ingresos» significa el valor de las citas completadas según su precio.
 - **Datos ficticios**: las cifras de la semilla sirven para demostrar el producto, no como resultados que enseñar a una clínica real.
-- **Dependencias**: requiere la 001 (agenda, acceso, semilla, formatos, RN8 y FR-037). El escenario 8 de la historia 5 solo se puede probar con las sesiones de paciente de la 002. Las cancelaciones que el paciente hace por la 002 y la 003 dentro del plazo de RN8 cambian lo que mide la tasa, como explica el aviso de RA3. Ninguna cifra depende del origen de la cancelación.
+- **Reloj fijado**: el panel es una pantalla de recepción, así que, mientras el reloj esté fijado, muestra con la cabecera común el aviso que exige FR-043 de la 001, con la fecha y la hora. Esta spec no añade ningún requisito propio para ese aviso.
+- **Dependencias**: requiere la 001 (agenda, acceso, semilla, formatos, RN8 y FR-037), y además FR-035 (identificadores de los tests), FR-040 (cita sin cerrar) y FR-043 (momento de referencia de la demostración), del segundo cambio de la 001, que está pendiente de aprobación. Si ese cambio no se aprobara tal como está, RA6, FR-023, SC-008 y las cifras de referencia tendrían que revisarse. El escenario 8 de la historia 5 solo se puede probar con las sesiones de paciente de la 002. Las cancelaciones que el paciente hace por la 002 y la 003 dentro del plazo de RN8 cambian lo que mide la tasa, como explica el aviso de RA3. Ninguna cifra depende del origen de la cancelación.
