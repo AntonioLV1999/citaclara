@@ -75,6 +75,8 @@ async function servirEstatico(camino, res, clinica, momentoFijado) {
 
 async function atender({ bd, ahora, momentoFijado, rutas }, req, res) {
   const [camino, consulta = ''] = req.url.split('?');
+  // FR-037: recepción solo lee la cookie `sesion` y solo busca en la tabla `sesion`. Una sesión de
+  // paciente, en su propia cookie o puesta en esta, se trata igual que no tener sesión.
   const token = leerCookie(req, 'sesion');
   const clinica = token ? clinicaDeSesion(bd, token) : undefined;
 

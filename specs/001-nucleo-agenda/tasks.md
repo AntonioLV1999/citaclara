@@ -448,14 +448,14 @@ Cualquier otro fallo es una regresión.
 
 ### Tests de la historia 4 (primero, deben fallar)
 
-- [ ] T117 [P] [US4] Escribir tests/integracion/sesiones-paciente.test.js con una sesión creada con `sesionPacienteDePrueba`:
+- [X] T117 [P] [US4] Escribir tests/integracion/sesiones-paciente.test.js con una sesión creada con `sesionPacienteDePrueba`:
   - `H4-E5 SC-012`: para cada ruta no pública de `servidor.rutasRegistradas`, incluida una ruta de `rutasExtra` que simula el panel de la 004, el token de paciente en la cookie `sesion_paciente`, y también puesto en la cookie `sesion`, hace que `GET` redirija a `/acceso` y `POST` dé 401 sin efecto. Ninguna respuesta contiene datos de pacientes.
   - `CL sesión de recepción y de paciente en el mismo navegador`: con las dos cookies, recepción funciona con normalidad. `POST /salir` solo borra la fila de `sesion`; la de `sesion_paciente` sigue, y la respuesta no envía ninguna cabecera `set-cookie` para `sesion_paciente`.
   - `FR-037`: no hay ninguna ruta de la 001 que cree o lea sesiones de paciente.
 
 ### Implementación de la historia 4
 
-- [ ] T118 [US4] Comprobar en src/web/servidor.js, src/servicios/acceso.js y src/web/rutas/acceso.js que solo se lee la cookie `sesion`, solo se busca en la tabla `sesion` y `POST /salir` solo cierra la de recepción. Corregir lo que haga fallar T117 y dejar en `atender` un comentario que cite FR-037. La tabla de T078 ya da la separación, así que esta tarea puede no necesitar más cambios: se deja constancia en el commit (depende de T117)
+- [X] T118 [US4] Comprobar en src/web/servidor.js, src/servicios/acceso.js y src/web/rutas/acceso.js que solo se lee la cookie `sesion`, solo se busca en la tabla `sesion` y `POST /salir` solo cierra la de recepción. Corregir lo que haga fallar T117 y dejar en `atender` un comentario que cite FR-037. La tabla de T078 ya da la separación, así que esta tarea puede no necesitar más cambios: se deja constancia en el commit (depende de T117)
 
 **Punto de control**: T117 en verde. **La trazabilidad, en verde**: termina el rojo de S-18.
 
