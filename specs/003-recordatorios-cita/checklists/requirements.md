@@ -31,5 +31,6 @@
 
 ## Notas
 
-- Quedan 3 marcadores (RR3, RR4 y RR5), que son las 3 preguntas para Sara. RR3 a RR5 y FR-022 no tienen criterio de aceptación cerrado hasta que se respondan.
+- Revalidada el 10/11/2026 tras la revisión cruzada (S-01 a S-04): todos los puntos se cumplen y no quedan marcadores.
+- La spec cita reglas que la 001 y la 002 aún deben recoger: el plazo único de cancelación del paciente, el origen y la etiqueta de la cancelación, la excepción única de FR-001 y la anulación conjunta de los enlaces. Ver «Dependencias».
 - `.eml` y `datos/salida-correo/` aparecen en la spec porque los fija el encargo: son comportamiento observable del modo simulado, no una decisión de diseño.
