@@ -26,6 +26,15 @@
 - **S-04, verificación**: FR-001 no cambia. El escenario 8 de la historia 5 comprueba que una sesión de paciente no abre el panel.
 - Quedan para otra pasada S-06, S-07 y S-09, que afectan a RA3 y a RA4.
 
+### 10/11/2026: segunda pasada de la revisión cruzada
+
+- **Base**: rama actualizada desde `master` (S-19). RN8 y FR-037 pertenecen al cambio de la 001 del 10/11/2026, que está **pendiente de aprobación**. Hasta entonces, la versión vigente de la 001 es la del commit `110b41c`. Si ese cambio varía antes de aprobarse, hay que revisar estas citas.
+- **S-06, cerrado en la 004**: RA3 es la única definición de «tasa de no asistencia» del producto, y explica la diferencia con el porcentaje de composición de la semilla de FR-030. Falta que la 003 cite RA3 en SC-001 y que la 001 renombre ese porcentaje en FR-030, cambios que corresponden a sus propietarios.
+- **S-07, cerrado en la 004**: RA3 se justifica por definición, y ya no dice «el paciente avisó y el hueco quedó libre». Se añade el aviso de lectura sobre RN8 y la ocupación. «Dependencias» sustituye a «No depende de las features 002 ni 003». Falta la doble condición de SC-001 en la 003, que es la propietaria de esa medida.
+- **S-08, parcial**: el supuesto «Misma clave, mismas cifras» remite a la deuda de conexión de la 001. El requisito de puerta de datos reales aún no existe en la 001.
+- **S-09, cerrado**: RA4 deja de decir «igual que no ocupan el hueco», excluye expresamente las reservadas y saca la capacidad de FR-012 de la 001. Las cifras de referencia no cambian.
+- **S-22**: el escenario 8 de la historia 5 cita FR-037 de la 001.
+
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
 Todas las cifras salen de la semilla por defecto (lunes de referencia 02/11/2026), con el reloj en la semana del 02/11/2026 al 08/11/2026. El periodo analizado es entonces del 07/09/2026 al 01/11/2026, es decir, las 8 semanas de historia. Las cifras que dependen de RA3 o de RA4 están en [Cifras de referencia](#cifras-de-referencia).
@@ -74,7 +83,7 @@ Sara ve, semana a semana y para cada profesional, qué parte del horario de la c
 **Escenarios de aceptación**:
 
 1. **Dados** los datos de demostración, **cuando** se abre el panel, **entonces** cada profesional muestra su ocupación en cada una de las 8 semanas y en el periodo completo, según RA4 y la tabla de referencia.
-2. **Dada** una semana y un profesional, **cuando** se calcula la ocupación, **entonces** la capacidad es de 55 horas: 11 horas al día, de lunes a viernes (FR-012 de la 001).
+2. **Dada** una semana y un profesional, **cuando** se calcula la ocupación, **entonces** la capacidad es el tiempo del horario de FR-012 de la 001 en esa semana: con el horario actual, de 09:00 a 20:00 de lunes a viernes, son 55 horas.
 3. **Dada** una ocupación mostrada, **cuando** Sara la lee, **entonces** tiene a la vista una frase llana que explica cómo se calcula.
 
 ---
@@ -113,7 +122,7 @@ El panel solo se abre con la clave de la clínica, que es la misma de la agenda,
 5. **Dado** el panel, **cuando** se revisa lo que ofrece, **entonces** no hay ninguna acción que cree, cambie o borre datos, y cualquier intento de escribir a través de él se rechaza.
 6. **Dado** el panel, **cuando** se revisa todo lo que muestra, **entonces** no aparece ningún dato de un paciente concreto.
 7. **Dado** un móvil con pantalla de 360 píxeles de ancho, **cuando** se abre el panel, **entonces** todos los gráficos y sus cifras se leen sin desplazamiento horizontal de la página.
-8. **Dada** una sesión de paciente, **cuando** intenta abrir el panel o sus datos por cualquier vía, **entonces** se rechaza igual que sin acceso y no se revela ninguna cifra, porque solo la clave de la clínica abre el panel (FR-001 de la 001 y FR-001 de esta spec).
+8. **Dada** una sesión de paciente, **cuando** intenta abrir el panel o sus datos por cualquier vía, **entonces** se rechaza igual que sin acceso y no se revela ninguna cifra, porque una sesión de paciente no da acceso al panel por ninguna vía (FR-037 de la 001 y FR-001 de esta spec).
 
 ---
 
@@ -125,7 +134,7 @@ El panel solo se abre con la clave de la clínica, que es la misma de la agenda,
 - **Clínica con menos de 8 semanas de datos**: las 8 semanas se muestran igualmente, y las vacías indican «Sin datos» de no asistencia y 0,00 € de ingresos.
 - **Cita cerrada tarde**: si recepción cierra hoy una cita de una semana ya analizada, las cifras de esa semana cambian al volver a abrir el panel. Es lo correcto: el panel refleja el estado actual.
 - **Consulta mientras recepción trabaja**: todas las cifras de una misma apertura salen del mismo instante, de modo que los totales cuadran aunque se esté cerrando una cita en ese momento.
-- **Días de cambio de hora**: el del 25/10/2026 cae en domingo, dentro de la semana del 19/10/2026. La capacidad sigue siendo de 55 horas y el tiempo de cada cita es la duración de su servicio, nunca una resta de relojes. Si un cambio de hora cae en cualquier otro día, se aplica lo mismo.
+- **Días de cambio de hora**: el del 25/10/2026 cae en domingo, dentro de la semana del 19/10/2026. La capacidad no cambia, porque sale del horario de FR-012 de la 001 y no de las horas reales de la semana, y el tiempo de cada cita es la duración de su servicio, nunca una resta de relojes. Si un cambio de hora cae en cualquier otro día, se aplica lo mismo.
 - **Límite de semana**: una cita pertenece a la semana de su fecha local de inicio. El cambio de semana es a las 00:00 del lunes en hora local de la clínica, también en Canarias, sea cual sea la zona del dispositivo.
 - **Festivos**: la agenda no los modela (supuesto de la 001), así que no reducen la capacidad. El lunes 12/10/2026 tiene 12 citas en la semilla y cuenta como un día normal.
 - **Profesional sin citas en una semana**: la ocupación es 0,0 %, y la no asistencia «Sin datos».
@@ -138,8 +147,11 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **RA1 (periodo)**: el periodo son las 8 últimas semanas completas, de lunes a domingo, anteriores a la semana en curso según la fecha local de la clínica. La semana en curso nunca cuenta.
 - **RA2 (pertenencia)**: una cita pertenece a la semana y al periodo de su fecha local de inicio.
-- **RA3 (tasa de no asistencia)**: la tasa es no asistidas ÷ (completadas + no asistidas). Las canceladas no cuentan, porque el paciente avisó y el hueco quedó libre. La cifra difiere a propósito del 9,9 % de FR-030 de la 001, que mide la composición de la semilla sobre todas las citas de la historia, canceladas incluidas.
-- **RA4 (ocupación)**: la ocupación es el tiempo de las citas completadas dividido entre la capacidad. Las no asistidas y las canceladas no cuentan, igual que no ocupan el hueco en la agenda (RN1 de la 001). La capacidad es de 55 horas por profesional y semana, y para la clínica, 55 horas por el número de profesionales. El tiempo de una cita es la duración de su servicio.
+- **RA3 (tasa de no asistencia)**: la tasa es no asistidas ÷ (completadas + no asistidas). Por definición, solo cuentan las citas que debían atenderse, es decir, las que llegaron a su hora sin cancelar. Una cancelada, sea cual sea su origen y aunque se anote tarde, ya no debía atenderse y queda fuera.
+  - **Única definición**: es la única definición de «tasa de no asistencia» del producto. Cualquier otra spec que la use, como SC-001 de la 003, cita RA3 y no la redefine. Una tasa de partida aportada por una clínica solo es comparable si se calculó con esta fórmula.
+  - **Diferencia con la 001**: la cifra difiere a propósito del 9,9 % de FR-030 de la 001, porque ese porcentaje es el de composición de la semilla: se calcula sobre todas las citas de la historia, canceladas incluidas. Con la semilla, 46 ÷ 426 da el 10,8 % de esta regla y 46 ÷ 463 da el 9,9 % de FR-030.
+  - **Aviso de lectura**: el plazo de RN8 de la 001 permite al paciente cancelar hasta 2 horas antes, y una cita que antes habría acabado como no asistida puede pasar a cancelada. Eso baja la tasa sin que se atienda ninguna cita más: si 10 de las 46 no asistidas de la semilla fueran canceladas, la tasa pasaría del 10,8 % al 8,7 %. Por eso la tasa se lee siempre junto a la ocupación (RA4), que solo sube si se atiende más tiempo.
+- **RA4 (ocupación)**: la ocupación es el tiempo de las citas completadas dividido entre la capacidad. No cuentan las no asistidas, ni las canceladas, ni las reservadas, aunque en la agenda una reservada sí ocupe su tramo. «Ocupación» mide tiempo atendido, no tramos ocupados de la agenda (FR-016 de la 001). La capacidad de un profesional en una semana es el tiempo del horario de la clínica de FR-012 de la 001 en esa semana, y la de la clínica es esa capacidad por el número de profesionales. El tiempo de una cita es la duración de su servicio.
 - **RA5 (ingresos)**: los ingresos son la suma, en céntimos exactos, del precio del servicio de cada cita completada. Ningún importe se redondea.
 - **RA6 (citas sin cerrar)**: una cita reservada cuyo inicio ya ha pasado no cuenta en ningún numerador ni denominador. Si hay alguna dentro del periodo, el panel indica cuántas son y que las cifras estarán completas cuando recepción las cierre.
 - **RA7 (porcentajes)**: un porcentaje se calcula siempre a partir de los recuentos o minutos exactos de su ámbito, nunca promediando otros porcentajes. Se redondea una sola vez, al mostrarlo, a un decimal y con la mitad hacia arriba (`9,2 %`). Si el denominador es cero, se muestra «Sin datos».
@@ -264,9 +276,9 @@ Esta feature no añade entidades. Lee las de la 001 y deriva de ellas, en cada a
 - **Un solo periodo fijo**: sin selector de fechas, filtros, comparativas, exportación ni impresión específica. El encargo no los pide (constitución, principio IV).
 - **Evolución de clínica**: «evolución de las últimas 8 semanas» se interpreta como las tres cifras (ocupación, no asistencia e ingresos) de la clínica en conjunto. El detalle por profesional ya está en la ocupación semanal.
 - **Periodo de la tasa e ingresos**: la tasa por profesional y los ingresos por servicio se dan para las 8 semanas juntas, porque semana a semana cada profesional tiene muy pocas citas para que su tasa signifique algo.
-- **Misma clave, mismas cifras**: quien tenga la clave de la clínica verá también los ingresos y las cifras por profesional. Es lo pedido, y hereda la deuda de autenticación de la 001, incluida la conexión sin cifrar.
-- **Capacidad teórica**: la 001 tiene un horario único y no modela jornadas, ausencias ni festivos, así que todos los profesionales tienen 55 horas semanales en todas las semanas. Si una clínica real trabaja menos horas, su ocupación saldrá baja.
+- **Misma clave, mismas cifras**: quien tenga la clave de la clínica verá también los ingresos y las cifras por profesional. Es lo pedido, y hereda la deuda de autenticación de la 001, incluida la conexión sin cifrar. El panel no se usa con datos reales hasta que se resuelva la puerta de datos reales de la 001. Hoy esa puerta es el supuesto «Conexión sin cifrar (deuda consciente)» de la 001, porque aún no tiene requisito propio (S-08). Cuando la 001 lo añada, este supuesto pasará a citarlo.
+- **Capacidad teórica**: la 001 tiene un horario único y no modela jornadas, ausencias ni festivos, así que todos los profesionales tienen la misma capacidad en todas las semanas: la del horario de FR-012 de la 001, hoy 55 horas. Si otra spec cambia ese horario, la capacidad cambia con él, y con ella las cifras de referencia. Si una clínica real trabaja menos horas, su ocupación saldrá baja.
 - **Precio actual del servicio**: los ingresos usan el precio del servicio, como la cita de la 001. La spec que permita cambiar precios deberá guardar el precio histórico, o los ingresos pasados cambiarían.
 - **Ingresos no son cobros**: la 001 no registra pagos. «Ingresos» significa el valor de las citas completadas según su precio.
 - **Datos ficticios**: las cifras de la semilla sirven para demostrar el producto, no como resultados que enseñar a una clínica real.
-- **Dependencia**: requiere la 001 (agenda, acceso, semilla y formatos). No depende de las features 002 ni 003.
+- **Dependencias**: requiere la 001 (agenda, acceso, semilla, formatos, RN8 y FR-037). El escenario 8 de la historia 5 solo se puede probar con las sesiones de paciente de la 002. Las cancelaciones que el paciente hace por la 002 y la 003 dentro del plazo de RN8 cambian lo que mide la tasa, como explica el aviso de RA3. Ninguna cifra depende del origen de la cancelación.

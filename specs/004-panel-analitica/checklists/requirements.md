@@ -31,5 +31,6 @@
 
 ## Notas
 
-- 10/11/2026: revalidada tras resolver S-03 de la revisión cruzada. No quedan marcadores; RA3 y RA4 se cerraron el 06/11/2026. S-06, S-07 y S-09 quedan para otra pasada.
+- 10/11/2026: revalidada tras resolver S-03 de la revisión cruzada. No quedan marcadores; RA3 y RA4 se cerraron el 06/11/2026.
+- 10/11/2026 (segunda pasada): revalidada tras S-06, S-07, S-09 y S-22, y S-08 en parte. Sigue 16/16 y las cifras de referencia no cambian.
 - La mención a `npm run semilla` en «Cifras de referencia» es la vía de reproducción que exige el principio V, igual que en FR-030 de la 001; no es una decisión de implementación.
