@@ -15,8 +15,12 @@
 ### Sesión del 06/11/2026
 
 - P: ¿Cuándo debe recibir el paciente el recordatorio de su cita? → R: el proceso sale cada día a las 08:00 y avisa de las citas de mañana, entre 25 y 36 horas antes (RR3).
-- P: ¿Qué ocurre cuando el paciente cancela desde el correo y hasta cuándo puede hacerlo? → R: la cita se cancela al momento, hasta 2 horas antes del inicio; después, el paciente debe contactar con la clínica (RR4).
+- P: ¿Qué ocurre cuando el paciente cancela desde el correo y hasta cuándo puede hacerlo? → R: la cita se cancela al momento, dentro del plazo del paciente; después, el paciente debe contactar con la clínica (RR4). Ese plazo es hoy el único de RN8 de la 001 (D1).
 - P: ¿Qué debe pasar con el recordatorio cuando una cita cambia de hora? → R: la cita nueva se trata como cualquier otra y tiene su recordatorio si aún le toca (RR5).
+
+### Sesión del 10/11/2026 (revisión cruzada)
+
+- P: ¿Hasta cuándo vale un enlace de cancelación? (D5, S-20) → R: hasta el inicio de la cita; desde ese momento da la respuesta uniforme de 002/FR-003 (RR6).
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -57,12 +61,12 @@ El paciente que sabe que no irá abre el enlace del recordatorio, ve qué cita v
 2. **Dada** esa pantalla, **cuando** el paciente confirma, **entonces** la cita queda cancelada al momento, su tramo queda libre y el paciente ve un mensaje que lo confirma.
 3. **Dada** una cita cancelada desde el correo, **cuando** recepción reserva ese tramo, **entonces** se acepta (RN1 de la 001).
 4. **Dada** una cita ya cancelada, **cuando** el paciente vuelve a abrir el enlace, **entonces** ve que ya está cancelada y no se le ofrece ninguna acción.
-5. **Dada** una cita completada o no asistida, **cuando** se abre su enlace, **entonces** se indica el estado en que está y no se ofrece cancelar.
-6. **Dada** una cita de las 10:00 y siendo las 08:01 de ese día, ya fuera del plazo de 2 horas de la 001, **cuando** se abre su enlace, **entonces** un mensaje llano explica que ya no puede cancelarse por esta vía y que debe contactar con la clínica, y la cita no cambia.
+5. **Dada** una cita cuya hora de inicio ya ha llegado, sea cual sea su estado, **cuando** se abre su enlace, **entonces** está caducado y da la respuesta uniforme de 002/FR-003, sin revelar la cita (RR6).
+6. **Dada** una cita de las 10:00 y siendo las 08:01 de ese día, ya fuera del plazo de RN8 de la 001, **cuando** se abre su enlace, **entonces** un mensaje llano explica que ya no puede cancelarse por esta vía y ofrece el teléfono de la clínica (FR-029 de la 001), que se puede pulsar desde el móvil, y la cita no cambia.
 7. **Dado** un enlace alterado o inventado, **cuando** se abre, **entonces** da la respuesta uniforme de 002/FR-003 y no se revela ningún dato.
 8. **Dado** un filtro de correo que abre el enlace de forma automática, **cuando** termina, **entonces** la cita sigue reservada, porque cancelar exige la confirmación expresa.
 9. **Dado** un móvil de 360 píxeles de ancho, **cuando** se abre el enlace, **entonces** se lee y se maneja sin desplazamiento horizontal.
-10. **Dado** un recordatorio ya enviado de una cita reservada, **cuando** recepción anula el enlace personal de esa ficha (002/FR-002) y después se abre el enlace de cancelación, **entonces** da la respuesta uniforme de 002/FR-003 y la cita sigue reservada.
+10. **Dado** un recordatorio ya enviado de una cita reservada, **cuando** recepción anula el enlace personal de esa ficha (RP7 de la 002) y después se abre el enlace de cancelación, **entonces** da la respuesta uniforme de 002/FR-003 y la cita sigue reservada.
 
 ---
 
@@ -79,13 +83,14 @@ Quien demuestra o prueba el producto ejecuta el proceso sin servidor de correo c
 1. **Dado** que no hay servidor de correo configurado, **cuando** se ejecuta el proceso, **entonces** cada recordatorio se escribe como fichero `.eml` en `datos/salida-correo/` y no sale ningún correo.
 2. **Dado** un recordatorio simulado, **cuando** se comprueba si la cita ya tiene recordatorio, **entonces** cuenta como enviado.
 3. **Dado** un fichero generado, **cuando** se abre, **entonces** tiene destinatario, asunto, los datos de la cita y un enlace de cancelación que funciona contra el producto en marcha.
-4. **Dados** los mismos datos de demostración y el mismo momento de ejecución, **cuando** se ejecuta el proceso, **entonces** los destinatarios y el contenido son idénticos, salvo el enlace de cancelación.
+4. **Dado** un servidor de correo configurado sin que se cumpla la puerta de uso con datos reales de la 001, **cuando** se ejecuta el proceso, **entonces** los recordatorios se escriben como en el escenario 1 y no sale ningún correo (FR-018).
+5. **Dados** los mismos datos de demostración y el mismo momento de ejecución, **cuando** se ejecuta el proceso, **entonces** los destinatarios y el contenido son idénticos, salvo el enlace de cancelación.
 
 ---
 
 ### Historia de usuario 4 - Saber que el paciente ha cancelado (Prioridad: P2)
 
-Recepción abre la agenda y distingue las citas que canceló el paciente de las que canceló ella, para poder ofrecer el hueco.
+Recepción abre la agenda y distingue las citas que canceló el paciente de las que canceló ella, para poder ofrecer el hueco. Los huecos cancelados desde el correo entran además en la lista de huecos liberados por pacientes de 002/FR-019.
 
 **Por qué esta prioridad**: el hueco ya queda libre sin esta historia, pero recepción no sabría por qué ha cambiado la agenda.
 
@@ -108,10 +113,12 @@ Recepción abre la agenda y distingue las citas que canceló el paciente de las 
 - **Cita cancelada justo antes del envío**: el estado se comprueba al enviar, y si ya no está reservada no sale el recordatorio.
 - **Fallo a mitad de ejecución**: al reanudar, las citas ya enviadas no se repiten y las pendientes se envían.
 - **Paciente y recepción cancelan a la vez**: solo una acción prospera; la otra ve que la cita ya está cancelada.
+- **Portal y correo cancelan a la vez**: la operación única de cancelar de la 001 deja la cita cancelada una vez y con un solo origen (FR-036 de la 001).
 - **Paciente cancela mientras recepción marca otro estado**: solo una prospera (RN4), y quien pierde ve el estado resultante.
-- **Pantalla abierta mientras vence el plazo**: con el plazo de 2 horas de la 001, si el paciente confirma a las 08:01 una cita de las 10:00 que abrió a las 07:55, se rechaza con el mensaje de fuera de plazo y la cita no cambia.
-- **Justo en el límite**: confirmar a las 08:00 una cita de las 10:00 se acepta.
-- **Doble pulsación al confirmar**: la cita se cancela una vez y la segunda pulsación ve el mensaje de cita ya cancelada.
+- **Pantalla abierta mientras vence el plazo**: con el plazo de RN8 de la 001, si el paciente confirma a las 08:01 una cita de las 10:00 que abrió a las 07:55, se rechaza con el mensaje de fuera de plazo y la cita no cambia.
+- **Justo en el límite**: confirmar a las 08:00 una cita de las 10:00 se acepta (RN8).
+- **Pantalla abierta hasta el inicio**: si el paciente confirma después de la hora de inicio, el enlace ya está caducado y da la respuesta uniforme de 002/FR-003 (RR6).
+- **Doble pulsación al confirmar**: la operación única de cancelar de la 001 cancela una sola vez y distingue «ya estaba cancelada». La segunda pulsación ve el mensaje de cita ya cancelada, sin error, como en el portal (002/FR-017).
 - **Hueco cancelado y vuelto a ocupar**: el enlace de la cita antigua solo actúa sobre esa cita y nunca sobre la nueva.
 - **Correo compartido en una familia**: cada cita tiene su recordatorio, y el enlace solo sirve para esa cita.
 - **Regenerar los datos de demostración**: los recordatorios registrados se borran con las citas, y los enlaces anteriores dejan de ser válidos.
@@ -125,9 +132,9 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **RR1**: una cita recibe como máximo un recordatorio, sea cual sea el número de ejecuciones del proceso y aunque coincidan en el tiempo. La garantía la da el sistema.
 - **RR2**: solo se recuerdan citas en estado reservada en el momento del envío, dentro de la ventana de recordatorio y de pacientes con correo.
 - **RR3**: la ventana de recordatorio de una ejecución son las citas cuyo inicio cae en el día natural siguiente al de la ejecución, en hora local de la clínica. Con la ejecución de las 08:00 y el horario de 09:00 a 20:00, el aviso llega entre 25 y 36 horas antes.
-- **RR4**: al confirmar desde el correo, la cita queda cancelada al momento y su tramo libre, sin intervención de recepción. El paciente puede hacerlo dentro del plazo de cancelación del paciente que fija la 001, único para todos sus canales (D1). Pasado ese plazo, solo recepción puede cancelarla (RN5 de la 001).
+- **RR4**: al confirmar desde el correo, la cita queda cancelada al momento y su tramo libre, sin intervención de recepción, mediante la operación única de cancelar de la 001 (S-05, pendiente de recoger allí). Esa operación aplica el plazo de RN8, registra el origen «correo» (FR-036) y distingue «cancelada ahora» de «ya estaba cancelada». Pasado el plazo de RN8, solo recepción puede cancelarla (RN5 de la 001). Esta spec solo fija los mensajes que ve el paciente.
 - **RR5**: cambiar una cita de hora es cancelarla y crear otra (001). La cita nueva se trata como cualquier otra: tiene su recordatorio si cumple RR2 y RR3, aunque la cancelada ya lo tuviera. No hay correo específico de cambio.
-- **RR6**: un enlace de cancelación solo da acceso a la cita para la que se generó y nunca cancela sin confirmación expresa. Es la segunda credencial del paciente (D2), y todo lo demás lo hereda del modelo de acceso de la 002: no se puede adivinar (002/FR-001), da la misma respuesta si es inventado o está anulado (002/FR-003), tiene límite de intentos y sesión (002/FR-004) y se anula con el enlace personal de la ficha (002/FR-002).
+- **RR6**: un enlace de cancelación solo da acceso a la cita para la que se generó, nunca cancela sin confirmación expresa y vale hasta la hora de inicio de esa cita (D5). Desde ese momento está caducado y da la respuesta uniforme de 002/FR-003. Es la segunda credencial del paciente (D2), y todo lo demás lo hereda del modelo de acceso de la 002 (RP6): no se puede adivinar (002/FR-025), tiene límite de intentos (002/FR-004) y sesiones aparte (002/FR-005), y se anula con el enlace personal de la ficha (RP7).
 
 ### Requisitos funcionales
 
@@ -152,15 +159,15 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-011**: El enlace DEBE dar acceso solo a la pantalla de cancelación de esa cita, con confirmación expresa (RR6). Funciona sin clave de clínica por la excepción única de FR-001 de la 001 para el acceso del paciente.
 - **FR-012**: La pantalla DEBE mostrar la clínica, el profesional, el servicio, la fecha y la hora, y NO DEBE mostrar datos de otras citas ni de la ficha del paciente.
 - **FR-013**: Antes de cancelar, la pantalla DEBE pedir confirmación y avisar de que no se puede deshacer, igual que FR-021 de la 001.
-- **FR-014**: El sistema DEBE aplicar RN4 y RR4 en el momento de confirmar, aunque la pantalla se abriera antes. Si la cita ya no puede cancelarse, DEBE decirlo y dejarla intacta.
+- **FR-014**: La confirmación DEBE usar la operación única de cancelar de la 001 (RR4), que aplica RN4 y RN8 en el momento de confirmar, aunque la pantalla se abriera antes. Esta spec solo fija los mensajes: si la cita ya no puede cancelarse, la pantalla lo dice y la cita queda intacta, y si es por el plazo de RN8, ofrece el teléfono de la clínica (FR-029 de la 001).
 - **FR-015**: Abrir el enlace NO DEBE cambiar nada: solo la confirmación expresa cancela.
-- **FR-016**: La cancelación DEBE registrar el origen «correo» y el momento de la cancelación, y la agenda DEBE mostrarla con la etiqueta «Cancelada por el paciente», según la definición de origen, momento y etiqueta de la 001. Esta spec no define ningún dato ni etiqueta propios.
+- **FR-016**: La cancelación DEBE registrar el origen «correo» y el momento de la cancelación, y la agenda DEBE mostrarla con la etiqueta «Cancelada por el paciente», según la definición de origen y momento (FR-036) y de etiqueta (FR-027) de la 001. Esta spec no define ningún dato ni etiqueta propios.
 - **FR-017**: La pantalla DEBE cumplir FR-027 y FR-028 de la 001: mensajes llanos, 360 píxeles de ancho sin desplazamiento horizontal, contraste de 4,5:1 y controles táctiles de 44 × 44 píxeles.
 
 **Modo de envío**
 
-- **FR-018**: Si hay un servidor de correo configurado, el sistema DEBE enviar los recordatorios a través de él.
-- **FR-019**: Si no lo hay, el sistema DEBE escribir cada recordatorio como un fichero `.eml` propio en `datos/salida-correo/`, sin sobrescribir los existentes y sin intentar enviar nada.
+- **FR-018**: El sistema DEBE enviar los recordatorios por correo real solo si hay un servidor de correo configurado y se cumple la puerta de uso con datos reales de la 001 (S-08, pendiente de recoger allí). Mientras esa puerta no exista o no se cumpla, el modo DEBE ser siempre el simulado de FR-019, aunque haya servidor configurado.
+- **FR-019**: En cualquier otro caso, el sistema DEBE escribir cada recordatorio como un fichero `.eml` propio en `datos/salida-correo/`, sin sobrescribir los existentes y sin intentar enviar nada.
 - **FR-020**: Un recordatorio simulado DEBE contar como enviado a efectos de RR1.
 
 **Datos de demostración** (constitución, principio V)
@@ -176,14 +183,18 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 ### Entidades clave
 
 - **Recordatorio**: constancia de que una cita tiene su aviso. Pertenece a una sola cita y guarda cuándo se envió, a qué dirección y por qué modo (real o simulado).
-- **Enlace de cancelación**: acceso a una sola cita, generado con su recordatorio, que exige confirmación expresa para cancelar. Es una credencial del modelo de acceso del paciente de la 002 (D2).
-- **Cita** (001): sin campos propios de esta feature. Usa el origen de la cancelación, con el valor «correo», y el momento que define la 001.
+- **Enlace de cancelación**: acceso a una sola cita, generado con su recordatorio, que exige confirmación expresa para cancelar y vale hasta la hora de inicio de la cita (D5). Es una credencial del modelo de acceso del paciente de la 002 (RP6, D2).
+- **Cita** (001): sin campos propios de esta feature. Usa el origen de la cancelación, con el valor «correo», y el momento que define FR-036 de la 001.
 
 ## Criterios de éxito *(obligatorio)*
 
 ### Resultados medibles
 
-- **SC-001**: La tasa de no asistencia de la clínica piloto baja al menos un 30 % respecto a la suya previa, medida durante los 3 primeros meses de uso.
+- **SC-001**: Durante los 3 primeros meses de uso se cumplen a la vez dos condiciones:
+  - La tasa de no asistencia de la clínica piloto, calculada según RA3 de la 004 (no asistidas ÷ (completadas + no asistidas)), baja al menos un 30 % respecto a su tasa de partida. Como referencia con la semilla, un 30 % menos desde 10,8 % es 7,6 %.
+  - La ocupación, calculada según RA4 de la 004, no baja respecto al mismo periodo de partida. Así la tasa no puede mejorar solo porque las no asistencias pasen a ser cancelaciones, sin ninguna cita más atendida (S-07).
+
+  Como propuesta, el informe de SC-001 da aparte cuántas cancelaciones del periodo tienen origen «correo» y cuántas «portal» (FR-036 de la 001).
 - **SC-002**: El 100 % de las citas reservadas con correo que cumplen RR2 tienen exactamente un recordatorio tras la ejecución.
 - **SC-003**: En 1.000 rondas de ejecuciones simultáneas del proceso, cero citas reciben más de un recordatorio.
 - **SC-004**: En 365 días consecutivos de ejecución simulada, que incluyen los dos cambios de hora, cero citas se quedan sin recordatorio por el cálculo de la ventana, tanto en la península como en Canarias.
@@ -194,27 +205,30 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 ## Supuestos
 
 - **Propietario**: se registra a AntonioLV1999, como en la 001, hasta que se indique otra cosa.
-- **Objetivo del 30 %**: es una propuesta para SC-001, porque el encargo no fija cifra y no conocemos la tasa real del piloto. La clínica debe aportar esa tasa de partida.
+- **Objetivo del 30 %**: es una propuesta para SC-001, porque el encargo no fija cifra y no conocemos la tasa real del piloto. La clínica debe aportar su tasa de partida calculada con la fórmula de RA3 de la 004, y no sobre el total de citas, para que sea comparable con el panel.
 - **Hoy no se mueven citas**: la 001 no tiene esa operación y cambiar una cita es cancelarla y crear otra. Si otra spec crea esa operación, deberá revisar RR5.
 - **Un único correo**: no hay confirmación de asistencia, ni segundo aviso, ni correo de confirmación tras cancelar. La pantalla de confirmación es el acuse.
 - **Sin correo no hay aviso**: recepción no recibe una lista para llamar a esos pacientes; el resumen solo los cuenta. El correo sigue siendo opcional en la ficha.
 - **Sin aviso en la agenda de si se envió el recordatorio**: el encargo no lo pide.
 - **Sin darse de baja**: el recordatorio es un aviso de servicio sobre una cita pedida por el paciente. Debe validarse con quien asesore en protección de datos antes de usar datos reales, porque el servicio de la cita puede revelar información de salud.
-- **Sin teléfono de la clínica**: la 001 no lo guarda y añadirlo alteraría la semilla, así que el mensaje de fuera de plazo dice «contacta con la clínica» sin dar un número.
 - **Dirección del producto**: el enlace necesita una dirección pública del producto, que forma parte de la configuración.
-- **Datos reales (deuda de la 001)**: la conexión sin cifrar de la 001 también afecta a los enlaces de cancelación. Enviar correo real a pacientes reales exige resolver antes esa deuda.
+- **Datos reales**: el envío real lo condiciona la puerta de uso con datos reales que debe definir la 001 (FR-018, S-08). Mientras no exista, la feature solo funciona en modo simulado.
 - **Ficheros simulados**: se guardan en una carpeta que no entra en el control de versiones y no se borran solos, porque el modo simulado solo se usa con datos ficticios.
 - **Fuera de alcance de la v1**: SMS, WhatsApp y que el paciente pueda mover la cita.
 
 ## Dependencias
 
-- **Cambios necesarios en la 001**, que debe aprobar su propietario antes de implementar (constitución, «Para trabajar en paralelo»):
-  - **Plazo de cancelación del paciente** (S-01, D1): una regla de la 001, junto a RN5, con el plazo único de 2 horas para todos los canales del paciente. RR4 la cita.
-  - **Origen, momento y etiqueta de la cancelación** (S-02): la 001 los define en la entidad Cita y en FR-027. FR-016 los cita.
-  - **Excepción única de FR-001 de la 001** (S-04): el acceso del paciente sin clave de clínica, que remite al modelo de la 002. Cubre el enlace de cancelación, y esta spec no pide otra excepción.
-  - **FR-020 de la 001** reserva a recepción los cambios de estado. Debe admitir la cancelación del paciente. FR-022 no se ve afectada, porque la cancelación la decide el paciente y no el sistema.
-- **002-portal-paciente** (S-04, D2): define el modelo de acceso del paciente, que hereda el enlace de cancelación (RR6). Debe recoger que anular el enlace personal de una ficha anula también los enlaces de cancelación de esa ficha. El plazo de cancelación ya es la regla común de la 001 (D1), y RR5 coincide con la 002, que no mueve citas.
-- **004-panel-analitica**: el origen de la cancelación (FR-016) puede interesarle; aquí solo se justifica por la agenda.
+- **Cambio del 10/11/2026 de la 001, pendiente de aprobación** (S-19). Esta spec cita de él:
+  - RN8, el plazo único de cancelación del paciente (D1).
+  - FR-036 y FR-027: origen, momento y etiqueta de la cancelación.
+  - La excepción única de FR-001, que remite al modelo de acceso de la 002 (D2).
+  - FR-029: teléfono de la clínica.
+  - FR-030: cifras de citas protegidas.
+- **Pendiente de recoger en la 001**, que debe aprobar su propietario antes de implementar (constitución, «Para trabajar en paralelo»):
+  - **Operación única de cancelar y FR-020** (S-05): FR-020 sigue hablando solo de recepción. Debe admitir al paciente dentro de RN8, con una sola operación de cancelar que reciba el canal, aplique RN8 y FR-036 y distinga «cancelada ahora» de «ya estaba cancelada». RR4, FR-014 y el caso límite «Doble pulsación» la citan. FR-022 no se ve afectada, porque la cancelación la decide el paciente y no el sistema.
+  - **Puerta de uso con datos reales** (S-08): conexión cifrada, revisión de protección de datos y responsable con fecha. FR-018 la cita como condición del envío real.
+- **002-portal-paciente** (D2, en borrador): define el modelo de acceso del paciente (RP6) que hereda el enlace de cancelación (RR6): 002/FR-025, 002/FR-003, 002/FR-004, 002/FR-005 y RP7. La vigencia que pide 002/FR-003 la fija RR6 (D5). La lista de huecos de 002/FR-019 incluye los cancelados desde el correo. El plazo de cancelación es RN8 de la 001, y RR5 coincide con la 002, que no mueve citas.
+- **004-panel-analitica** (en borrador): SC-001 se mide con RA3 y RA4. Si cambian, hay que revisar SC-001.
 
 ## Historial de cambios
 
@@ -226,3 +240,15 @@ Resuelve los bloqueantes de `specs/000-revision-cruzada-nov2026.md` (en `master`
 - **S-02**: FR-016, HU4 y la entidad Cita usan el origen «correo», el momento y la etiqueta «Cancelada por el paciente» de la 001. Esta spec ya no añade ese dato por su cuenta.
 - **S-03**: FR-021 protege las cifras de citas de la semilla (FR-030 de la 001) y ya no protege sus resúmenes de contenido.
 - **S-04**: RR6, FR-011 y la entidad «Enlace de cancelación» solo definen el alcance: una cita y confirmación expresa. El resto se hereda de 002/FR-001 a 002/FR-004 (D2), con un escenario nuevo para el enlace personal anulado (HU2, escenario 10). FR-011 remite a la excepción única de FR-001 de la 001. La dependencia de analítica pasa a ser `004-panel-analitica`.
+
+### 10/11/2026: hallazgos altos y medios de la revisión cruzada
+
+**Aviso (S-19)**: esta spec cita el cambio de la 001 del 10/11/2026 (RN8, FR-027, FR-029, FR-030, FR-036 y la excepción de FR-001), que está **pendiente de aprobación** por su propietario. Cita también la 002 y la 004, que siguen en borrador. Si esos textos cambian antes de aprobarse, hay que revisar estas citas.
+
+- **S-05**: RR4, FR-014 y el caso límite «Doble pulsación» citan la operación única de cancelar de la 001, y la 003 solo fija sus mensajes. Esa operación aún no está en la 001, así que la petición sobre FR-020 se mantiene en «Dependencias», reescrita como pendiente. Se añade el caso límite de cancelación simultánea desde el portal y el correo.
+- **S-06**: SC-001 se mide con RA3 de la 004, y la tasa de partida se pide con esa fórmula. Con la semilla, un 30 % menos desde 10,8 % es 7,6 %.
+- **S-07**: SC-001 exige además que la ocupación (RA4 de la 004) no baje en el mismo periodo, y propone informar aparte de las cancelaciones con origen «correo» y «portal».
+- **S-08**: FR-018 solo envía correo real si se cumple la puerta de uso con datos reales de la 001, y si no, siempre usa el modo simulado de FR-019 (HU3, escenario 4 nuevo). La puerta aún no existe en la 001 y queda pendiente en «Dependencias».
+- **S-11**: se retira el supuesto «Sin teléfono de la clínica». HU2-E6 y FR-014 ofrecen el teléfono de FR-029 de la 001.
+- **S-20, decisión D5**: el enlace de cancelación vale hasta la hora de inicio de la cita, y después da la respuesta uniforme de 002/FR-003. Cambian RR6, la entidad y HU2-E5, que pasa a ser un caso de enlace caducado. Se añade un caso límite.
+- **S-22**: RR6 cita 002/FR-025, 002/FR-005 y RP7, y HU2-E10 cita RP7. Al añadirse HU3-E4, el antiguo HU3-E4 pasa a ser HU3-E5. Las aclaraciones, HU2-E6, los casos límite y las dependencias citan RN8 en lugar de repetir la cifra. HU4 cita 002/FR-019.
