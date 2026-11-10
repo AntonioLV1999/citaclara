@@ -13,8 +13,9 @@ function confirmar({ bd, clinica, parametros, consulta }) {
 }
 
 function aplicar(contexto) {
-  const { clinica, parametros, formulario } = contexto;
-  const resultado = aplicarAccion(contexto, parametros.id, formulario.accion);
+  const { bd, clinica, ahora, momentoFijado, parametros, formulario } = contexto;
+  // El contexto de la operación única es exactamente el del contrato (operacion-cancelar.md).
+  const resultado = aplicarAccion({ bd, clinica, ahora, momentoFijado }, parametros.id, formulario.accion);
   if (resultado.ok) return redireccion(agendaDe(resultado.cita));
   if (resultado.motivo === 'no_encontrado') return paginaNoEncontrada(clinica);
   return paginaMensaje(409, 'No se ha podido cambiar la cita', resultado.mensaje, clinica, {

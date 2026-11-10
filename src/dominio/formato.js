@@ -35,6 +35,20 @@ export function etiquetaEstado(estado) {
   return ETIQUETAS_ESTADO[estado];
 }
 
+const ORIGENES_DEL_PACIENTE = new Set(['portal', 'correo']);
+
+/**
+ * FR-027: la etiqueta de una cita. Una cancelada por el paciente lleva la fecha y la hora de la
+ * cancelación, sin decir por qué canal; la cita sin cerrar sigue siendo «Reservada».
+ */
+export function etiquetaCita(cita) {
+  if (cita.estado === 'cancelada' && ORIGENES_DEL_PACIENTE.has(cita.origen_cancelacion)) {
+    const momento = cita.momento_cancelacion;
+    return `Cancelada por el paciente el ${fecha(momento)} a las ${hora(momento)}`;
+  }
+  return etiquetaEstado(cita.estado);
+}
+
 export function etiquetaZona(zona) {
   return ETIQUETAS_ZONA[zona];
 }

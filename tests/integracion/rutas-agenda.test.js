@@ -237,3 +237,52 @@ test('FR-006 un hueco justo del servicio más corto sí ofrece reservar', async 
   const r = await agenda(`?profesional=${e.a.fisio}&dia=2026-11-12`);
   assert.ok(r.texto.includes('hora=09:00"'));
 });
+
+const POR_EL_PACIENTE = 'Cancelada por el paciente el 08/11/2026 a las 19:30';
+
+test('H6-E6 FR-027 una cancelada por el portal o por el correo muestra la fecha y la hora, y su tramo es reservable', async () => {
+  citaDe(`${HOY}T15:00`, 'cancelada', { origen: 'portal', momento: '2026-11-08T19:30' });
+  citaDe(`${HOY}T17:00`, 'cancelada', { origen: 'correo', momento: '2026-11-08T19:30' });
+  const r = await agenda();
+  const texto = textoVisible(r.texto);
+  assert.equal(texto.split(POR_EL_PACIENTE).length - 1, 2);
+  assert.match(texto, /Libre 12:00 a 20:00/);
+  assert.match(r.texto, /href="\/citas\/nueva\?profesional=\d+&amp;dia=2026-11-11&amp;hora=12:00">Reservar</);
+});
+
+test('H6-E7 FR-027 una cancelada por recepción muestra «Cancelada», sin fecha ni hora', async () => {
+  citaDe(`${HOY}T15:00`, 'cancelada', { origen: 'recepcion', momento: '2026-11-08T19:30' });
+  const texto = textoVisible((await agenda()).texto);
+  assert.match(texto, /15:00 a 15:45 Ana Núñez Sesión de fisioterapia Cancelada/);
+  assert.doesNotMatch(texto, /Cancelada por el paciente/);
+  assert.doesNotMatch(texto, /08\/11\/2026/);
+  assert.doesNotMatch(texto, /19:30/);
+});
+
+test('SC-011 FR-036 cada cancelada muestra la etiqueta de su origen', async () => {
+  const origenes = { '13:00': 'recepcion', '15:00': 'portal', '17:00': 'correo' };
+  for (const [horaInicio, origen] of Object.entries(origenes)) {
+    citaDe(`${HOY}T${horaInicio}`, 'cancelada', { origen, momento: '2026-11-08T19:30' });
+  }
+  const texto = textoVisible((await agenda()).texto);
+  assert.match(texto, /13:00 a 13:45 Ana Núñez Sesión de fisioterapia Cancelada(?! por)/);
+  assert.match(texto, new RegExp(`15:00 a 15:45 Ana Núñez Sesión de fisioterapia ${POR_EL_PACIENTE}`));
+  assert.match(texto, new RegExp(`17:00 a 17:45 Ana Núñez Sesión de fisioterapia ${POR_EL_PACIENTE}`));
+});
+
+test('FR-040 una cita sin cerrar se sigue viendo como «Reservada»', async () => {
+  citaDe(`${HOY}T10:00`, 'reservada');
+  const texto = textoVisible((await agenda()).texto);
+  assert.match(texto, /10:00 a 10:45 Ana Núñez Sesión de fisioterapia Reservada/);
+});
+
+test('FR-027 la agenda nunca muestra «Pendiente de confirmar por la clínica», recepcion ni portal', async () => {
+  citaDe(`${HOY}T10:00`, 'reservada');
+  citaDe(`${HOY}T13:00`, 'cancelada', { origen: 'recepcion', momento: '2026-11-08T19:30' });
+  citaDe(`${HOY}T15:00`, 'cancelada', { origen: 'portal', momento: '2026-11-08T19:30' });
+  citaDe(`${HOY}T17:00`, 'cancelada', { origen: 'correo', momento: '2026-11-08T19:30' });
+  const texto = textoVisible((await agenda()).texto);
+  assert.doesNotMatch(texto, /Pendiente de confirmar por la clínica/);
+  assert.doesNotMatch(texto, /recepcion/);
+  assert.doesNotMatch(texto, /portal/);
+});

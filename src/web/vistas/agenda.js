@@ -1,5 +1,5 @@
 import { ACCIONES } from '../../dominio/estados.js';
-import { etiquetaEstado, etiquetaZona, fecha, hora, nombreDia } from '../../dominio/formato.js';
+import { etiquetaCita, etiquetaZona, fecha, hora, nombreDia } from '../../dominio/formato.js';
 import { diaDeSemana, esDiaLaborable, minutosEntre, sumarDias } from '../../dominio/tiempo.js';
 import { html, layout } from '../plantilla.js';
 
@@ -33,7 +33,7 @@ function filaCita(cita) {
     <p class="cita__hora">${hora(cita.inicio)} a ${hora(cita.fin)}</p>
     <p class="cita__paciente">${cita.paciente_nombre}</p>
     <p class="cita__servicio">${cita.servicio_nombre}</p>
-    <p class="estado estado--${cita.estado.replace('_', '-')}">${etiquetaEstado(cita.estado)}</p>
+    <p class="estado estado--${cita.estado.replace('_', '-')}">${etiquetaCita(cita)}</p>
     ${cita.acciones.length > 0 && html`<div class="acciones">
       ${cita.acciones.map((accion) => html`<a class="boton boton--secundario" href="/citas/${cita.id}/confirmar?accion=${accion}">${ACCIONES[accion].texto}</a>`)}
     </div>`}

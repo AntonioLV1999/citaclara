@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { etiquetaEstado, etiquetaZona, euros, fecha, hora } from '../../src/dominio/formato.js';
+import {
+  etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora,
+} from '../../src/dominio/formato.js';
 
 test('FR-024 las fechas se muestran como dd/mm/aaaa', () => {
   assert.equal(fecha('2026-11-05'), '05/11/2026');
@@ -35,4 +37,34 @@ test('FR-027 los estados se muestran con su etiqueta', () => {
 test('FR-023 cada zona tiene su aviso de hora local', () => {
   assert.equal(etiquetaZona('Europe/Madrid'), 'Horas en hora peninsular');
   assert.equal(etiquetaZona('Atlantic/Canary'), 'Horas en hora de Canarias');
+});
+
+const cancelada = (origen, momento = '2026-11-08T19:30') => ({
+  estado: 'cancelada', inicio: '2026-11-16T18:00', origen_cancelacion: origen, momento_cancelacion: momento,
+});
+
+test('FR-027 una cancelada por el portal o por el correo muestra fecha y hora, sin distinguir el canal', () => {
+  const esperada = 'Cancelada por el paciente el 08/11/2026 a las 19:30';
+  assert.equal(etiquetaCita(cancelada('portal')), esperada);
+  assert.equal(etiquetaCita(cancelada('correo')), esperada);
+});
+
+test('FR-027 una cancelada por recepción se muestra como «Cancelada», sin fecha', () => {
+  assert.equal(etiquetaCita(cancelada('recepcion')), 'Cancelada');
+});
+
+test('FR-027 FR-040 las demás citas llevan la etiqueta de su estado, también la sin cerrar', () => {
+  const sinOrigen = { origen_cancelacion: null, momento_cancelacion: null, inicio: '2026-11-02T10:00' };
+  assert.equal(etiquetaCita({ ...sinOrigen, estado: 'reservada' }), 'Reservada');
+  assert.equal(etiquetaCita({ ...sinOrigen, estado: 'completada' }), 'Completada');
+  assert.equal(etiquetaCita({ ...sinOrigen, estado: 'no_asistida' }), 'No asistida');
+});
+
+test('FR-027 la etiqueta de una cita nunca es «Pendiente de confirmar por la clínica»', () => {
+  const sinOrigen = { origen_cancelacion: null, momento_cancelacion: null, inicio: '2026-11-02T10:00' };
+  const etiquetas = [
+    ...['reservada', 'completada', 'no_asistida'].map((estado) => etiquetaCita({ ...sinOrigen, estado })),
+    ...['recepcion', 'portal', 'correo'].map((origen) => etiquetaCita(cancelada(origen))),
+  ];
+  for (const etiqueta of etiquetas) assert.doesNotMatch(etiqueta, /Pendiente de confirmar/);
 });

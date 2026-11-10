@@ -127,3 +127,32 @@ test('RN4 la agenda no ofrece acciones en una cita con estado definitivo', async
   const r = await peticion(servidor, { ruta: `/agenda?profesional=${e.a.fisio}&dia=${DIA}`, cookie });
   assert.doesNotMatch(r.texto, new RegExp(`/citas/${empezada}/confirmar`));
 });
+
+test('H3-E5 FR-038 cancelar por HTTP una cita ya cancelada da 409 con el mensaje literal', async () => {
+  assert.equal((await aplicar(futura, 'cancelar')).estado, 303);
+  const r = await aplicar(futura, 'cancelar');
+  assert.equal(r.estado, 409);
+  assert.ok(textoVisible(r.texto).includes('Esta cita ya está cancelada y no se puede cambiar.'));
+});
+
+test('H3-E5 FR-038 cancelar por HTTP una cita completada da 409 con el mensaje literal', async () => {
+  await aplicar(empezada, 'completar');
+  const r = await aplicar(empezada, 'cancelar');
+  assert.equal(r.estado, 409);
+  assert.ok(textoVisible(r.texto).includes('Esta cita ya está completada y no se puede cambiar.'));
+  assert.equal(estado(empezada), 'completada');
+});
+
+test('FR-036 cancelar por HTTP registra el origen recepcion y el momento local', async () => {
+  await aplicar(futura, 'cancelar');
+  const guardada = e.bd.prepare('SELECT origen_cancelacion, momento_cancelacion FROM cita WHERE id = ?').get(futura);
+  assert.deepEqual({ ...guardada }, { origen_cancelacion: 'recepcion', momento_cancelacion: `${DIA}T12:00` });
+});
+
+test('CL dos acciones de estado a la vez por HTTP: la cancelación pasa por la operación única', async () => {
+  const respuestas = await Promise.all([aplicar(futura, 'cancelar'), aplicar(futura, 'cancelar')]);
+  assert.deepEqual(respuestas.map((r) => r.estado).sort(), [303, 409]);
+  assert.match(textoVisible(respuestas.find((r) => r.estado === 409).texto), /Esta cita ya está cancelada/);
+  const guardada = e.bd.prepare('SELECT origen_cancelacion FROM cita WHERE id = ?').get(futura);
+  assert.equal(guardada.origen_cancelacion, 'recepcion');
+});

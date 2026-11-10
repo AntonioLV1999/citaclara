@@ -130,3 +130,52 @@ test('FR-004 una cita de otra clínica no se puede tocar', () => {
   assert.equal(aplicarAccion(contexto(DESPUES, e.b), id, 'cancelar').motivo, 'no_encontrado');
   assert.equal(estado(), 'reservada');
 });
+
+const fila = () => e.bd.prepare('SELECT estado, origen_cancelacion, momento_cancelacion FROM cita WHERE id = ?').get(id);
+
+test('H3-E5 FR-038 cancelar desde recepción una cita ya cancelada o completada da el mensaje de su estado', () => {
+  aplicarAccion(contexto(ANTES), id, 'cancelar');
+  const antes = { ...fila() };
+  const r = aplicarAccion(contexto(), id, 'cancelar');
+  assert.equal(r.ok, false);
+  assert.equal(r.motivo, 'rechazo');
+  assert.equal(r.mensaje, 'Esta cita ya está cancelada y no se puede cambiar.');
+  assert.deepEqual({ ...fila() }, antes);
+
+  const otra = citaDirecta(e.bd, {
+    clinica: e.a.id, profesional: e.a.fisio, servicio: e.a.sesion, paciente: e.a.pacientes[0], inicio: `${DIA}T11:00`,
+  });
+  aplicarAccion(contexto(), otra, 'completar');
+  const completada = aplicarAccion(contexto(), otra, 'cancelar');
+  assert.equal(completada.mensaje, 'Esta cita ya está completada y no se puede cambiar.');
+});
+
+test('FR-036 la cancelación de recepción guarda el origen recepcion y el «ahora» local como momento', () => {
+  assert.equal(aplicarAccion(contexto(ANTES), id, 'cancelar').ok, true);
+  assert.deepEqual({ ...fila() }, { estado: 'cancelada', origen_cancelacion: 'recepcion', momento_cancelacion: `${DIA}T09:00` });
+});
+
+test('FR-036 FR-043 con el reloj fijado, la cancelación de recepción guarda el momento fijado', () => {
+  const r = aplicarAccion({ ...contexto(ANTES), momentoFijado: '2026-11-04T12:00' }, id, 'cancelar');
+  assert.equal(r.ok, true);
+  assert.equal(fila().momento_cancelacion, '2026-11-04T12:00');
+});
+
+test('FR-036 completar o marcar como no asistida no deja origen ni momento', () => {
+  aplicarAccion(contexto(), id, 'completar');
+  assert.deepEqual({ ...fila() }, { estado: 'completada', origen_cancelacion: null, momento_cancelacion: null });
+});
+
+test('CL dos acciones de estado a la vez: completar gana y la cancelación, por la operación única, recibe el estado', () => {
+  const otraConexion = abrirBd(e.ruta);
+  try {
+    const primera = aplicarAccion(contexto(), id, 'completar');
+    const segunda = aplicarAccion({ ...contexto(), bd: otraConexion }, id, 'cancelar');
+    assert.equal(primera.ok, true);
+    assert.equal(segunda.ok, false);
+    assert.equal(segunda.mensaje, 'Esta cita ya está completada y no se puede cambiar.');
+    assert.deepEqual({ ...fila() }, { estado: 'completada', origen_cancelacion: null, momento_cancelacion: null });
+  } finally {
+    otraConexion.close();
+  }
+});

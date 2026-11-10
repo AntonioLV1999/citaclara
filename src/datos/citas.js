@@ -32,6 +32,19 @@ export function citaPorId(bd, clinicaId, id) {
   return bd.prepare(`${CITA_COMPLETA} WHERE cita.clinica_id = ? AND cita.id = ?`).get(clinicaId, id);
 }
 
+const CIERRES = new Set(['completada', 'no_asistida']);
+
+/** Cierra una cita reservada. Cancelar no pasa por aquí, sino por la operación única (FR-038). */
 export function cambiarEstado(bd, id, estado) {
+  if (!CIERRES.has(estado)) throw new Error(`cambiarEstado no admite el estado «${estado}»`);
   bd.prepare("UPDATE cita SET estado = ? WHERE id = ? AND estado = 'reservada'").run(estado, id);
+}
+
+/**
+ * FR-036: estado, origen y momento en una sola escritura. Solo la importa src/servicios/cancelar.js
+ * (FR-038), y un test lo comprueba.
+ */
+export function registrarCancelacion(bd, id, origen, momento) {
+  bd.prepare(`UPDATE cita SET estado = 'cancelada', origen_cancelacion = ?, momento_cancelacion = ?
+    WHERE id = ? AND estado = 'reservada'`).run(origen, momento, id);
 }

@@ -288,17 +288,17 @@ Cualquier otro fallo es una regresión.
 
 ### Tests de la historia 6 (primero, deben fallar)
 
-- [ ] T084 [P] [US6] Escribir tests en tests/unit/estados.test.js:
+- [X] T084 [P] [US6] Escribir tests en tests/unit/estados.test.js:
   - `FR-040 sinCerrar`: es cierto para una reservada con `inicio` igual a «ahora» o anterior, y falso un minuto antes del inicio y en completadas, canceladas y no asistidas pasadas.
   - `RN5`: `accionesPermitidas` usa la misma frontera.
   - `RN8 limiteCancelacion`: `2026-11-16T18:00` → `2026-11-16T16:00`, `2027-03-29T09:00` → `2027-03-29T07:00` y `2026-10-26T09:00` → `2026-10-26T07:00`.
   - `RN8 dentroDePlazo`: con inicio a las 18:00, cierto a las 16:00 y falso a las 16:01.
-- [ ] T085 [P] [US6] Escribir tests `FR-027` de `etiquetaCita` en tests/unit/formato.test.js:
+- [X] T085 [P] [US6] Escribir tests `FR-027` de `etiquetaCita` en tests/unit/formato.test.js:
   - Origen `portal` o `correo` con momento `2026-11-08T19:30`: «Cancelada por el paciente el 08/11/2026 a las 19:30», idéntica con los dos canales.
   - Origen `recepcion`: «Cancelada».
   - «Reservada» también para una cita sin cerrar, y «Completada» y «No asistida».
   - Nunca devuelve «Pendiente de confirmar por la clínica».
-- [ ] T086 [P] [US6] Escribir tests del servicio en tests/integracion/cancelar.test.js, con `relojFijo` y `momentoFijado`. Cita a las 18:00 de un lunes futuro salvo que se diga otra cosa:
+- [X] T086 [P] [US6] Escribir tests del servicio en tests/integracion/cancelar.test.js, con `relojFijo` y `momentoFijado`. Cita a las 18:00 de un lunes futuro salvo que se diga otra cosa:
   - `H6-E1`: a las 15:59, por `portal` y por `correo`, da `cancelada_ahora` con `origen` igual al canal y `momento` `…T15:59`, y `citaQueSolapa` ya no la encuentra.
   - `H6-E2`: aceptada a las 16:00:00 y a las 16:00:59, con segundos en `relojFijo`.
   - `H6-E3`: a las 16:01, a las 17:30 y a las 18:05 da `fuera_de_plazo` con `limite` `…T16:00`. La cita sigue reservada, sin origen ni momento.
@@ -310,20 +310,20 @@ Cualquier otro fallo es una regresión.
   - `H6-E8`: tras cada resultado distinto de `cancelada_ahora`, la fila de la cita es idéntica a la de antes.
   - `FR-038`: una cita inexistente o de otra clínica devuelve `null` sin efecto, y un canal no válido (`'Recepción'`, `''`, `undefined`) lanza una excepción.
   - `FR-036`: en Canarias, el momento es la hora local de la clínica.
-- [ ] T087 [P] [US6] Escribir el test `H6-E9 SC-013` de concurrencia en tests/concurrencia/cancelacion.test.js y tests/concurrencia/trabajador-cancelar.js, con el mismo esquema de barrera que tests/concurrencia/solape.test.js:
+- [X] T087 [P] [US6] Escribir el test `H6-E9 SC-013` de concurrencia en tests/concurrencia/cancelacion.test.js y tests/concurrencia/trabajador-cancelar.js, con el mismo esquema de barrera que tests/concurrencia/solape.test.js:
   - 4 procesos por `fork` sobre un archivo compartido, dos con canal `portal` y dos con `correo`, todos con `momentoFijado` dentro del plazo.
   - 1.000 rondas. En cada una, el padre inserta una cita reservada nueva con `citaDirecta`, envía el instante común y recoge todas las respuestas.
   - Comprobar en cada ronda exactamente un `cancelada_ahora` y tres `ya_cancelada`, con el `origen` y el `momento` del ganador, y que la fila guardada tiene ese origen.
   - Al final, que han ganado al menos 2 procesos distintos y los dos canales.
-- [ ] T088 [P] [US6] Escribir tests `FR-038 SC-013` en tests/integracion/operacion-unica.test.js:
+- [X] T088 [P] [US6] Escribir tests `FR-038 SC-013` en tests/integracion/operacion-unica.test.js:
   - Recorriendo src/, solo src/servicios/cancelar.js importa `registrarCancelacion`.
   - Ningún archivo de src/ salvo src/datos/citas.js contiene `UPDATE cita`.
   - `cambiarEstado(bd, id, 'cancelada')` lanza una excepción y la cita no cambia.
-- [ ] T089 [P] [US6] Ampliar tests/integracion/cambio-estado.test.js y tests/integracion/rutas-estado.test.js:
+- [X] T089 [P] [US6] Ampliar tests/integracion/cambio-estado.test.js y tests/integracion/rutas-estado.test.js:
   - `H3-E5 FR-038`: cancelar desde recepción una cita ya cancelada da 409 con «Esta cita ya está cancelada y no se puede cambiar.», y una completada, «Esta cita ya está completada y no se puede cambiar.».
   - `FR-036`: la cancelación de recepción guarda origen `recepcion` y como momento el «ahora» local, también con `momentoFijado`.
   - `CL dos acciones de estado a la vez`: cancelar y completar a la vez, con la cancelación por la operación única.
-- [ ] T090 [P] [US6] Ampliar tests/integracion/rutas-agenda.test.js:
+- [X] T090 [P] [US6] Ampliar tests/integracion/rutas-agenda.test.js:
   - `H6-E6`: canceladas con origen `portal` y `correo` y momento `2026-11-08T19:30` muestran «Cancelada por el paciente el 08/11/2026 a las 19:30», y su tramo es libre y reservable.
   - `H6-E7`: con origen `recepcion`, «Cancelada», sin fecha ni hora.
   - `SC-011`: cada cancelada muestra la etiqueta de su origen.
@@ -332,24 +332,24 @@ Cualquier otro fallo es una regresión.
 
 ### Implementación de la historia 6
 
-- [ ] T091 [P] [US6] Añadir a src/dominio/estados.js `sinCerrar(cita, ahora)` (`cita.estado === 'reservada' && cita.inicio <= ahora`), `limiteCancelacion(inicio)` (`sumarMinutos(inicio, -120)`) y `dentroDePlazo(inicio, ahora)` (`ahora <= limiteCancelacion(inicio)`). Hacer que `accionesPermitidas` use `sinCerrar` para RN5
-- [ ] T092 [P] [US6] Añadir `etiquetaCita(cita)` a src/dominio/formato.js: con `estado` `cancelada` y `origen_cancelacion` `portal` o `correo`, `Cancelada por el paciente el ${fecha} a las ${hora}` a partir de `momento_cancelacion`, con `fecha` y `hora` de ese mismo módulo; en los demás casos, `etiquetaEstado(cita.estado)`
-- [ ] T093 [US6] En src/datos/citas.js:
+- [X] T091 [P] [US6] Añadir a src/dominio/estados.js `sinCerrar(cita, ahora)` (`cita.estado === 'reservada' && cita.inicio <= ahora`), `limiteCancelacion(inicio)` (`sumarMinutos(inicio, -120)`) y `dentroDePlazo(inicio, ahora)` (`ahora <= limiteCancelacion(inicio)`). Hacer que `accionesPermitidas` use `sinCerrar` para RN5
+- [X] T092 [P] [US6] Añadir `etiquetaCita(cita)` a src/dominio/formato.js: con `estado` `cancelada` y `origen_cancelacion` `portal` o `correo`, `Cancelada por el paciente el ${fecha} a las ${hora}` a partir de `momento_cancelacion`, con `fecha` y `hora` de ese mismo módulo; en los demás casos, `etiquetaEstado(cita.estado)`
+- [X] T093 [US6] En src/datos/citas.js:
   - Añadir `registrarCancelacion(bd, id, origen, momento)`, un único `UPDATE cita SET estado = 'cancelada', origen_cancelacion = ?, momento_cancelacion = ? WHERE id = ? AND estado = 'reservada'`.
   - Hacer que `cambiarEstado` solo admita `completada` y `no_asistida`, y lance una excepción con cualquier otro estado.
-- [ ] T094 [US6] Crear src/servicios/cancelar.js con `cancelarCita(contexto, citaId, canal)` según [contracts/operacion-cancelar.md](contracts/operacion-cancelar.md):
+- [X] T094 [US6] Crear src/servicios/cancelar.js con `cancelarCita(contexto, citaId, canal)` según [contracts/operacion-cancelar.md](contracts/operacion-cancelar.md):
   - `CANALES = ['recepcion', 'portal', 'correo']`. Un canal no válido lanza una excepción antes de abrir la transacción.
   - Dentro de una sola `transaccionInmediata`: `citaPorId`, o `null` si no existe. Después, en este orden: `ya_cancelada` con `origen` y `momento`; `no_cancelable` con `estado`; si el canal no es `recepcion` y `!dentroDePlazo(inicio, ahoraLocal(contexto, zona))`, `fuera_de_plazo` con `limite`; si no, `registrarCancelacion` con `momento = ahoraLocal(…)` y `cancelada_ahora` con `origen` y `momento`.
   - Todos los resultados incluyen `cita`.
   - (depende de T080, T091, T093)
-- [ ] T095 [US6] Revisar que el contexto que reciben `aplicarAccion` y `cancelarCita` es `{ bd, clinica, ahora, momentoFijado }`, como fija el contrato, sin campos con otro nombre, en src/web/rutas/estado.js (depende de T082)
-- [ ] T096 [US6] En `aplicarAccion` de src/servicios/cambio-estado.js, delegar la acción `cancelar` en `cancelarCita(contexto, id, 'recepcion')`:
+- [X] T095 [US6] Revisar que el contexto que reciben `aplicarAccion` y `cancelarCita` es `{ bd, clinica, ahora, momentoFijado }`, como fija el contrato, sin campos con otro nombre, en src/web/rutas/estado.js (depende de T082)
+- [X] T096 [US6] En `aplicarAccion` de src/servicios/cambio-estado.js, delegar la acción `cancelar` en `cancelarCita(contexto, id, 'recepcion')`:
   - `null` da `no_encontrado`.
   - `ya_cancelada` y `no_cancelable` dan `rechazo` con «Esta cita ya está {estado} y no se puede cambiar.», con el estado en minúscula según `etiquetaEstado`.
   - `cancelada_ahora` da `ok`.
   - Completar y marcar como no asistida siguen por `cambiarEstado`.
   - (depende de T094)
-- [ ] T097 [US6] Usar `etiquetaCita(cita)` en lugar de `etiquetaEstado(cita.estado)` en src/web/vistas/agenda.js, manteniendo la clase de estado (depende de T092)
+- [X] T097 [US6] Usar `etiquetaCita(cita)` en lugar de `etiquetaEstado(cita.estado)` en src/web/vistas/agenda.js, manteniendo la clase de estado (depende de T092)
 
 **Punto de control**: T084 a T090 en verde, y vuelven a verde las cancelaciones de recepción. En la trazabilidad ya solo faltan H2-E6, H4-E5, H5-E4, H5-E5 y SC-012.
 
