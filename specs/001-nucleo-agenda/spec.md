@@ -336,7 +336,12 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
 | **S-03** Semilla y resúmenes | — | FR-029 (teléfono, enlaces y origen), FR-030 (cifras protegidas, resúmenes nuevos y única fuente), HU5 escenario 4, entidad Clínica |
 | **S-04** Acceso del paciente | **D2**: dos credenciales, un único modelo de acceso definido por la 002 | FR-001 (única excepción), FR-037 (nuevo), HU4 escenario 5, entidades Paciente y Sesión, SC-012 |
 
-- **Estado**: la spec estaba aprobada el 06/11/2026. Este cambio, con las secciones siguientes (S-05, S-08, S-18 y S-06), lo **aprobó su propietario, AntonioLV1999, el 10/11/2026**, y ya se puede implementar (principio I). Queda pendiente de su decisión qué se hace con la suite en rojo mientras tanto (S-18).
+- **Estado**: la spec estaba aprobada el 06/11/2026. Este cambio, con las secciones siguientes (S-05, S-08, S-18 y S-06), lo **aprobó su propietario, AntonioLV1999, el 10/11/2026**, y ya se puede implementar (principio I).
+- **Suite en rojo (S-18, opción c, decisión del propietario del 10/11/2026)**: el cambio se implementa nada más aprobarlo, con sus tests, para que la suite vuelva a verde. Mientras dura la implementación, el test de trazabilidad sigue en rojo, y es un rojo esperado y acotado:
+  - **Lo que falla**: los identificadores de este cambio que aún no tienen test: RN8, HU4 escenario 5, HU5 escenario 4, HU6 escenarios 1 a 9, y SC-010 a SC-013. Falla también el recuento fijo de reglas, escenarios y criterios del propio test.
+  - **Lo que no se hace**: el test no se relaja ni se desactiva (principio VI). Solo se actualiza su recuento para que coincida con esta spec.
+  - **Cualquier otro fallo** es una regresión y se trata como tal.
+  - **Cuándo acaba**: con la implementación de este cambio, que no se integra hasta que la suite esté en verde. Las ramas de la 002, la 003 y la 004 se rebasan sobre ella, no sobre el rojo.
 - **Resúmenes de FR-030 (decisión D4, S-18)**: se calcularon antes de aprobar, sin implementar en el tronco. Así se rompe el círculo de S-18, en el que no se implementaba sin aprobar ni se aprobaba sin los resúmenes. El procedimiento fue este:
   - En un worktree desechable sacado de `master` (`bdc7c26`), se aplicaron solo los datos nuevos de FR-029, con los cambios mínimos de esquema y semilla.
   - Se ejecutó `npm run semilla`, y los resúmenes salieron de la misma función `resumen()` de `src/semilla/carga.js`.
