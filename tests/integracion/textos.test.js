@@ -103,3 +103,36 @@ test('FR-027 las páginas declaran el idioma español de España', async () => {
     assert.match((await peticion(servidor, { ruta, cookie })).texto, /<html lang="es-ES">/);
   }
 });
+
+const PROHIBIDO_EN_LOS_CAMBIOS = /recepcion|portal|cancelada_ahora|ya_cancelada|fuera_de_plazo|no_cancelable|SQLITE|CHECK constraint/;
+
+test('FR-027 la página de correo, la doble cancelación y el aviso del reloj no muestran valores internos', async () => {
+  const conReloj = await escuchar(crearServidor({
+    bd: e.bd, ahora: relojFijo(`${DIA}T12:00:00+01:00`), momentoFijado: `${DIA}T12:00`,
+  }));
+  try {
+    const correo = (formulario) => peticion(conReloj, {
+      metodo: formulario ? 'POST' : 'GET', ruta: `/citas/${ids.futura}/correo`, cookie, formulario,
+    });
+    await estado(ids.futura, 'cancelar');
+    const pantallas = {
+      'página de correo': await correo(),
+      'correo no válido': await correo({ email: 'x@' }),
+      'doble cancelación': await peticion(conReloj, {
+        metodo: 'POST', ruta: `/citas/${ids.futura}/estado`, cookie, formulario: { accion: 'cancelar' },
+      }),
+      'aviso en el acceso': await peticion(conReloj, { ruta: '/acceso' }),
+      'aviso en la agenda': await peticion(conReloj, { ruta: `/agenda?profesional=${e.a.fisio}&dia=${DIA}`, cookie }),
+    };
+    assert.equal(pantallas['correo no válido'].estado, 422);
+    assert.equal(pantallas['doble cancelación'].estado, 409);
+    assert.ok(textoVisible(pantallas['doble cancelación'].texto).includes('Esta cita ya está cancelada y no se puede cambiar.'));
+    for (const [nombre, respuesta] of Object.entries(pantallas)) {
+      comprobar(respuesta, nombre);
+      assert.doesNotMatch(textoVisible(respuesta.texto), PROHIBIDO_EN_LOS_CAMBIOS, nombre);
+      assert.match(textoVisible(respuesta.texto), /Reloj de demostración: la hora está fijada en el miércoles 11\/11\/2026 a las 12:00 y no avanza\./, nombre);
+    }
+  } finally {
+    await detener(conReloj);
+  }
+});

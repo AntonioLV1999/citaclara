@@ -61,3 +61,18 @@ Se leen en este orden y con estas palabras:
 - [x] **V. Datos reproducibles**: las cifras de FR-030 coinciden con la salida de `npm run semilla`.
 - [x] **VI. Tests**: `npm test` y `npm run test:e2e` en verde, sin tests desactivados ni relajados.
 - [x] **VII y VIII. Interfaz e idioma**: lo que ve la persona usuaria está en español de España, sin jerga técnica y con los umbrales de FR-028.
+
+## Puertas de la segunda pasada (cambios del 10/11/2026)
+
+- [x] **Trazabilidad en verde (FR-035, SC-008)**: `tests/unit/trazabilidad.test.js` encuentra RN1 a RN8, los 42 escenarios y los 13 criterios en nombres de test que empiezan por un identificador de la 001. Termina el rojo de S-18.
+- [x] **Resúmenes de FR-030 reproducidos (principio V)**: `npm run semilla` da, con el lunes por defecto, 40 pacientes, 463 citas de historia (380, 46 y 37) y 57 futuras, y los dos resúmenes escritos en FR-030. Dos ejecuciones dan lo mismo, y con `--lunes 2026-11-09` el resumen sin fechas no cambia.
+- [x] **SC-013 en 1.000 rondas (principio III)**: `tests/concurrencia/cancelacion.test.js` termina cada ronda con exactamente un «cancelada ahora», un solo origen y un solo momento, con al menos dos procesos ganadores y los dos canales.
+- [x] **Escenarios manuales 10 a 13** de [quickstart.md](../quickstart.md) comprobados con `CITACLARA_AHORA=2026-11-04T12:00`.
+
+## Uso con datos reales (FR-039)
+
+- [ ] **FR-039 no se cumple**: su fecha de comprobación sigue pendiente en la spec, así que el producto **solo se usa con los datos de la semilla**. Esta casilla la marca el responsable (AntonioLV1999) cuando escriba esa fecha en FR-039, no quien integre esta feature.
+
+## Pendiente de personas
+
+- SC-002 y SC-003 siguen pendientes de T068: las sesiones con al menos 10 personas del protocolo de arriba no se han hecho, y son condición de merge.

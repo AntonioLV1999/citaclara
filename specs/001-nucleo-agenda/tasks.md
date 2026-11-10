@@ -465,15 +465,15 @@ Cualquier otro fallo es una regresión.
 
 **Propósito**: interfaz en navegador, textos y verificación completa
 
-- [ ] T119 [P] Cambiar tests/e2e/servidor-e2e.js para que arranque con `momentoFijado: '2026-11-04T10:00'` en lugar de un `ahora` fijo, de modo que todas las pruebas e2e vean el aviso del reloj
-- [ ] T120 [P] Añadir a tests/e2e/accesibilidad.spec.js la página de correo y el aviso del reloj, con FR-028 y SC-007 en los dos proyectos: sin desbordamiento horizontal, controles de al menos 44 × 44 píxeles y contraste de al menos 4,5:1 (depende de T119)
-- [ ] T121 Añadir a tests/e2e/flujo-recepcion.spec.js los escenarios 7, 10, 11, 12 y 13 de [quickstart.md](quickstart.md): cancelar y ver «Cancelada» sin fecha; el aviso, también en el acceso; añadir un correo mal escrito y después uno bien; quitarlo; y cancelar una cita ya cancelada desde dos pestañas (depende de T119)
-- [ ] T122 [P] Ampliar tests/integracion/textos.test.js (FR-027) con la página de correo, el 409 de la doble cancelación y el aviso del reloj. Comprobar que no aparecen `recepcion`, `portal`, `cancelada_ahora`, `ya_cancelada`, `fuera_de_plazo`, `no_cancelable`, `SQLITE` ni `CHECK constraint`
-- [ ] T123 Añadir a specs/001-nucleo-agenda/checklists/entrega.md:
+- [X] T119 [P] Cambiar tests/e2e/servidor-e2e.js para que arranque con `momentoFijado: '2026-11-04T10:00'` en lugar de un `ahora` fijo, de modo que todas las pruebas e2e vean el aviso del reloj
+- [X] T120 [P] Añadir a tests/e2e/accesibilidad.spec.js la página de correo y el aviso del reloj, con FR-028 y SC-007 en los dos proyectos: sin desbordamiento horizontal, controles de al menos 44 × 44 píxeles y contraste de al menos 4,5:1 (depende de T119)
+- [X] T121 Añadir a tests/e2e/flujo-recepcion.spec.js los escenarios 7, 10, 11, 12 y 13 de [quickstart.md](quickstart.md): cancelar y ver «Cancelada» sin fecha; el aviso, también en el acceso; añadir un correo mal escrito y después uno bien; quitarlo; y cancelar una cita ya cancelada desde dos pestañas (depende de T119)
+- [X] T122 [P] Ampliar tests/integracion/textos.test.js (FR-027) con la página de correo, el 409 de la doble cancelación y el aviso del reloj. Comprobar que no aparecen `recepcion`, `portal`, `cancelada_ahora`, `ya_cancelada`, `fuera_de_plazo`, `no_cancelable`, `SQLITE` ni `CHECK constraint`
+- [X] T123 Añadir a specs/001-nucleo-agenda/checklists/entrega.md:
   - Las puertas de esta pasada: trazabilidad en verde, resúmenes de FR-030 reproducidos y SC-013 en 1.000 rondas.
   - Que FR-039 no se cumple mientras su fecha de comprobación esté pendiente, así que el producto solo se usa con la semilla.
   - Que SC-002 y SC-003 siguen pendientes de T068.
-- [ ] T124 Ejecutar `npm test`, `npm run test:e2e`, la verificación de semilla de [quickstart.md](quickstart.md) (dos ejecuciones y `--lunes 2026-11-09`) y los escenarios manuales 10 a 13 con `CITACLARA_AHORA=2026-11-04T12:00`. Corregir lo que falle sin relajar ningún test (principio VI), y marcar las puertas en specs/001-nucleo-agenda/checklists/entrega.md (depende de todas las tareas anteriores de esta pasada)
+- [X] T124 Ejecutar `npm test`, `npm run test:e2e`, la verificación de semilla de [quickstart.md](quickstart.md) (dos ejecuciones y `--lunes 2026-11-09`) y los escenarios manuales 10 a 13 con `CITACLARA_AHORA=2026-11-04T12:00`. Corregir lo que falle sin relajar ningún test (principio VI), y marcar las puertas en specs/001-nucleo-agenda/checklists/entrega.md (depende de todas las tareas anteriores de esta pasada)
 
 ---
 

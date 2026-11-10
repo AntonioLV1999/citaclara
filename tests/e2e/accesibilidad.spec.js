@@ -89,4 +89,25 @@ test.describe('con sesión', () => {
     await expect(page.getByRole('alert')).toBeVisible();
     await comprobar(page);
   });
+
+  test('SC-007 FR-028 FR-041 página del correo de la ficha, también con un correo no válido', async ({ page }) => {
+    await page.goto('/agenda?dia=2026-10-22');
+    await page.locator('.cita').getByRole('link', { name: /(Añadir|Cambiar) correo/ }).first().click();
+    await expect(page.getByRole('heading', { name: /^Correo de / })).toBeVisible();
+    await comprobar(page);
+
+    await page.getByLabel('Correo electrónico').fill('no-es-un-correo');
+    await page.getByRole('button', { name: 'Guardar correo' }).click();
+    await expect(page.getByRole('alert')).toBeVisible();
+    await comprobar(page);
+  });
+});
+
+test('SC-007 FR-028 FR-043 el aviso del reloj fijado se lee entero y con contraste suficiente', async ({ page }) => {
+  await page.goto('/acceso');
+  const aviso = page.getByRole('status');
+  await expect(aviso).toHaveText('Reloj de demostración: la hora está fijada en el miércoles 04/11/2026 a las 10:00 y no avanza.');
+  const { width } = await aviso.boundingBox();
+  expect(width).toBeLessThanOrEqual(page.viewportSize().width);
+  await comprobar(page);
 });

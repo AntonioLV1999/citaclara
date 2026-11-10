@@ -30,7 +30,7 @@ test('H4-E4 al salir hace falta de nuevo la clave', async ({ page }) => {
 test('H2-E1 escenario 2: agenda de María, cambio a Jorge y a otro día, con la hora local indicada', async ({ page }) => {
   await entrar(page);
   await expect(page.getByRole('heading', { name: 'Agenda de María' })).toBeVisible();
-  await expect(page.getByText('Miércoles 04/11/2026')).toBeVisible();
+  await expect(page.getByText('Miércoles 04/11/2026', { exact: true })).toBeVisible();
   await expect(page.getByText('Horas en hora peninsular')).toBeVisible();
   await page.getByRole('link', { name: 'Jorge' }).click();
   await expect(page.getByRole('heading', { name: 'Agenda de Jorge' })).toBeVisible();
@@ -173,6 +173,8 @@ test('H3-E4 CL hueco liberado y vuelto a ocupar escenario 7: se ven las dos cita
   await expect(citas).toHaveCount(2);
   await expect(citas.filter({ hasText: 'Cancelada' })).toHaveCount(1);
   await expect(citas.filter({ hasText: 'Reservada' })).toHaveCount(1);
+  // H6-E7: la cancelada por recepción pone «Cancelada», sin fecha ni hora de la cancelación.
+  await expect(citas.filter({ hasText: 'Cancelada' }).locator('.estado')).toHaveText('Cancelada');
 });
 
 test('RN4 H3-E6 escenario 8: una cita pasada se marca como no asistida con confirmación y queda definitiva', async ({ page }, testInfo) => {
@@ -189,7 +191,8 @@ test('RN4 H3-E6 escenario 8: una cita pasada se marca como no asistida con confi
 
   const cerrada = page.locator('.cita', { hasText: tramo });
   await expect(cerrada).toContainText('No asistida');
-  await expect(cerrada.getByRole('link')).toHaveCount(0);
+  // RN4: ya no tiene acciones de estado. Solo queda el correo de la ficha, que FR-041 ofrece en cualquier estado.
+  await expect(cerrada.getByRole('link')).toHaveText([/^(Añadir|Cambiar) correo$/]);
 
   const respuesta = await page.request.post(`/citas/${id}/estado`, { form: { accion: 'completar' } });
   expect(respuesta.status()).toBe(409);
@@ -203,4 +206,72 @@ test('H2-E4 FR-018 hoy no se ofrece reservar antes de las 10:00', async ({ page 
   );
   expect(horas.length).toBeGreaterThan(0);
   for (const hora of horas) expect(hora >= '10:00').toBe(true);
+});
+
+const AVISO_RELOJ = 'Reloj de demostración: la hora está fijada en el miércoles 04/11/2026 a las 10:00 y no avanza.';
+
+test('H5-E5 FR-043 escenario 10: con el reloj fijado, el aviso se ve en todas las pantallas, también en el acceso', async ({ page }) => {
+  await page.goto('/acceso');
+  await expect(page.getByRole('status')).toHaveText(AVISO_RELOJ);
+  await entrar(page);
+  await expect(page.getByRole('status')).toHaveText(AVISO_RELOJ);
+  await expect(page.getByText('Miércoles 04/11/2026', { exact: true })).toBeVisible();
+  for (const ruta of ['/citas/nueva', '/no-existe']) {
+    await page.goto(ruta);
+    await expect(page.getByRole('status')).toHaveText(AVISO_RELOJ);
+  }
+});
+
+test('H2-E6 FR-041 escenarios 11 y 12: añadir un correo mal escrito, después uno bien, y quitarlo', async ({ page }, testInfo) => {
+  await entrar(page);
+  // Cada proyecto busca en días propios una cita cuyo paciente aún no tiene correo.
+  const dias = diaDe(testInfo, ['2026-10-19', '2026-10-20', '2026-10-21'], ['2026-10-26', '2026-10-27', '2026-10-28']);
+  const enlace = page.locator('.cita').getByRole('link', { name: 'Añadir correo' }).first();
+  for (const dia of dias) {
+    await page.goto(`/agenda?dia=${dia}`);
+    if (await enlace.count() > 0) break;
+  }
+  const destino = await enlace.getAttribute('href');
+  const cita = page.locator('.cita', { has: page.locator(`a[href="${destino}"]`) });
+  const antes = await cita.locator('.cita__hora, .cita__paciente, .cita__servicio, .estado').allInnerTexts();
+  const agenda = page.url();
+  await enlace.click();
+
+  // Escenario 11: primero mal, conservando lo escrito; después bien.
+  await expect(page.getByRole('heading', { name: /^Correo de / })).toBeVisible();
+  await page.getByLabel('Correo electrónico').fill('paciente@ejemplo');
+  await page.getByRole('button', { name: 'Guardar correo' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Ese correo no parece válido. Revísalo o déjalo en blanco.');
+  await expect(page.getByLabel('Correo electrónico')).toHaveValue('paciente@ejemplo');
+  await page.getByLabel('Correo electrónico').fill('paciente@example.com');
+  await page.getByRole('button', { name: 'Guardar correo' }).click();
+  await expect(page).toHaveURL(/\/agenda/);
+  await expect(page.locator(`a[href="${destino}"]`)).toHaveText('Cambiar correo');
+
+  // Escenario 12: dejarlo en blanco lo quita, y la cita no cambia.
+  await page.locator(`a[href="${destino}"]`).click();
+  await expect(page.getByLabel('Correo electrónico')).toHaveValue('paciente@example.com');
+  await page.getByLabel('Correo electrónico').fill('');
+  await page.getByRole('button', { name: 'Guardar correo' }).click();
+  await expect(page).toHaveURL(/\/agenda/);
+  await expect(page.locator(`a[href="${destino}"]`)).toHaveText('Añadir correo');
+  await page.goto(agenda);
+  expect(await cita.locator('.cita__hora, .cita__paciente, .cita__servicio, .estado').allInnerTexts()).toEqual(antes);
+});
+
+test('H3-E5 FR-038 escenario 13: cancelar desde dos pestañas una cita ya cancelada da el mensaje de su estado', async ({ page, context }, testInfo) => {
+  await entrar(page);
+  await page.goto(`/agenda?profesional=3&dia=${diaDe(testInfo, '2026-11-05', '2026-11-06')}`);
+  await expect(page.getByRole('heading', { name: 'Agenda de Lucía' })).toBeVisible();
+  await page.locator('.cita').getByRole('link', { name: 'Cancelar' }).first().click();
+  await expect(page.getByText('Esta acción no se puede deshacer.')).toBeVisible();
+
+  const otra = await context.newPage();
+  await otra.goto(page.url());
+  await expect(otra.getByText('Esta acción no se puede deshacer.')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Sí, confirmar' }).click();
+  await expect(page).toHaveURL(/\/agenda/);
+  await otra.getByRole('button', { name: 'Sí, confirmar' }).click();
+  await expect(otra.getByRole('alert')).toHaveText('Esta cita ya está cancelada y no se puede cambiar.');
 });
