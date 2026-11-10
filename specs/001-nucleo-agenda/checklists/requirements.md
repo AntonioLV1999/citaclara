@@ -13,7 +13,7 @@
 
 ## Completitud de los requisitos
 
-- [ ] No quedan marcadores [NEEDS CLARIFICATION] (cambio del 10/11/2026: quedan 4, los dos resúmenes de FR-030 y el responsable y la fecha de FR-039)
+- [ ] No quedan marcadores [NEEDS CLARIFICATION] (cambio del 10/11/2026: quedan 2 en FR-030, los dos resúmenes)
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -43,7 +43,7 @@
 
 ### Revalidación del 10/11/2026 (mismo cambio pendiente: S-05 y S-08)
 
-- Pasan todos los puntos salvo el mismo: ahora quedan 4 marcadores [NEEDS CLARIFICATION]. A los 2 de FR-030 se suman el responsable y la fecha de FR-039, que fija el propietario de la 001 y no se inventan.
+- Pasan todos los puntos salvo el mismo: siguen quedando solo los 2 marcadores de FR-030. El responsable de FR-039 es AntonioLV1999, y su fecha es la de la comprobación de la puerta, que se escribirá cuando ocurra. No es un marcador: mientras falte, la puerta no se cumple.
 - FR-038 define los cuatro resultados de la operación de cancelar sin fijar ningún texto: el mensaje lo elige cada canal (HU3-E5, 002/FR-017 y 003/FR-014), así que la spec sigue sin detalles de interfaz de otras features.
 - FR-039 nombra la conexión cifrada y la cookie limitada a ella. Es un detalle técnico que se mantiene a propósito, porque ya estaba en el supuesto de conexión sin cifrar y sin él la puerta no se puede comprobar.
 - Requisitos nuevos o cambiados: FR-020, FR-038, FR-039; HU3-E5, HU6-E9; SC-013; caso límite «Dos acciones de estado a la vez»; supuestos «Conexión sin cifrar (deuda consciente)» y «Fuera de alcance de la 001».
