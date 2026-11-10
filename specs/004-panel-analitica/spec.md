@@ -29,7 +29,7 @@
 ### 10/11/2026: segunda pasada de la revisión cruzada
 
 - **Base**: rama actualizada desde `master` (S-19). RN8, FR-037 y FR-039 pertenecen al cambio de la 001 del 10/11/2026, que su propietario **aprobó** el 10/11/2026 y es la versión vigente de la 001.
-- **S-06, cerrado en la 004**: RA3 es la única definición de «tasa de no asistencia» del producto, y explica la diferencia con el porcentaje de composición de la semilla de FR-030. Falta que la 003 cite RA3 en SC-001 y que la 001 renombre ese porcentaje en FR-030, cambios que corresponden a sus propietarios.
+- **S-06, cerrado en la 004**: RA3 es la única definición de «tasa de no asistencia» del producto, y explica la diferencia con el porcentaje de composición de la semilla de FR-030. La 001 ya llama a esa cifra «porcentaje de composición de la semilla» en FR-030 y remite a RA3 (cambio aprobado el 10/11/2026). Falta que la 003 cite RA3 en SC-001, cambio que corresponde a su propietario.
 - **S-07, cerrado en la 004**: RA3 se justifica por definición, y ya no dice «el paciente avisó y el hueco quedó libre». Se añade el aviso de lectura sobre RN8 y la ocupación. «Dependencias» sustituye a «No depende de las features 002 ni 003». Falta la doble condición de SC-001 en la 003, que es la propietaria de esa medida.
 - **S-08, cerrado**: el supuesto «Misma clave, mismas cifras» cita FR-039 de la 001, la puerta de uso con datos reales, en lugar del supuesto «Conexión sin cifrar» de la 001.
 - **S-09, cerrado**: RA4 deja de decir «igual que no ocupan el hueco», excluye expresamente las reservadas y saca la capacidad de FR-012 de la 001. Las cifras de referencia no cambian.
