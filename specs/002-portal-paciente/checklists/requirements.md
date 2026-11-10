@@ -32,6 +32,6 @@
 ## Notas
 
 - Las decisiones de la spec se cerraron en la sesión de aclaraciones del 06/11/2026. El 10/11/2026 se resolvieron S-01 a S-04 de la revisión cruzada, con las decisiones D1 y D2.
-- Antes de aprobar: aprobar el cambio de la 001 del 10/11/2026, que esta spec cita (RN8, FR-001, FR-037 y HU6), y los puntos pendientes de «Cambios que se piden a la 001».
-- 10/11/2026, segunda pasada: S-05, S-08, S-21 y S-22. Quedan abiertas para Sara D3 y S-15 (no son marcadores [NEEDS CLARIFICATION]). Las peticiones de S-05 (operación única de cancelar) y S-08 (puerta de datos reales) siguen pendientes en la 001.
+- El cambio de la 001 del 10/11/2026, que esta spec cita (RN8, FR-001, FR-037, FR-038, FR-039 y HU6), está aprobado. Antes de aprobar esta spec faltan los puntos pendientes de «Cambios que se piden a la 001».
+- 10/11/2026, segunda pasada: S-05, S-08, S-21 y S-22. Quedan abiertas para Sara D3 y S-15 (no son marcadores [NEEDS CLARIFICATION]). S-05 y S-08 quedan recogidos en FR-038 y FR-039 de la 001.
 - Cifras comprobadas con el generador de la semilla (lunes 02/11/2026, reloj en 04/11/2026 12:00): 41 de 42 citas futuras cancelables con el plazo de 2 horas.
