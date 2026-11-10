@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -82,9 +83,15 @@ export function sesionDePrueba(bd, clinicaId) {
   return `sesion=${abrirSesion(bd, clinicaId)}`;
 }
 
-/** Escribe una cita directamente en la tabla, sin pasar por los servicios. */
-export function citaDirecta(bd, { clinica, profesional, servicio, paciente, inicio, fin, estado = 'reservada' }) {
+/**
+ * Escribe una cita directamente en la tabla, sin pasar por los servicios. Una cancelada sin
+ * `origen` ni `momento` nace como las de la semilla: origen `recepcion` y su inicio como momento.
+ */
+export function citaDirecta(bd, {
+  clinica, profesional, servicio, paciente, inicio, fin, estado = 'reservada', origen, momento,
+}) {
   const { duracion_min: duracion } = bd.prepare('SELECT duracion_min FROM servicio WHERE id = ?').get(servicio);
+  const cancelada = estado === 'cancelada';
   return insertar(bd, 'cita', {
     clinica_id: clinica,
     profesional_id: profesional,
@@ -93,7 +100,17 @@ export function citaDirecta(bd, { clinica, profesional, servicio, paciente, inic
     inicio,
     fin: fin ?? sumarMinutos(inicio, duracion),
     estado,
+    origen_cancelacion: origen === undefined ? (cancelada ? 'recepcion' : null) : origen,
+    momento_cancelacion: momento === undefined ? (cancelada ? inicio : null) : momento,
   });
+}
+
+/** Sesión de paciente válida, guardada como la guardará la 002: el SHA-256 del token. */
+export function sesionPacienteDePrueba(bd, pacienteId) {
+  const token = randomBytes(32).toString('hex');
+  const hash = createHash('sha256').update(token).digest('hex');
+  bd.prepare('INSERT INTO sesion_paciente (token_hash, paciente_id) VALUES (?, ?)').run(hash, pacienteId);
+  return token;
 }
 
 export async function escuchar(servidor) {

@@ -3,14 +3,15 @@ import { citasDelDia } from '../../datos/citas.js';
 import { accionesPermitidas } from '../../dominio/estados.js';
 import { calcularHuecos } from '../../dominio/huecos.js';
 import { MENSAJES } from '../../dominio/reglas.js';
-import { ahoraEnZona, esFechaValida, leerDia } from '../../dominio/tiempo.js';
+import { ahoraLocal, esFechaValida, leerDia } from '../../dominio/tiempo.js';
 import { pagina, paginaMensaje, paginaNoEncontrada, redireccion } from '../plantilla.js';
 import { vistaAgenda } from '../vistas/agenda.js';
 
-function agenda({ bd, ahora, clinica, consulta }) {
+function agenda(contexto) {
+  const { bd, clinica, consulta } = contexto;
   const lista = profesionales(bd, clinica.id);
   const profesional = consulta.profesional ? profesionalPorId(bd, clinica.id, consulta.profesional) : lista[0];
-  const momento = ahoraEnZona(ahora(), clinica.zona_horaria);
+  const momento = ahoraLocal(contexto, clinica.zona_horaria);
   const hoy = momento.slice(0, 10);
   const dia = leerDia(consulta.dia) || hoy;
   if (!profesional) return paginaNoEncontrada(clinica);

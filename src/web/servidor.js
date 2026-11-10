@@ -72,7 +72,7 @@ async function servirEstatico(camino, res, clinica) {
   }
 }
 
-async function atender({ bd, ahora, rutas }, req, res) {
+async function atender({ bd, ahora, momentoFijado, rutas }, req, res) {
   const [camino, consulta = ''] = req.url.split('?');
   const token = leerCookie(req, 'sesion');
   const clinica = token ? clinicaDeSesion(bd, token) : undefined;
@@ -91,6 +91,7 @@ async function atender({ bd, ahora, rutas }, req, res) {
   const respuesta = await encontrada.ruta.manejador({
     bd,
     ahora,
+    momentoFijado,
     clinica,
     token,
     parametros: encontrada.parametros,
@@ -100,18 +101,19 @@ async function atender({ bd, ahora, rutas }, req, res) {
   return enviar(res, respuesta);
 }
 
-export function crearServidor({ bd, ahora, rutasExtra = [] }) {
+export function crearServidor({ bd, ahora, momentoFijado = null, rutasExtra = [] }) {
   const rutas = [
     ...rutasAcceso, ...rutasAgenda, ...rutasCitas, ...rutasEstado, ...rutasPacientes, ...rutasExtra,
   ].map(compilarRuta);
   const servidor = createServer((req, res) => {
-    atender({ bd, ahora, rutas }, req, res).catch((error) => {
+    atender({ bd, ahora, momentoFijado, rutas }, req, res).catch((error) => {
       if (error instanceof FormularioDemasiadoGrande) return enviar(res, paginaDemasiadoGrande());
       console.error(error);
       if (res.headersSent) return res.destroy();
       return enviar(res, paginaFallo());
     });
   });
+  servidor.momentoFijado = momentoFijado;
   servidor.rutasRegistradas = rutas.map(({ metodo, patron, publica = false }) => ({ metodo, patron, publica }));
   return servidor;
 }

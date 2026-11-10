@@ -236,37 +236,37 @@ description: "Lista de tareas de implementación del núcleo de agenda"
 
 ### Tests de la base (primero, deben fallar)
 
-- [ ] T074 [P] Actualizar tests/unit/trazabilidad.test.js según FR-035 y SC-008. (1) El recuento esperado pasa a `['RN1', …, 'RN8']`, 42 escenarios y 13 criterios. (2) «Todos los tests empiezan por lo que comprueban» admite además `RP\d`, `RR\d`, `RA\d` y `\d{3}/(FR-\d{3}|SC-\d{3}|H\d-E\d|CL)`. (3) La cobertura de la 001 solo cuenta los nombres que **empiezan** por un identificador de la 001 sin prefijo (`RN`, `FR-`, `SC-`, `H\d-E\d` o `CL`). Dentro de ellos, un identificador solo cuenta si no lleva delante una barra, una letra, un dígito ni un guion. (4) Añadir tests `FR-035` de la propia regla: `002/SC-010 …` no cuenta como `SC-010`, y `RP1 … RN8` no cuenta como `RN8`. No se relaja nada más (principio VI). Al terminar, el test sigue en rojo y lista **exactamente** los 18 identificadores: RN8, H2-E6, H4-E5, H5-E4, H5-E5, H6-E1 a H6-E9 y SC-010 a SC-013
-- [ ] T075 [P] Escribir tests del esquema v2 en tests/integracion/esquema.test.js, con escritura directa:
+- [X] T074 [P] Actualizar tests/unit/trazabilidad.test.js según FR-035 y SC-008. (1) El recuento esperado pasa a `['RN1', …, 'RN8']`, 42 escenarios y 13 criterios. (2) «Todos los tests empiezan por lo que comprueban» admite además `RP\d`, `RR\d`, `RA\d` y `\d{3}/(FR-\d{3}|SC-\d{3}|H\d-E\d|CL)`. (3) La cobertura de la 001 solo cuenta los nombres que **empiezan** por un identificador de la 001 sin prefijo (`RN`, `FR-`, `SC-`, `H\d-E\d` o `CL`). Dentro de ellos, un identificador solo cuenta si no lleva delante una barra, una letra, un dígito ni un guion. (4) Añadir tests `FR-035` de la propia regla: `002/SC-010 …` no cuenta como `SC-010`, y `RP1 … RN8` no cuenta como `RN8`. No se relaja nada más (principio VI). Al terminar, el test sigue en rojo y lista **exactamente** los 18 identificadores: RN8, H2-E6, H4-E5, H5-E4, H5-E5, H6-E1 a H6-E9 y SC-010 a SC-013
+- [X] T075 [P] Escribir tests del esquema v2 en tests/integracion/esquema.test.js, con escritura directa:
   - `FR-036 SC-011`: se aborta insertar una `cancelada` sin origen o sin momento, una `reservada`, `completada` o `no_asistida` con origen o con momento, un origen fuera de `recepcion`, `portal` y `correo`, y un `UPDATE` a `cancelada` sin origen. `cita_rn4` rechaza cambiar después el origen o el momento.
   - `FR-029`: `paciente.enlace` solo admite «32 caracteres hexadecimales en minúscula» (se rechazan mayúsculas, 31 caracteres y letras fuera de `a-f`). Es único entre los no nulos, y admite varios nulos. `clinica.telefono` admite nulo.
   - `FR-037`: existe la tabla `sesion_paciente`, que referencia a `paciente`.
   - Versión: un archivo nuevo queda con `PRAGMA user_version = 2`, y se reabre sin error. Un archivo con tablas y otra versión lanza un error que dice que hay que borrarlo y ejecutar `npm run semilla`, sin modificar el archivo.
-- [ ] T076 [P] Escribir tests `FR-043` en tests/unit/tiempo.test.js:
+- [X] T076 [P] Escribir tests `FR-043` en tests/unit/tiempo.test.js:
   - `ahoraLocal({ ahora, momentoFijado: '2026-11-04T12:00' }, zona)` devuelve `'2026-11-04T12:00'` en `Europe/Madrid` y en `Atlantic/Canary`, y no cambia aunque `ahora()` avance.
   - Con `momentoFijado: null`, coincide con `ahoraEnZona(ahora(), zona)`.
   - `esMomentoValido` acepta `2026-11-04T12:00` y rechaza `2026-11-04 12:00`, `2026-02-30T12:00`, `2026-11-04T24:00`, `2026-11-04T12:00:00`, `2026-11-04T12:5` y el texto vacío.
-- [ ] T077 [P] Ampliar tests/ayudas/escenario.js:
+- [X] T077 [P] Ampliar tests/ayudas/escenario.js:
   - `citaDirecta` acepta `origen` y `momento`. Si `estado` es `'cancelada'` y no se pasan, usa por defecto `origen: 'recepcion'` y `momento` igual a `inicio`, como la semilla. Así los tests que ya insertan canceladas siguen siendo válidos con la restricción nueva.
   - Nueva `sesionPacienteDePrueba(bd, pacienteId)`: inserta en `sesion_paciente` el SHA-256 de un token aleatorio y devuelve el token.
 
 ### Implementación de la base
 
-- [ ] T078 Pasar src/datos/esquema.sql a la versión 2 según [data-model.md](data-model.md):
+- [X] T078 Pasar src/datos/esquema.sql a la versión 2 según [data-model.md](data-model.md):
   - `clinica.telefono TEXT`, que admite nulo.
   - `paciente.enlace TEXT` con `CHECK (enlace IS NULL OR (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*'))` y un índice único parcial `WHERE enlace IS NOT NULL`.
   - En `cita`, `origen_cancelacion TEXT CHECK (origen_cancelacion IN ('recepcion', 'portal', 'correo'))` y `momento_cancelacion TEXT`.
   - Restricción de tabla: «`origen_cancelacion` y `momento_cancelacion` son los dos no nulos si `estado = 'cancelada'`, y los dos nulos en cualquier otro estado».
   - Tabla `sesion_paciente (token_hash TEXT PRIMARY KEY, paciente_id INTEGER NOT NULL REFERENCES paciente (id))`.
   - `cita_rn4` **no cambia**.
-- [ ] T079 En `abrirBd` de src/datos/bd.js:
+- [X] T079 En `abrirBd` de src/datos/bd.js:
   - Archivo sin tablas: aplicar el esquema y fijar `PRAGMA user_version = 2`.
   - Con tablas y versión 2: seguir como hasta ahora.
   - Con tablas y otra versión: lanzar un error propio, `EsquemaAntiguo`, sin modificar el archivo, con un mensaje en español que nombra el archivo y dice que hay que borrarlo y ejecutar `npm run semilla` ([research.md §16](research.md#16-cambio-de-esquema-sobre-un-archivo-existente)) (depende de T078)
-- [ ] T080 [P] Añadir a src/dominio/tiempo.js `esMomentoValido(texto)` (formato exacto `AAAA-MM-DDTHH:MM`, con fecha y hora posibles, reutilizando `esFechaValida`) y `ahoraLocal(contexto, zona)`, que devuelve `contexto.momentoFijado ?? ahoraEnZona(contexto.ahora(), zona)`
-- [ ] T081 Hacer que `crearServidor({ bd, ahora, momentoFijado = null, rutasExtra })` de src/web/servidor.js incluya `momentoFijado` en el contexto que recibe cada manejador y lo exponga como `servidor.momentoFijado` (depende de T080)
-- [ ] T082 Sustituir las cuatro llamadas a `ahoraEnZona(ahora(), clinica.zona_horaria)` por `ahoraLocal(contexto, clinica.zona_horaria)` en src/servicios/alta-cita.js, src/servicios/cambio-estado.js, src/web/rutas/agenda.js y src/web/rutas/citas.js. Comprobar que el contexto con `momentoFijado` llega a `crearCita` y a `aplicarAccion` (depende de T081)
-- [ ] T083 En src/principal.js:
+- [X] T080 [P] Añadir a src/dominio/tiempo.js `esMomentoValido(texto)` (formato exacto `AAAA-MM-DDTHH:MM`, con fecha y hora posibles, reutilizando `esFechaValida`) y `ahoraLocal(contexto, zona)`, que devuelve `contexto.momentoFijado ?? ahoraEnZona(contexto.ahora(), zona)`
+- [X] T081 Hacer que `crearServidor({ bd, ahora, momentoFijado = null, rutasExtra })` de src/web/servidor.js incluya `momentoFijado` en el contexto que recibe cada manejador y lo exponga como `servidor.momentoFijado` (depende de T080)
+- [X] T082 Sustituir las cuatro llamadas a `ahoraEnZona(ahora(), clinica.zona_horaria)` por `ahoraLocal(contexto, clinica.zona_horaria)` en src/servicios/alta-cita.js, src/servicios/cambio-estado.js, src/web/rutas/agenda.js y src/web/rutas/citas.js. Comprobar que el contexto con `momentoFijado` llega a `crearCita` y a `aplicarAccion` (depende de T081)
+- [X] T083 En src/principal.js:
   - Leer `CITACLARA_AHORA` **antes** de crear `datos/` o abrir la base. Si tiene valor y no pasa `esMomentoValido`, escribir en stderr, literalmente, «El momento de referencia CITACLARA_AHORA no es válido. Escríbelo como AAAA-MM-DDTHH:MM, por ejemplo 2026-11-04T12:00.» y terminar con código 1.
   - Ante `EsquemaAntiguo`, escribir su mensaje sin traza y terminar con código 1.
   - Pasar `momentoFijado` a `crearServidor`.

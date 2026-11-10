@@ -4,7 +4,7 @@ import { citaQueSolapa, insertarCita } from '../datos/citas.js';
 import { crearPaciente, pacientePorId } from '../datos/pacientes.js';
 import { hora } from '../dominio/formato.js';
 import { calcularFin, MENSAJES, validarAlta, validarPaciente } from '../dominio/reglas.js';
-import { ahoraEnZona } from '../dominio/tiempo.js';
+import { ahoraLocal } from '../dominio/tiempo.js';
 
 /** Interrumpe la transacción para deshacerla toda: ni cita ni ficha (FR-010, FR-013). */
 class Rechazo extends Error {
@@ -44,7 +44,8 @@ function insertarVigilandoSolape(bd, cita, profesional) {
   }
 }
 
-function registrar({ bd, clinica, ahora }, formulario) {
+function registrar(contexto, formulario) {
+  const { bd, clinica } = contexto;
   const profesional = profesionalPorId(bd, clinica.id, formulario.profesional);
   const servicio = servicioPorId(bd, clinica.id, formulario.servicio);
   if (!profesional || !servicio) throw noEncontrado();
@@ -57,7 +58,7 @@ function registrar({ bd, clinica, ahora }, formulario) {
     dia,
     hora: horaInicio,
     duracionMin: servicio.duracion_min,
-    ahora: ahoraEnZona(ahora(), clinica.zona_horaria),
+    ahora: ahoraLocal(contexto, clinica.zona_horaria),
   });
   if (error) throw invalido(error);
 

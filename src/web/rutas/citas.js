@@ -2,21 +2,22 @@ import { profesionales, profesionalPorId, serviciosDeEspecialidad } from '../../
 import { citasDelDia } from '../../datos/citas.js';
 import { pacientesDeClinica } from '../../datos/pacientes.js';
 import { calcularHuecos } from '../../dominio/huecos.js';
-import { ahoraEnZona, esFechaValida, leerDia } from '../../dominio/tiempo.js';
+import { ahoraLocal, esFechaValida, leerDia } from '../../dominio/tiempo.js';
 import { crearCita } from '../../servicios/alta-cita.js';
 import { pagina, paginaNoEncontrada, redireccion } from '../plantilla.js';
 import { vistaAlta } from '../vistas/alta.js';
 
 const ESTADO_DE_RECHAZO = { solape: 409, invalido: 422 };
 
-function paginaAlta({ bd, ahora, clinica }, valores, rechazo) {
+function paginaAlta(contexto, valores, rechazo) {
+  const { bd, clinica } = contexto;
   const lista = profesionales(bd, clinica.id);
   const profesional = valores.profesional
     ? profesionalPorId(bd, clinica.id, valores.profesional)
     : lista[0];
   if (!profesional) return paginaNoEncontrada(clinica);
 
-  const momento = ahoraEnZona(ahora(), clinica.zona_horaria);
+  const momento = ahoraLocal(contexto, clinica.zona_horaria);
   const dia = valores.dia || momento.slice(0, 10);
   const conDia = { ...valores, dia };
   const huecos = rechazo && esFechaValida(dia)

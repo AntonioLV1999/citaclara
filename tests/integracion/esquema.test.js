@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { abrirBd, EsquemaAntiguo } from '../../src/datos/bd.js';
 import { citaDirecta, crearEscenario } from '../ayudas/escenario.js';
 
 const DIA = '2026-11-11';
@@ -86,11 +91,16 @@ describe('RN4 en el almacén', () => {
   const cambiar = (asignacion, ...valores) =>
     e.bd.prepare(`UPDATE cita SET ${asignacion} WHERE id = ?`).run(...valores, id);
   const estado = () => e.bd.prepare('SELECT estado FROM cita WHERE id = ?').get(id).estado;
+  // FR-036: una cancelación válida escribe a la vez el estado, el origen y el momento.
+  const llevarA = (final, citaId = id) => (final === 'cancelada'
+    ? e.bd.prepare("UPDATE cita SET estado = 'cancelada', origen_cancelacion = 'recepcion', momento_cancelacion = ? WHERE id = ?")
+      .run(`${DIA}T08:00`, citaId)
+    : e.bd.prepare('UPDATE cita SET estado = ? WHERE id = ?').run(final, citaId));
 
   test('RN4 admite las tres transiciones desde reservada', () => {
     for (const final of ['completada', 'cancelada', 'no_asistida']) {
       const otra = alta({ inicio: `${DIA}T${final === 'completada' ? 12 : final === 'cancelada' ? 14 : 16}:00` });
-      e.bd.prepare('UPDATE cita SET estado = ? WHERE id = ?').run(final, otra);
+      llevarA(final, otra);
       assert.equal(e.bd.prepare('SELECT estado FROM cita WHERE id = ?').get(otra).estado, final);
     }
   });
@@ -106,7 +116,7 @@ describe('RN4 en el almacén', () => {
 
   for (const definitivo of ['completada', 'cancelada', 'no_asistida']) {
     test(`RN4 un estado ${definitivo} es definitivo`, () => {
-      cambiar('estado = ?', definitivo);
+      llevarA(definitivo);
       for (const otro of ['reservada', 'completada', 'cancelada', 'no_asistida']) {
         assert.throws(() => cambiar('estado = ?', otro), /ESTADO/);
       }
@@ -186,4 +196,140 @@ test('RN1 la conexión usa WAL, claves ajenas y una espera de bloqueo de 5.000 m
   assert.equal(e.bd.prepare('PRAGMA journal_mode').get().journal_mode, 'wal');
   assert.equal(e.bd.prepare('PRAGMA foreign_keys').get().foreign_keys, 1);
   assert.equal(e.bd.prepare('PRAGMA busy_timeout').get().timeout, 5000);
+});
+
+describe('FR-036 SC-011 origen y momento de la cancelación en el almacén', () => {
+  const INICIO = `${DIA}T10:00`;
+  const MOMENTO = `${DIA}T08:00`;
+  const fila = (id) => e.bd.prepare('SELECT * FROM cita WHERE id = ?').get(id);
+
+  test('FR-036 SC-011 aborta una cancelada sin origen o sin momento', () => {
+    rechazada({ inicio: INICIO, estado: 'cancelada', origen: null, momento: MOMENTO }, /CHECK/);
+    rechazada({ inicio: INICIO, estado: 'cancelada', origen: 'portal', momento: null }, /CHECK/);
+    rechazada({ inicio: INICIO, estado: 'cancelada', origen: null, momento: null }, /CHECK/);
+  });
+
+  test('FR-036 SC-011 aborta una cita no cancelada con origen o con momento', () => {
+    for (const [i, estado] of ['reservada', 'completada', 'no_asistida'].entries()) {
+      const inicio = `${DIA}T1${i}:00`;
+      rechazada({ inicio, estado, origen: 'recepcion', momento: null }, /CHECK/);
+      rechazada({ inicio, estado, origen: null, momento: MOMENTO }, /CHECK/);
+      rechazada({ inicio, estado, origen: 'portal', momento: MOMENTO }, /CHECK/);
+    }
+  });
+
+  test('FR-036 SC-011 solo admite los orígenes recepcion, portal y correo', () => {
+    for (const origen of ['Recepción', 'recepción', 'telefono', '', 'PORTAL']) {
+      rechazada({ inicio: INICIO, estado: 'cancelada', origen, momento: MOMENTO }, /CHECK/);
+    }
+    for (const [i, origen] of ['recepcion', 'portal', 'correo'].entries()) {
+      alta({ inicio: `${DIA}T1${i}:00`, estado: 'cancelada', origen, momento: MOMENTO });
+    }
+    assert.equal(contar(), 3);
+  });
+
+  test('FR-036 SC-011 aborta un UPDATE a cancelada sin origen ni momento', () => {
+    const id = alta({ inicio: INICIO });
+    assert.throws(() => e.bd.prepare("UPDATE cita SET estado = 'cancelada' WHERE id = ?").run(id), /CHECK/);
+    assert.throws(
+      () => e.bd.prepare("UPDATE cita SET estado = 'cancelada', origen_cancelacion = 'portal' WHERE id = ?").run(id),
+      /CHECK/,
+    );
+    assert.equal(fila(id).estado, 'reservada');
+    assert.equal(fila(id).origen_cancelacion, null);
+  });
+
+  test('FR-036 SC-011 una cita reservada no puede ganar origen sin cancelarse', () => {
+    const id = alta({ inicio: INICIO });
+    assert.throws(
+      () => e.bd.prepare("UPDATE cita SET origen_cancelacion = 'portal', momento_cancelacion = ? WHERE id = ?").run(MOMENTO, id),
+      /CHECK|ESTADO/,
+    );
+    assert.equal(fila(id).origen_cancelacion, null);
+  });
+
+  test('FR-036 cita_rn4 rechaza corregir después el origen o el momento', () => {
+    const id = alta({ inicio: INICIO, estado: 'cancelada', origen: 'portal', momento: MOMENTO });
+    assert.throws(() => e.bd.prepare("UPDATE cita SET origen_cancelacion = 'correo' WHERE id = ?").run(id), /ESTADO/);
+    assert.throws(() => e.bd.prepare('UPDATE cita SET momento_cancelacion = ? WHERE id = ?').run(`${DIA}T09:00`, id), /ESTADO/);
+    assert.deepEqual(
+      [fila(id).origen_cancelacion, fila(id).momento_cancelacion],
+      ['portal', MOMENTO],
+    );
+  });
+});
+
+describe('FR-029 teléfono de la clínica y enlace del paciente', () => {
+  const enlace = (id, valor) => e.bd.prepare('UPDATE paciente SET enlace = ? WHERE id = ?').run(valor, id);
+  const VALIDO = 'c73f5e835397826416bda7b3e5323d02';
+
+  test('FR-029 el enlace solo admite 32 caracteres hexadecimales en minúscula', () => {
+    const [p] = e.a.pacientes;
+    for (const malo of [VALIDO.toUpperCase(), VALIDO.slice(0, 31), `${VALIDO.slice(0, 31)}g`, `${VALIDO}0`, '']) {
+      assert.throws(() => enlace(p, malo), /CHECK/, malo);
+    }
+    enlace(p, VALIDO);
+    assert.equal(e.bd.prepare('SELECT enlace FROM paciente WHERE id = ?').get(p).enlace, VALIDO);
+  });
+
+  test('FR-029 el enlace es único entre los no nulos y admite varios nulos', () => {
+    const [p1, p2, p3] = e.a.pacientes;
+    enlace(p1, VALIDO);
+    assert.throws(() => enlace(p2, VALIDO), /UNIQUE/);
+    enlace(p2, null);
+    enlace(p3, null);
+    const nulos = e.bd.prepare('SELECT count(*) AS n FROM paciente WHERE enlace IS NULL').get().n;
+    assert.ok(nulos >= 2);
+  });
+
+  test('FR-029 la clínica admite teléfono, y también que no lo tenga', () => {
+    e.bd.prepare("UPDATE clinica SET telefono = '000 200 000' WHERE id = ?").run(e.a.id);
+    assert.equal(e.bd.prepare('SELECT telefono FROM clinica WHERE id = ?').get(e.a.id).telefono, '000 200 000');
+    assert.equal(e.bd.prepare('SELECT telefono FROM clinica WHERE id = ?').get(e.b.id).telefono, null);
+  });
+});
+
+test('FR-037 las sesiones de paciente tienen su propia tabla, que referencia a paciente', () => {
+  const columnas = e.bd.prepare("PRAGMA table_info('sesion_paciente')").all().map((c) => c.name);
+  assert.deepEqual(columnas, ['token_hash', 'paciente_id']);
+  const ajenas = e.bd.prepare("PRAGMA foreign_key_list('sesion_paciente')").all();
+  assert.deepEqual(ajenas.map((a) => [a.from, a.table]), [['paciente_id', 'paciente']]);
+  assert.throws(
+    () => e.bd.prepare("INSERT INTO sesion_paciente (token_hash, paciente_id) VALUES ('x', 999999)").run(),
+    /FOREIGN KEY/,
+  );
+});
+
+describe('FR-032 versión del esquema del archivo de datos', () => {
+  let carpeta;
+  beforeEach(() => { carpeta = mkdtempSync(join(tmpdir(), 'citaclara-version-')); });
+  afterEach(() => rmSync(carpeta, { recursive: true, force: true }));
+
+  test('FR-032 un archivo nuevo queda en la versión 2 y se reabre sin error', () => {
+    const ruta = join(carpeta, 'nuevo.db');
+    const bd = abrirBd(ruta);
+    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 2);
+    bd.close();
+    const otra = abrirBd(ruta);
+    assert.equal(otra.prepare('PRAGMA user_version').get().user_version, 2);
+    otra.close();
+  });
+
+  test('FR-032 un archivo con tablas de otra versión se rechaza sin tocarlo', () => {
+    const ruta = join(carpeta, 'antiguo.db');
+    const vieja = new DatabaseSync(ruta);
+    vieja.exec('CREATE TABLE clinica (id INTEGER PRIMARY KEY, nombre TEXT)');
+    vieja.close();
+    const antes = readFileSync(ruta);
+
+    assert.throws(() => abrirBd(ruta), (error) => {
+      assert.ok(error instanceof EsquemaAntiguo);
+      assert.match(error.message, /antiguo\.db/);
+      assert.match(error.message, /Bórralo/);
+      assert.match(error.message, /npm run semilla/);
+      return true;
+    });
+    assert.deepEqual(readFileSync(ruta), antes);
+    assert.equal(existsSync(`${ruta}-wal`), false);
+  });
 });

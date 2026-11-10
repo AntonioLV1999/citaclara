@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ahoraEnZona, diaDeSemana, esDiaLaborable, esFechaValida, leerDia, sumarDias, sumarMinutos,
+  ahoraEnZona, ahoraLocal, diaDeSemana, esDiaLaborable, esFechaValida, esMomentoValido, leerDia, sumarDias,
+  sumarMinutos,
 } from '../../src/dominio/tiempo.js';
 
 test('FR-023 ahoraEnZona da la hora local de Madrid en invierno y en verano', () => {
@@ -92,4 +93,32 @@ test('FR-024 leerDia convierte dd/mm/aaaa y deja igual lo demás', () => {
   assert.equal(leerDia('2026-11-05'), '2026-11-05');
   assert.equal(leerDia('mañana'), 'mañana');
   assert.equal(leerDia(undefined), undefined);
+});
+
+test('FR-043 ahoraLocal devuelve el momento fijado, en las dos zonas, aunque el reloj avance', () => {
+  let instante = Date.parse('2026-11-20T09:00:00Z');
+  const contexto = { ahora: () => new Date(instante), momentoFijado: '2026-11-04T12:00' };
+  for (const zona of ['Europe/Madrid', 'Atlantic/Canary']) {
+    assert.equal(ahoraLocal(contexto, zona), '2026-11-04T12:00');
+    instante += 3 * 3_600_000;
+    assert.equal(ahoraLocal(contexto, zona), '2026-11-04T12:00');
+  }
+});
+
+test('FR-043 sin momento fijado, ahoraLocal es la hora local del reloj', () => {
+  const reloj = () => new Date('2026-11-05T09:30:00Z');
+  for (const zona of ['Europe/Madrid', 'Atlantic/Canary']) {
+    assert.equal(ahoraLocal({ ahora: reloj, momentoFijado: null }, zona), ahoraEnZona(reloj(), zona));
+    assert.equal(ahoraLocal({ ahora: reloj }, zona), ahoraEnZona(reloj(), zona));
+  }
+});
+
+test('FR-043 esMomentoValido solo acepta AAAA-MM-DDTHH:MM con fecha y hora posibles', () => {
+  assert.equal(esMomentoValido('2026-11-04T12:00'), true);
+  assert.equal(esMomentoValido('2028-02-29T00:00'), true);
+  assert.equal(esMomentoValido('2026-11-04T23:59'), true);
+  for (const malo of ['2026-11-04 12:00', '2026-02-30T12:00', '2026-11-04T24:00', '2026-11-04T12:00:00',
+    '2026-11-04T12:5', '2026-11-04T12:60', '', undefined, null]) {
+    assert.equal(esMomentoValido(malo), false, String(malo));
+  }
 });

@@ -56,6 +56,20 @@ export function esFechaValida(texto) {
   return aTexto(aInstante(texto)).startsWith(texto);
 }
 
+/** Momento local exacto `AAAA-MM-DDTHH:MM`, con una fecha y una hora que existen. */
+export function esMomentoValido(texto) {
+  const partes = typeof texto === 'string' && texto.match(/^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):[0-5]\d$/);
+  return Boolean(partes) && esFechaValida(partes[1]);
+}
+
+/**
+ * «Ahora» en hora local de la clínica (FR-043): el momento de referencia si existe, que no avanza,
+ * y si no, la hora real. Las esperas no se miden con esto, sino con el tiempo real.
+ */
+export function ahoraLocal(contexto, zona) {
+  return contexto.momentoFijado ?? ahoraEnZona(contexto.ahora(), zona);
+}
+
 /** Convierte el día escrito como `dd/mm/aaaa` a `AAAA-MM-DD`. Lo demás sigue igual, y lo valida `esFechaValida`. */
 export function leerDia(texto) {
   const limpio = texto?.trim();

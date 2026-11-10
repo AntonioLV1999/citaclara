@@ -1,11 +1,15 @@
 -- Fechas y horas: texto en hora local de la clínica, `AAAA-MM-DDTHH:MM`. Importes: céntimos enteros.
+-- Versión 2 del esquema (`PRAGMA user_version`, que fija `abrirBd`). Un archivo de otra versión no
+-- se migra: se borra y se regenera con la semilla.
 
 CREATE TABLE IF NOT EXISTS clinica (
   id INTEGER PRIMARY KEY,
   nombre TEXT NOT NULL,
   clave_hash TEXT NOT NULL,
   clave_sal TEXT NOT NULL,
-  zona_horaria TEXT NOT NULL CHECK (zona_horaria IN ('Europe/Madrid', 'Atlantic/Canary'))
+  zona_horaria TEXT NOT NULL CHECK (zona_horaria IN ('Europe/Madrid', 'Atlantic/Canary')),
+  -- El que se da a los pacientes (FR-029). Admite nulo: hay clínicas de prueba sin teléfono.
+  telefono TEXT
 );
 
 CREATE TABLE IF NOT EXISTS profesional (
@@ -29,8 +33,12 @@ CREATE TABLE IF NOT EXISTS paciente (
   clinica_id INTEGER NOT NULL REFERENCES clinica (id),
   nombre TEXT NOT NULL CHECK (length(trim(nombre)) > 0),
   telefono TEXT NOT NULL,
-  email TEXT
+  email TEXT,
+  -- Enlace personal: solo el token, 32 caracteres hexadecimales en minúscula (FR-029).
+  enlace TEXT CHECK (enlace IS NULL OR (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*'))
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS paciente_enlace ON paciente (enlace) WHERE enlace IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS cita (
   id INTEGER PRIMARY KEY,
@@ -43,7 +51,14 @@ CREATE TABLE IF NOT EXISTS cita (
     AND substr(inicio, 15, 2) IN ('00', '15', '30', '45')
   ),
   fin TEXT NOT NULL,
-  estado TEXT NOT NULL DEFAULT 'reservada' CHECK (estado IN ('reservada', 'completada', 'cancelada', 'no_asistida'))
+  estado TEXT NOT NULL DEFAULT 'reservada' CHECK (estado IN ('reservada', 'completada', 'cancelada', 'no_asistida')),
+  origen_cancelacion TEXT CHECK (origen_cancelacion IN ('recepcion', 'portal', 'correo')),
+  momento_cancelacion TEXT,
+  -- FR-036, SC-011: origen y momento, los dos si la cita está cancelada, y ninguno si no lo está.
+  CHECK (
+    (estado = 'cancelada' AND origen_cancelacion IS NOT NULL AND momento_cancelacion IS NOT NULL)
+    OR (estado <> 'cancelada' AND origen_cancelacion IS NULL AND momento_cancelacion IS NULL)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS cita_profesional_inicio ON cita (profesional_id, inicio);
@@ -51,6 +66,12 @@ CREATE INDEX IF NOT EXISTS cita_profesional_inicio ON cita (profesional_id, inic
 CREATE TABLE IF NOT EXISTS sesion (
   token_hash TEXT PRIMARY KEY,
   clinica_id INTEGER NOT NULL REFERENCES clinica (id)
+);
+
+-- FR-037: las sesiones de paciente viven aparte. La 001 no las crea ni las lee; la 002 amplía la tabla.
+CREATE TABLE IF NOT EXISTS sesion_paciente (
+  token_hash TEXT PRIMARY KEY,
+  paciente_id INTEGER NOT NULL REFERENCES paciente (id)
 );
 
 -- Misma clínica: los cuatro registros de una cita pertenecen a la misma clínica.
