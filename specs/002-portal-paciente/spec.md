@@ -20,6 +20,14 @@
 - P: ¿Debe caducar el enlace personal del paciente? → R: no, sigue válido hasta que recepción lo anule (FR-001).
 - P: ¿Quién es el propietario de esta spec? → R: Sara.
 
+### Preguntas abiertas para Sara (10/11/2026)
+
+Salen de la revisión cruzada. Están sin decidir, y la spec no se aprueba hasta que Sara las responda.
+
+- **D3 (S-12)**: ¿el recordatorio de la 003 debe incluir el enlace personal del portal, además del enlace de cancelación? **Recomendación: no en esta versión.** Un correo reenviado solo debe dar acceso a una cita (RP6), y meter el enlace personal deshace esa separación. Afecta a RP6, al caso límite «Correo de recordatorio reenviado» y al supuesto «Entrega manual del enlace», cuyo motivo («no depender de un proveedor externo») deja de valer cuando la 003 envíe correos.
+- **S-15, cita sin cerrar**: ¿se pide a la 001 que FR-027 admita la etiqueta «Pendiente de confirmar por la clínica» para una cita reservada ya empezada (002/FR-009, historia 2, escenario 3)? Si no, el portal solo puede mostrarla con las etiquetas de FR-027.
+- **S-15, cita que canceló el propio paciente**: ¿qué etiqueta ve el paciente en su historial? Puede ser «Cancelada», como dice hoy la historia 3, escenario 2, o «Cancelada por el paciente el dd/mm/aaaa a las hh:mm», como muestra la agenda según FR-027 de la 001. Según el informe, la 001 es la propietaria de las etiquetas y debe aclarar cuáles ve el paciente. La respuesta decide qué se le pide.
+
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
 ### Datos de los ejemplos
@@ -86,12 +94,12 @@ El paciente que no puede ir cancela la cita desde el móvil en unos segundos, co
 **Escenarios de aceptación**:
 
 1. **Dada** la cita de David Gil del 09/11/2026 a las 18:00, dentro de plazo, **cuando** pulsa «Cancelar», **entonces** se le pide confirmación mostrando la cita y avisando de que no se puede deshacer.
-2. **Dada** esa confirmación, **cuando** la acepta, **entonces** la cita queda cancelada, pasa al historial como «Cancelada», y su cita de las 19:00 sigue reservada.
+2. **Dada** esa confirmación, **cuando** la acepta, **entonces** la cita queda cancelada, pasa al historial como «Cancelada» (etiqueta pendiente de la pregunta S-15), y su cita de las 19:00 sigue reservada.
 3. **Dada** esa confirmación, **cuando** la rechaza, **entonces** la cita sigue reservada y nada cambia.
 4. **Dada** una cita fuera del plazo de RN8 de la 001, como la de Javier Peña del 04/11/2026 a las 12:15, cuyo límite fueron las 10:15, **cuando** se muestra, **entonces** no ofrece cancelar, explica hasta cuándo se podía y ofrece el teléfono de la clínica.
 5. **Dada** una cita fuera del plazo de RN8 de la 001, **cuando** se intenta cancelar por una vía distinta de la pantalla del portal, incluido el enlace de cancelación del correo de la 003, **entonces** se rechaza y la cita no cambia.
-6. **Dada** una cita ya cancelada por recepción mientras el paciente tenía la página abierta, **cuando** pulsa «Cancelar», **entonces** un mensaje le dice que ya está cancelada y la página se actualiza.
-7. **Dada** una doble pulsación al confirmar, **cuando** llegan las dos peticiones, **entonces** la cita se cancela una sola vez y el paciente ve la cancelación como hecha, no como un error.
+6. **Dada** una cita ya cancelada por recepción mientras el paciente tenía la página abierta, **cuando** pulsa «Cancelar», **entonces** la operación única de cancelar de la 001 responde que ya estaba cancelada, el portal le dice que «ya está cancelada» y actualiza la página, y el origen y el momento siguen siendo los de recepción (002/FR-017; 001, HU6, escenario 8).
+7. **Dada** una doble pulsación al confirmar, **cuando** llegan las dos peticiones, **entonces** la operación única de cancelar de la 001 cancela la cita una sola vez, con un solo origen y un solo momento, y el paciente ve la cancelación como hecha, sin ningún error (002/FR-017).
 
 ---
 
@@ -144,7 +152,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **RP1**: un paciente solo ve y cancela las citas de su ficha, y con un enlace de cancelación solo la cita de ese enlace (RP6). La garantía la da el sistema y no depende de la interfaz. Nunca ve datos de otros pacientes ni la agenda de los profesionales.
 - **RP2**: una cita es futura si está reservada y su inicio es posterior al momento actual, según la hora local de la clínica. Cualquier otra cita pertenece al historial.
 - **RP3**: un paciente solo cancela citas futuras, y solo dentro del plazo de RN8 de la 001, que es el único plazo del paciente en cualquier canal. Esta spec no fija ninguna cifra propia. Pasado el plazo, cancela recepción, que no tiene plazo (RN5 de la 001).
-- **RP4**: cancelar desde el portal es la misma transición reservada → cancelada de RN4: es definitiva y libera el tramo en ese mismo instante, sin ningún paso de recepción.
+- **RP4**: el portal no define cómo se cancela. Registra toda cancelación con la operación única de cancelar de la 001, indicando el canal «portal», y esa operación aplica RN4 y RN8, registra el origen y el momento (FR-036 de la 001) y distingue «cancelada ahora» de «ya estaba cancelada». No hace falta ningún paso de recepción. Esta spec solo fija qué mensaje ve el paciente con cada resultado (FR-017). Mientras la 001 no defina esa operación, la referencia queda pedida (ver [Cambios que se piden a la 001](#cambios-que-se-piden-a-la-001), S-05).
 - **RP5**: la cancelación es la única escritura del paciente en la agenda. El portal no crea, mueve ni reprograma citas.
 - **RP6 (modelo de acceso del paciente, decisión D2)**: el paciente tiene dos credenciales, las dos en forma de enlace y sin clave de clínica:
   - El **enlace personal** da acceso a toda la ficha: ver sus citas y cancelar las futuras (FR-001 y FR-002).
@@ -162,15 +170,15 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-003**: Un enlace de cualquiera de los dos tipos que sea inventado, anulado o caducado DEBE dar la misma respuesta, igual para los dos tipos, sin revelar si corresponde a un paciente o a una cita de la clínica ni de qué tipo era. «Caducado» solo se aplica al enlace de cancelación, según la vigencia que fije la 003, porque el enlace personal no caduca.
 - **FR-004**: El sistema DEBE limitar los intentos con enlaces no válidos, de los dos tipos y contados juntos, y el paciente DEBE poder salir. La sesión DEBE cerrarse tras 30 minutos sin actividad.
 - **FR-005**: Las sesiones de paciente, abiertas con cualquiera de los dos tipos de enlace, DEBEN usar un almacén y una cookie propios, y NO DEBEN abrir la agenda, ninguna ruta de recepción ni el panel de analítica, tal como exige FR-037 de la 001. La clave de clínica NO DEBE dar acceso a la página de un paciente ni a la cancelación por enlace.
-- **FR-025**: Ningún enlace de paciente, de ninguno de los dos tipos, DEBE poder adivinarse ni deducirse de los datos del paciente o de la cita, ni de otro enlace.
+- **FR-025**: Ningún enlace de paciente, de ninguno de los dos tipos, DEBE poder adivinarse ni deducirse de los datos del paciente o de la cita, ni de otro enlace. La única excepción son los enlaces personales de demostración de la semilla (FR-029 de la 001). Son deterministas, ficticios y públicos, igual que la clave `eleva-demo` (FR-002 de la 001), y NO DEBEN usarse con datos reales. Los tests de este requisito DEBEN usar enlaces generados fuera de la semilla, nunca los de demostración.
 - **FR-026**: Este modelo de acceso es la única excepción a la clave de clínica que admite FR-001 de la 001. Las únicas rutas sin clave son las que abren los dos tipos de enlace, y cada una alcanza solo lo que permite su tipo (RP6).
-- **FR-006**: El portal NO DEBE abrirse con datos reales de pacientes mientras la conexión no vaya cifrada (ver [Cambios que se piden a la 001](#cambios-que-se-piden-a-la-001)).
+- **FR-006**: El portal NO DEBE abrirse con datos reales de pacientes mientras no se cumpla la puerta de uso con datos reales de la 001. Esta spec no fija una condición propia (ver [Cambios que se piden a la 001](#cambios-que-se-piden-a-la-001), S-08).
 
 **Ver citas**
 
 - **FR-007**: La página DEBE mostrar primero «Próximas citas», de la más cercana a la más lejana, y después «Historial», de la más reciente a la más antigua, según RP2.
 - **FR-008**: Cada cita DEBE mostrar día de la semana, fecha, hora de inicio y de fin, servicio, profesional y estado. NO DEBE mostrar importes.
-- **FR-009**: Los estados DEBEN mostrarse como en la 001 (FR-027). Una cita reservada ya empezada DEBE mostrarse como «Pendiente de confirmar por la clínica». El estado NO DEBE comunicarse solo por el color.
+- **FR-009**: Los estados DEBEN mostrarse como en la 001 (FR-027). Una cita reservada ya empezada DEBE mostrarse como «Pendiente de confirmar por la clínica» (pendiente de la pregunta S-15). El estado NO DEBE comunicarse solo por el color.
 - **FR-010**: Fechas y horas DEBEN cumplir 001/FR-023 a FR-025: `dd/mm/aaaa`, 24 horas, hora local de la clínica indicada en pantalla e igual desde cualquier dispositivo.
 - **FR-011**: La página DEBE mostrar el nombre de la clínica, y su teléfono como enlace que permita llamar desde el móvil.
 - **FR-012**: Si el paciente no tiene citas futuras, la página DEBE decirlo y ofrecer el teléfono de la clínica.
@@ -179,9 +187,13 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **FR-013**: Cada cita cancelable según RP3 DEBE ofrecer «Cancelar». Las demás citas futuras DEBEN explicar hasta cuándo se podía cancelar y ofrecer el teléfono de la clínica.
 - **FR-014**: Cancelar DEBE pedir confirmación, mostrando la cita y avisando de que no se puede deshacer.
-- **FR-015**: El sistema DEBE aplicar RP1, RP3 y RN4 en el momento de registrar la cancelación, por cualquier vía, incluido el enlace de cancelación del correo. El plazo es siempre el de RN8 de la 001. Si rechaza la cancelación, DEBE dejar la cita intacta y decir por qué en lenguaje llano.
+- **FR-015**: El portal DEBE registrar las cancelaciones solo a través de la operación única de cancelar de la 001 (RP4), después de comprobar RP1. Esa operación aplica RN4 y el plazo de RN8 de la 001 en el momento de registrar la cancelación, por cualquier vía, incluido el enlace de cancelación del correo. Si rechaza la cancelación, la cita queda intacta y el portal DEBE mostrar el mensaje que corresponda según FR-017.
 - **FR-016**: Tras cancelar, el paciente DEBE ver la confirmación en pantalla y el teléfono de la clínica por si quiere pedir otra cita.
-- **FR-017**: Repetir una cancelación ya hecha NO DEBE producir un error ni cambiar nada.
+- **FR-017**: El portal DEBE mostrar, según el resultado de la operación única de cancelar de la 001:
+  - **Cancelada ahora**, o **ya estaba cancelada con origen de paciente**, como en una doble pulsación: la confirmación de FR-016, como hecha y sin ningún error.
+  - **Ya estaba cancelada con origen «recepción»**: un mensaje que dice que la cita «ya está cancelada», y la página actualizada.
+  - **Fuera del plazo de RN8**: un mensaje que explica hasta cuándo se podía cancelar, con la fecha y la hora del límite, y el teléfono de la clínica.
+  - **Cualquier otro rechazo**: qué ha pasado y qué puede hacer el paciente, en lenguaje llano (FR-023).
 
 **Hueco liberado**
 
@@ -218,9 +230,11 @@ La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos ca
 | RN5 y RN8 | El portal y el correo fijaban plazos distintos (S-01) | Un único plazo del paciente para todos los canales | Recogido: RN8 de la 001, 2 horas (D1) |
 | Origen, momento y etiqueta de la cancelación (FR-015, FR-017, FR-027 y Entidad Cita) | La 002 y la 003 añadían el mismo dato con etiquetas distintas (S-02) | Una sola definición que citan la 002 y la 003 | Recogido: HU6 de la 001. La 002 solo la cita (FR-019) |
 | Semilla: Entidad Clínica, FR-029, FR-030 y FR-032 | Teléfono de la clínica, enlaces personales de demostración, origen de las 37 canceladas y resúmenes de contenido (S-03) | Un cambio único de la 001 que añade los datos y actualiza los resúmenes una sola vez. Esta spec no altera la semilla por su cuenta | Remite al cambio único de la 001 (HU5, escenario 4) |
-| Entidad Paciente y Supuestos | «Sin acceso al producto» y acceso del paciente fuera de alcance | Remitir a esta spec | Pendiente |
+| Entidad Paciente y Supuestos | «Sin acceso al producto» y acceso del paciente fuera de alcance | Remitir a esta spec | Recogido: entidad Paciente y supuesto «Fuera de alcance de la 001» (S-22) |
+| FR-020, HU3 escenario 5 y Casos límite | Solo recepción cambia estados, y una cita ya cancelada se rechaza, mientras el portal pide que la repetición no dé error (S-05) | Una operación única de cancelar que admita al paciente dentro de RN8, reciba el canal, registre el origen y el momento (FR-036) y distinga «cancelada ahora» de «ya estaba cancelada». La 002 solo elige el mensaje (RP4, FR-015 y FR-017) | Pendiente: la 001 de `master` (`5ddb0c4`) aún no la define |
 | FR-013 | «Fuera del alta de cita no se gestionan pacientes», y recepción copia y anula enlaces desde una cita | Exceptuar el enlace personal (002/FR-002) | Pendiente |
-| Supuestos: conexión sin cifrar y deuda de autenticación | Se aceptaron para datos ficticios, y deben resolverse antes de usar datos reales | Fijar quién resuelve la deuda y cuándo. Bloquea el uso real del portal (002/FR-006) | Pendiente |
+| Supuestos: conexión sin cifrar y deuda de autenticación | Se aceptaron para datos ficticios, y deben resolverse antes de usar datos reales (S-08) | Un requisito único de puerta de uso con datos reales (conexión cifrada, revisión de protección de datos y responsable con fecha) que citen 002/FR-006, la 003 y la 004 | Pendiente: la 001 de `master` (`5ddb0c4`) aún no tiene ese requisito |
+| FR-027 | La 002 muestra «Pendiente de confirmar por la clínica», que FR-027 no admite, y no dice qué etiqueta ve el paciente en una cita que él canceló (S-15) | Por decidir: ver la pregunta S-15 para Sara | Sin pedir |
 
 ## Criterios de éxito *(obligatorio)*
 
@@ -254,6 +268,16 @@ La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos ca
 - **Fuera de alcance de la v1**: reservar o mover citas online, pagos, lista de espera, avisos a otros pacientes y gestión de fichas.
 
 ## Historial de cambios
+
+### 10/11/2026, segunda pasada de la revisión cruzada: S-05, S-08, S-21 y S-22
+
+Propuesta para Sara, sin aprobar. Ninguna decisión de producto se toma aquí: D3 y S-15 quedan como [preguntas abiertas](#preguntas-abiertas-para-sara-10112026).
+
+- **S-05 (operación de cancelar)**: RP4, FR-015, FR-017 y los escenarios 6 y 7 de la historia 3 dejan de describir cómo se cancela, y remiten a la operación única de cancelar de la 001. La spec solo fija los mensajes: la doble pulsación se ve como hecha y sin error, la cita cancelada antes por recepción dice que «ya está cancelada», y fuera de RN8 se explica hasta cuándo se podía y se da el teléfono. **La 001 de `master` (`5ddb0c4`) aún no define esa operación**: FR-020 sigue hablando solo de recepción. La petición se añade como pendiente en «Cambios que se piden a la 001».
+- **S-08 (datos reales)**: FR-006 deja su propia condición (conexión cifrada) y remite a la puerta de uso con datos reales de la 001. **La 001 de `master` aún no tiene ese requisito**, así que la fila de la tabla sigue como pendiente. Cuando exista, FR-006 citará su identificador y la fila pasará a recogida.
+- **S-21 (enlaces de demostración)**: FR-025 admite la excepción de los enlaces de demostración de FR-029 de la 001, y exige que sus tests usen enlaces generados fuera de la semilla.
+- **S-22 (referencias)**: la fila «Entidad Paciente y Supuestos» pasa a recogida.
+- **S-15**: se añade a la tabla como punto sin pedir, a la espera de la respuesta de Sara.
 
 ### 10/11/2026: revisión cruzada (`specs/000-revision-cruzada-nov2026.md`)
 
