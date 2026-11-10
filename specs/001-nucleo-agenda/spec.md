@@ -4,7 +4,7 @@
 
 **Creada**: 05/11/2026
 
-**Estado**: Aprobada por su propietario el 06/11/2026. El cambio del 10/11/2026 (S-01 a S-06, S-08 y S-18; ver [Historial de cambios](#historial-de-cambios)) lo aprobó también su propietario el 10/11/2026, y esta es la versión vigente.
+**Estado**: Aprobada por su propietario el 06/11/2026. El primer cambio del 10/11/2026 (S-01 a S-06, S-08 y S-18) lo aprobó también su propietario el 10/11/2026. El **segundo cambio del 10/11/2026** (S-13 a S-17, S-22, S-24 y S-25, y el matiz de S-18; ver [Historial de cambios](#historial-de-cambios)) está **pendiente de aprobación** del propietario. Hasta que lo apruebe, la versión vigente es la del primer cambio.
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -23,6 +23,9 @@
 
 - P: ¿Qué plazo tiene el paciente para cancelar? (D1, S-01) → R: hasta 2 horas antes del inicio, minuto límite incluido, igual en todos los canales del paciente (RN8). Recepción sigue sin plazo (RN5).
 - P: ¿Una credencial de paciente o dos? (D2, S-04) → R: dos, el enlace personal del portal y el enlace de cancelación del correo, con un único modelo de acceso que define la 002. La 001 solo admite esa excepción a la clave (FR-001) y aísla las sesiones de paciente (FR-037).
+- P: ¿Qué etiqueta ve el paciente en una cita reservada ya empezada, y en una que canceló él? (D6, S-15, decide Sara) → R: en la cita sin cerrar (FR-040), «Pendiente de confirmar por la clínica», solo en los canales del paciente. En las canceladas, la misma etiqueta que la agenda (FR-027).
+- P: ¿Qué forma tienen los enlaces personales? (D7, S-25, decide Sara) → R: la que se usó en D4, de 32 caracteres hexadecimales, igual para los enlaces reales y para los de demostración. La fija 002/FR-025, y FR-029 la cita.
+- P: ¿Puede recepción tocar la ficha del paciente fuera del alta? (S-13) → R: solo para gestionar su enlace personal (002/FR-002) y para añadir, corregir o quitar su correo (FR-041).
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
@@ -65,6 +68,7 @@ Recepción abre la agenda, elige profesional y día, y ve de un vistazo qué tra
 3. **Dada** una cita cancelada o no asistida, **cuando** se muestra la agenda, **entonces** sigue visible, se distingue de las que ocupan el hueco, y su tramo cuenta como libre.
 4. **Dado** un día ya pasado o el tramo pasado de hoy, **cuando** se muestra la agenda, **entonces** no se ofrece reservar en ese tiempo.
 5. **Dado** un móvil con pantalla de 360 píxeles de ancho, **cuando** se abre la agenda, **entonces** se lee y se maneja sin desplazamiento horizontal.
+6. **Dada** una cita de un paciente cuya ficha no tiene correo, o lo tiene mal escrito, **cuando** recepción añade o corrige el correo desde esa cita en la agenda, **entonces** queda guardado en la ficha con la validación de FR-013, y la cita, el nombre y el teléfono no cambian (FR-041).
 
 ---
 
@@ -119,6 +123,7 @@ Cualquier persona del equipo genera los datos ficticios de Clínica Eleva y obti
 2. **Dados** los datos generados, **cuando** se revisa cada profesional, **entonces** ninguna cita reservada o completada solapa otra.
 3. **Dados** los datos generados, **cuando** se cuentan las citas de la historia, **entonces** los porcentajes de composición de no asistidas y de canceladas están dentro de los márgenes de FR-030.
 4. **Dados** los datos generados, **cuando** se revisan, **entonces** la clínica tiene teléfono, cada uno de los 40 pacientes tiene su enlace personal de demostración, y las 37 canceladas de la historia tienen origen «recepción» (FR-029).
+5. **Dado** el servidor arrancado con el momento de referencia del miércoles 04/11/2026 a las 12:00 (FR-043), **cuando** recepción abre la agenda, **entonces** se abre en el 04/11/2026, no se ofrece reservar antes de las 12:00, y la pantalla indica que el reloj está fijado en ese día y esa hora.
 
 ---
 
@@ -150,7 +155,7 @@ El paciente cancela una cita por cualquiera de sus canales (el portal de la 002 
 - **Doble pulsación o reintento**: la misma alta llega dos veces. Solo queda una cita, y la segunda petición se rechaza como cualquier solape.
 - **Dos acciones de estado a la vez** sobre la misma cita (por ejemplo, cancelar y completar): solo una prospera; la otra recibe un mensaje con el estado resultante. Si alguna de ellas es cancelar, sea de recepción o del paciente, pasa por la operación única de cancelar (FR-038).
 - **El servicio no cabe en el hueco**: una cita de 60 minutos en un hueco libre de 45 se rechaza por solapar la siguiente o por salirse del horario.
-- **Cita reservada ya pasada sin cerrar**: sigue reservada y ocupando su tramo. El sistema nunca cambia estados por su cuenta; recepción la cierra cuando pueda.
+- **Cita sin cerrar** (FR-040): sigue reservada y ocupando su tramo. El sistema nunca cambia estados por su cuenta, y recepción la cierra cuando pueda. En la agenda se ve como «Reservada», y el paciente la ve como «Pendiente de confirmar por la clínica» (FR-027).
 - **Cancelación registrada tarde**: si el paciente avisó y recepción lo anota después de la hora, se marca como cancelada, no como no asistida, porque «no asistida» significa exclusivamente que no se presentó.
 - **Hueco liberado y vuelto a ocupar**: la agenda muestra en el mismo tramo la cita cancelada y la nueva sin confundirlas.
 - **Mismo paciente, dos profesionales a la misma hora**: no se impide en esta feature; RN1 protege al profesional.
@@ -192,7 +197,13 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 - **FR-039 (puerta de uso con datos reales, S-08)**: Ningún canal del producto (la agenda y el resto de recepción, el portal de la 002, el correo real de la 003 ni el panel de la 004) DEBE usarse con datos reales de pacientes hasta que se cumplan, a la vez, estas tres condiciones:
   1. **Conexión cifrada**: la conexión entre el navegador y el servidor va cifrada, y las cookies de sesión, de recepción y de paciente (FR-037), solo viajan por ella.
-  2. **Revisión de protección de datos**: está hecha, e incluye de forma expresa el riesgo aceptado del enlace personal sin caducidad de la 002.
+  2. **Revisión de protección de datos**: está hecha, y cubre de forma expresa cada uno de estos riesgos, que las specs dejan pendientes de ella:
+     - a. el enlace personal sin caducidad (002, supuesto «Enlace sin caducidad»);
+     - b. los datos de salud que revelan el servicio y la especialidad en el portal (002, supuesto «Datos de salud»);
+     - c. el recordatorio por correo, que incluye el servicio de la cita y no ofrece darse de baja (003, supuesto «Sin darse de baja»);
+     - d. la deuda de autenticación de la 001: una sola clave por clínica, sin usuarios individuales, sin límite de intentos y sin caducidad de sesión (supuestos «Una sola clave por clínica» y «Sin caducidad de sesión»). La revisión la acepta o exige resolverla antes, y en ese caso la condición no se cumple hasta que se resuelva.
+
+     Si una spec necesita que la revisión cubra otro riesgo, pide que se añada a esta lista, y no fija una condición propia.
   3. **Responsable y fecha**: esta spec tiene escritos un responsable y la fecha en que comprobó que se cumplen las condiciones 1 y 2. Responsable: AntonioLV1999. Fecha de comprobación: pendiente. El responsable la escribe aquí el día en que lo comprueba, y mientras no esté escrita, la puerta no se cumple.
 
   Mientras no se cumplan las tres, el producto DEBE funcionar solo con los datos ficticios de la semilla (FR-029 a FR-034), y el correo de la 003 solo en modo simulado (003/FR-019), aunque haya servidor de correo configurado. Es la única puerta de uso con datos reales: ninguna otra spec fija otra condición ni la relaja, y las features la citan como «FR-039 de la 001».
@@ -207,7 +218,8 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-010**: El sistema DEBE aplicar RN1, RN2 y RN3 en el momento de registrar la cita, y si la rechaza, DEBE dejar la agenda intacta.
 - **FR-011**: Las horas de inicio DEBEN caer en múltiplos de 15 minutos.
 - **FR-012**: Una cita DEBE empezar y terminar dentro del horario de la clínica, que en la 001 es único y fijo para todos: de lunes a viernes, de 09:00 a 20:00, en hora local de la clínica.
-- **FR-013**: Durante el alta de una cita, recepción DEBE poder crear la ficha de un paciente nuevo con nombre y teléfono obligatorios y correo electrónico opcional. El teléfono DEBE tener al menos 9 dígitos, y solo admite dígitos, espacios y un `+` inicial. El correo, si se escribe, DEBE tener forma de correo. La ficha y la cita se registran juntas: si la cita se rechaza, no queda ficha y el formulario conserva lo escrito. Fuera del alta de cita no se gestionan pacientes.
+- **FR-013**: Durante el alta de una cita, recepción DEBE poder crear la ficha de un paciente nuevo con nombre y teléfono obligatorios y correo electrónico opcional. El teléfono DEBE tener al menos 9 dígitos, y solo admite dígitos, espacios y un `+` inicial. El correo, si se escribe, DEBE tener forma de correo. La ficha y la cita se registran juntas: si la cita se rechaza, no queda ficha y el formulario conserva lo escrito. Fuera del alta de cita no se gestionan pacientes, con **dos únicas excepciones** (S-13): recepción gestiona el enlace personal de la ficha (copiarlo y anularlo, según 002/FR-002 y RP7) y añade, corrige o quita su correo (FR-041). Ninguna otra spec añade otra excepción sin cambiar antes este requisito.
+- **FR-041 (correo de la ficha, S-13)**: Desde una cita de la agenda, recepción DEBE poder añadir el correo a la ficha de su paciente, corregirlo o quitarlo, con la validación de FR-013. Solo cambia el correo: el nombre y el teléfono no se editan, y la cita no cambia. Guardar el correo no envía nada. Quitarlo es la forma de que un paciente deje de recibir recordatorios, porque la 003 solo envía a fichas con correo en el momento del envío (003, RR2).
 
 **Agenda del día**
 
@@ -223,6 +235,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-020**: Recepción DEBE poder marcar una cita reservada como completada, cancelada o no asistida, según RN4 y RN5. El paciente solo puede cancelar, por cualquiera de sus canales y dentro del plazo de RN8; nunca marca una cita como completada ni como no asistida. Toda cancelación, la haga quien la haga, DEBE pasar por la operación única de cancelar (FR-038). El sistema DEBE rechazar cualquier otra transición.
 - **FR-021**: Cada acción de estado DEBE pedir confirmación y avisar de que no se puede deshacer.
 - **FR-022**: El sistema NO DEBE cambiar el estado de ninguna cita por su cuenta.
+- **FR-040 (cita sin cerrar, S-15)**: Una cita está **sin cerrar** si sigue reservada y su inicio es anterior o igual al «ahora» del sistema (`inicio <= ahora`), en hora local de la clínica. Deja de ser futura en su minuto de inicio exacto, y sigue reservada y ocupando su tramo hasta que recepción la cierre (FR-022). Es la única definición del producto: la 002 (RP2 y 002/FR-009) y la 004 (RA6) la citan, y ninguna otra spec la redefine.
 - **FR-036**: Toda cancelación DEBE registrar su origen («recepción», «portal» o «correo») y su momento, en hora local de la clínica, en la misma operación que cambia el estado a cancelada, y como parte indivisible de ella: si la cancelación no prospera, no se registra nada. El origen y el momento NO DEBEN rellenarse ni corregirse después, y una cita que no está cancelada NO DEBE tener origen ni momento de cancelación. El origen es el canal que registró la cancelación: lo que recepción cancela es siempre «recepción», y «portal» y «correo» son los dos orígenes del paciente.
 - **FR-038 (operación única de cancelar, S-05)**: Toda cancelación DEBE registrarse mediante una única operación, la misma para todos los canales. Ninguna pantalla, vía ni spec DEBE cancelar una cita de otra forma.
   - **Entrada**: la cita y el canal que registra la cancelación: «recepción», «portal» o «correo». El canal es el origen de FR-036.
@@ -248,7 +261,11 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 **Mensajes e interfaz** (constitución, principios VII y VIII)
 
-- **FR-027**: Todos los textos DEBEN estar en español de España, sin jerga técnica, y cada error DEBE decir qué ha pasado y qué puede hacer la persona. Esto incluye los avisos de validación de los formularios, que NO DEBEN depender del idioma del navegador. Los estados se muestran como «Reservada», «Completada», «Cancelada» y «No asistida». Hay una única etiqueta más: una cita cancelada con origen «portal» o «correo» (FR-036) se muestra como «Cancelada por el paciente», con la fecha y la hora de la cancelación en los formatos de FR-023 y FR-024 (por ejemplo, «Cancelada por el paciente el 08/11/2026 a las 19:30»), sin distinguir entre los dos canales. Las canceladas con origen «recepción» siguen mostrándose como «Cancelada». Ninguna otra spec añade etiquetas de estado sin cambiar antes este requisito.
+- **FR-027**: Todos los textos DEBEN estar en español de España, sin jerga técnica, y cada error DEBE decir qué ha pasado y qué puede hacer la persona. Esto incluye los avisos de validación de los formularios, que NO DEBEN depender del idioma del navegador. Los estados se muestran como «Reservada», «Completada», «Cancelada» y «No asistida». Hay solo dos etiquetas más:
+  - **«Cancelada por el paciente»**: una cita cancelada con origen «portal» o «correo» (FR-036), con la fecha y la hora de la cancelación en los formatos de FR-023 y FR-024 (por ejemplo, «Cancelada por el paciente el 08/11/2026 a las 19:30»), sin distinguir entre los dos canales. Las canceladas con origen «recepción» se muestran como «Cancelada».
+  - **«Pendiente de confirmar por la clínica»** (D6): una cita sin cerrar (FR-040), y **solo en los canales del paciente** (002). En la agenda se sigue mostrando como «Reservada», porque es recepción quien la cierra.
+
+  En sus canales, el paciente ve para cada cita cancelada la misma etiqueta que la agenda: «Cancelada por el paciente el…» si la canceló él, por el portal o por el correo, y «Cancelada» si la canceló recepción. Ninguna otra spec añade etiquetas de estado sin cambiar antes este requisito.
 - **FR-028**: La interfaz DEBE funcionar desde 360 píxeles de ancho hasta el portátil de recepción, sin desplazamiento horizontal, con contraste de al menos 4,5:1 en texto normal, y con controles táctiles de al menos 44 × 44 píxeles.
 
 **Datos de demostración** (constitución, principio V)
@@ -262,7 +279,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
   | Consulta de nutrición | Nutrición | 30 min | 35,00 € |
   | Primera consulta de nutrición | Nutrición | 45 min | 45,00 € |
 
-  Además, la semilla DEBE generar el teléfono de la clínica, ficticio (`000 200 000`), y un enlace personal de demostración para cada uno de los 40 pacientes, con la forma que fije el modelo de acceso de la 002. Esos enlaces DEBEN ser deterministas (mismos parámetros, mismos enlaces) y son, como la clave `eleva-demo` (FR-002), ficticios y públicos: pueden aparecer en el código y en la documentación, y NO DEBEN usarse con datos reales. Las 37 citas canceladas de la historia DEBEN nacer con origen «recepción» y con el inicio de la cita como momento de la cancelación (FR-036), de modo que se muestran como «Cancelada».
+  Además, la semilla DEBE generar el teléfono de la clínica, ficticio (`000 200 000`), y un enlace personal de demostración para cada uno de los 40 pacientes. Su forma es la de los enlaces personales de 002/FR-025 (D7, S-25): solo el token, sin ruta ni dominio, de 32 caracteres hexadecimales en minúscula. El del paciente número *n* (de 1 a 40, en el orden de la semilla) son los 32 primeros caracteres hexadecimales del SHA-256 del texto `citaclara-enlace-<semilla>-<n>`, donde `<semilla>` es el número de semilla de los parámetros (`20261102`), que no cambia con el lunes de referencia. Por ejemplo, el del primer paciente, David Gil, es `c73f5e835397826416bda7b3e5323d02`. Esos enlaces DEBEN ser deterministas (mismos parámetros, mismos enlaces) y son, como la clave `eleva-demo` (FR-002), ficticios y públicos: pueden aparecer en el código y en la documentación, y NO DEBEN usarse con datos reales. Las 37 citas canceladas de la historia DEBEN nacer con origen «recepción» y con el inicio de la cita como momento de la cancelación (FR-036), de modo que se muestran como «Cancelada».
 
 - **FR-030**: La semilla DEBE generar 8 semanas de historia en estados definitivos, de las que entre el 9 % y el 11 % sean no asistidas, entre el 7 % y el 9 % canceladas y el resto completadas, calculado sobre el total de citas de la historia. Son **porcentajes de composición de la semilla**, no tasas: dicen cómo se reparte la historia generada, y nadie debe leer el de no asistidas como una «tasa de no asistencia», cuya única definición en el producto es 004/RA3 (S-06). Cifras exactas con el lunes por defecto, reproducibles con `npm run semilla`: 40 pacientes; 463 citas de historia, de las que 380 son completadas (82,1 %), 46 no asistidas (9,9 %) y 37 canceladas (8,0 %); y 57 reservas futuras.
   - **Cifras de citas**: el cambio del 10/11/2026 (teléfono, enlaces y origen, FR-029) no altera ninguna de esas cifras. Son estas cifras, y no los resúmenes, lo que las demás specs DEBEN proteger cuando digan que no alteran la semilla.
@@ -276,14 +293,30 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 **Pruebas** (constitución, principios III y VI)
 
 - **FR-035**: Cada regla de negocio y cada criterio de aceptación DEBE tener un test que lo referencie, incluidas pruebas que intenten provocar solapes con reservas simultáneas, tanto del hueco exacto como parciales.
+  - **Convención de identificadores, para todas las specs (S-14)**: cada test empieza por el identificador que comprueba.
+    - Los de la 001 van sin prefijo: `RN1`, `FR-001`, `SC-001`, `H1-E1` y `CL`.
+    - Las reglas de las demás specs usan su letra propia, que no se repite, y van sin prefijo: `RP1` (002), `RR1` (003) y `RA1` (004).
+    - Todo identificador de otra spec que se repita entre specs lleva delante el número de su spec y una barra: `002/FR-017`, `003/SC-001` y `004/H5-E8`.
+  - **Cobertura**: la cobertura de una spec solo la dan los tests que **empiezan** por un identificador de esa spec. Un test de una feature que nombre más adelante una regla de la 001, como RN8, no cuenta como cobertura de la 001, y un identificador con prefijo nunca cuenta como uno de la 001.
+  - Cada feature comprueba su propia cobertura, y el test que obliga a empezar por un identificador admite las formas de esta convención.
+
+**Configuración común**
+
+- **FR-042 (dirección pública del producto, S-16)**: El producto DEBE tener un único ajuste de configuración con su dirección pública, la que se usa para construir los enlaces que el paciente abre fuera del navegador de recepción: el enlace personal (002) y el enlace de cancelación del correo (003). El portal de cada clínica cuelga de esa dirección. Ninguna spec DEBE crear otro ajuste para lo mismo. La 001 no lo usa: lo crea la primera feature que lo necesite, con esta definición.
+- **FR-043 (momento de referencia de la demostración, S-17)**: El servidor y todo proceso del producto, incluido el de recordatorios (003/FR-003), DEBEN poder arrancarse con un momento de referencia, en fecha y hora local de la clínica, que toman como «ahora». Es el mismo ajuste para todos.
+  - **Con el ajuste**: el reloj queda fijado en ese momento y no avanza mientras el servidor o el proceso sigan en marcha. RN2, RN5, RN8, FR-038, FR-040, «hoy» en la agenda y la vigencia de los enlaces de la 003 (RR6) usan ese momento.
+  - **Sin el ajuste**: «ahora» es la hora real.
+  - **Aviso**: mientras el reloj esté fijado, las pantallas de recepción DEBEN indicarlo, con la fecha y la hora, para que nadie lo tome por un fallo (HU5, escenario 5).
+  - **Solo con datos de demostración**: NO DEBE usarse con datos reales (FR-039).
+  - Cada spec elige el momento de sus ejemplos, pero lo expresa con este ajuste.
 
 ### Entidades clave
 
 - **Clínica**: la consulta que usa el producto. Tiene nombre, clave de acceso, zona horaria y teléfono, que es el que se da a los pacientes. Todo lo demás pertenece a una clínica.
 - **Profesional**: quien atiende las citas. Tiene nombre y especialidad.
 - **Servicio**: lo que se ofrece. Tiene nombre, especialidad, duración en minutos y precio en euros.
-- **Paciente**: ficha de una persona atendida. Tiene nombre, teléfono y, si lo facilita, correo electrónico. Accede a sus citas solo a través del modelo de acceso de la 002 (FR-001), nunca a la agenda ni a nada de recepción (FR-037).
-- **Cita**: une un profesional, un servicio y un paciente de la misma clínica, con inicio, fin y estado (reservada, completada, cancelada o no asistida). Si está cancelada, guarda además el origen de la cancelación («recepción», «portal» o «correo») y su momento (FR-036).
+- **Paciente**: ficha de una persona atendida. Tiene nombre, teléfono y, si lo facilita, correo electrónico, que recepción puede añadir, corregir o quitar después (FR-041). Tiene también su enlace personal (002/FR-001 y FR-029). Accede a sus citas solo a través del modelo de acceso de la 002 (FR-001), nunca a la agenda ni a nada de recepción (FR-037).
+- **Cita**: une un profesional, un servicio y un paciente de la misma clínica, con inicio, fin y estado (reservada, completada, cancelada o no asistida). Si está cancelada, guarda además el origen de la cancelación («recepción», «portal» o «correo») y su momento (FR-036). Si sigue reservada y ya ha llegado su inicio, está sin cerrar (FR-040).
 - **Sesión**: lo que permite seguir usando el producto tras identificarse. Hay dos clases, separadas: la de recepción, que se abre con la clave de la clínica, y la de paciente, que se abre con una credencial del modelo de acceso de la 002 (FR-037).
 
 ## Criterios de éxito *(obligatorio)*
@@ -306,7 +339,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ## Supuestos
 
-- **Una sola clave por clínica (deuda consciente)**: no hay usuarios individuales, y por tanto no se sabe qué persona hizo cada acción. Tampoco hay en esta versión cambio de clave, recuperación ni límite de intentos. La entrada se decide solo por la clave, así que dos clínicas no deben compartirla: en la 001 no puede ocurrir, porque solo se carga una clínica y no hay pantallas para crear otras, y la spec que lo permita deberá impedirlo. Esta deuda debe resolverse antes de usar el producto con datos reales de pacientes.
+- **Una sola clave por clínica (deuda consciente)**: no hay usuarios individuales, y por tanto no se sabe qué persona hizo cada acción. Tampoco hay en esta versión cambio de clave, recuperación ni límite de intentos. La entrada se decide solo por la clave, así que dos clínicas no deben compartirla: en la 001 no puede ocurrir, porque solo se carga una clínica y no hay pantallas para crear otras, y la spec que lo permita deberá impedirlo. Antes de usar el producto con datos reales de pacientes, la revisión de protección de datos debe aceptar esta deuda o exigir resolverla (FR-039, condición 2, riesgo d).
 - **Los servicios tienen especialidad**: el encargo no lo cita, pero sin ello se podría reservar una consulta de nutrición con un fisioterapeuta. Es lo mínimo para que RN7 sea posible.
 - **Configuración fija**: en la 001 no hay pantallas para gestionar la clínica, los profesionales ni los servicios. Se cargan con la semilla.
 - **Sin editar citas**: mover o reprogramar queda fuera de esta feature. Para cambiar una cita se cancela y se crea otra. Las transiciones definitivas tampoco tienen deshacer; por eso se pide confirmación.
@@ -316,12 +349,12 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **Festivos y ausencias fuera de alcance**: la agenda no los modela, y la semilla trata todos los días laborables por igual.
 - **Precio por servicio**: como los servicios no se editan en la 001, la cita toma el precio del servicio. Guardar el precio histórico corresponderá a la spec que permita cambiarlo.
 - **Sin detección de fichas duplicadas**: un teléfono puede repetirse, porque una familia puede compartirlo.
-- **Sin caducidad de sesión**: la sesión dura hasta salir o cerrar el navegador. Forma parte de la deuda de autenticación.
+- **Sin caducidad de sesión**: la sesión de recepción dura hasta salir o cerrar el navegador. Forma parte de la deuda de autenticación (FR-039, condición 2, riesgo d).
 - **Conexión sin cifrar (deuda consciente)**: la 001 no cifra la conexión, y la clave y los datos viajan en claro entre el navegador y el servidor. Sirve para demostraciones con datos ficticios. Forma parte de la deuda de autenticación: antes de usar datos reales de pacientes, la conexión debe ir cifrada y la cookie de sesión debe limitarse a ella. Es la primera condición de la puerta de uso con datos reales (FR-039), que fija además las otras dos.
 - **Teléfono de la clínica en la semilla**: `000 200 000`, de la misma familia ficticia que los teléfonos de los pacientes, para cumplir FR-034.
 - **Momento de las canceladas de la semilla**: la historia no registra cuándo se canceló cada cita, así que se toma su inicio. Es determinista y se desplaza con el lunes de referencia (FR-032), y no se muestra, porque las canceladas por recepción no llevan fecha en la etiqueta.
 - **El plazo se prueba como regla**: la 001 no abre ningún canal del paciente. RN8 y la historia 6 se prueban en la 001 como reglas, indicando el canal y el momento, y la 002 y la 003 prueban además sus pantallas citando estos identificadores.
-- **Fuera de alcance de la 001** (specs propias): las pantallas y el modelo de acceso del paciente (002), los recordatorios (003), la analítica (004) y los pagos online. La 001 solo fija la excepción a la clave (FR-001), la separación de sesiones (FR-037), el plazo (RN8), el origen y la etiqueta de las cancelaciones (FR-027 y FR-036), la operación única de cancelar (FR-038), la puerta de uso con datos reales (FR-039) y los datos de semilla que esas features necesitan (FR-029).
+- **Fuera de alcance de la 001** (specs propias): las pantallas y el modelo de acceso del paciente (002), los recordatorios (003), la analítica (004) y los pagos online. La 001 solo fija la excepción a la clave (FR-001), la separación de sesiones (FR-037), el plazo (RN8), el origen y la etiqueta de las cancelaciones (FR-027 y FR-036), la operación única de cancelar (FR-038), la puerta de uso con datos reales (FR-039), la cita sin cerrar (FR-040), las dos excepciones de la ficha (FR-013 y FR-041), la configuración común (FR-042 y FR-043), la convención de identificadores de los tests (FR-035) y los datos de semilla que esas features necesitan (FR-029).
 
 ## Historial de cambios
 
@@ -341,7 +374,7 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
   - **Lo que falla**: los identificadores de este cambio que aún no tienen test: RN8, HU4 escenario 5, HU5 escenario 4, HU6 escenarios 1 a 9, y SC-010 a SC-013. Falla también el recuento fijo de reglas, escenarios y criterios del propio test.
   - **Lo que no se hace**: el test no se relaja ni se desactiva (principio VI). Solo se actualiza su recuento para que coincida con esta spec.
   - **Cualquier otro fallo** es una regresión y se trata como tal.
-  - **Cuándo acaba**: con la implementación de este cambio, que no se integra hasta que la suite esté en verde. Las ramas de la 002, la 003 y la 004 se rebasan sobre ella, no sobre el rojo.
+  - **Cuándo acaba**: con la implementación de este cambio, que no se integra hasta que la suite esté en verde. Las ramas de la 002, la 003 y la 004 pueden rebasarse antes para leer la spec, pero no planifican ni tocan `src/` hasta que `master` esté en verde, y entonces se rebasan otra vez (matiz del segundo cambio, S-18).
 - **Resúmenes de FR-030 (decisión D4, S-18)**: se calcularon antes de aprobar, sin implementar en el tronco. Así se rompe el círculo de S-18, en el que no se implementaba sin aprobar ni se aprobaba sin los resúmenes. El procedimiento fue este:
   - En un worktree desechable sacado de `master` (`bdc7c26`), se aplicaron solo los datos nuevos de FR-029, con los cambios mínimos de esquema y semilla.
   - Se ejecutó `npm run semilla`, y los resúmenes salieron de la misma función `resumen()` de `src/semilla/carga.js`.
@@ -354,7 +387,7 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
   - **Paciente**: `nombre`, `telefono`, `email` y `enlace`, en ese orden.
   - **Cita cancelada de la historia**: tras `inicio` y `fin`, `origen_cancelacion` (`recepcion`) y `momento_cancelacion`, igual a `inicio` y con su mismo formato. Las citas que no están canceladas no llevan esos dos campos, ni siquiera vacíos (FR-036).
   - **Resumen sin fechas**: además de `inicio` y `fin`, quita `momento_cancelacion`, porque también es una fecha. Si no lo quitara, cambiaría con el lunes de referencia, y FR-032 exige que no cambie.
-- **Forma del enlace personal de demostración**: la 002 no fija una forma concreta (002/FR-025 solo exige que los de la semilla sean deterministas). Se usó esta:
+- **Forma del enlace personal de demostración**: la 002 no fijaba una forma concreta (002/FR-025 solo exigía que los de la semilla fueran deterministas). Desde el segundo cambio, la forma la fija 002/FR-025 (D7), y FR-029 la recoge. Se usó esta:
   - Solo el token, sin ruta ni dominio: los 32 primeros caracteres hexadecimales del SHA-256 del texto `citaclara-enlace-<semilla>-<n>`. La semilla es la de `src/semilla/datos-base.js` (`20261102`), y `<n>` es el número del paciente en el orden de la semilla, de 1 a 40.
   - Por ejemplo, el primer paciente, David Gil, tiene `c73f5e835397826416bda7b3e5323d02`.
   - Guardar solo el token permite que la 002 fije la ruta del portal sin cambiar los resúmenes. Cualquier otra forma de token sí los cambiaría.
@@ -363,7 +396,7 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
   - Algunos tests crean otras clínicas sin teléfono, así que la columna del teléfono de la clínica no pudo ser obligatoria sin tocarlos.
   - El diff aplicado se guardó como referencia fuera del repositorio.
 - **Tests que cambiarán** (principio VI, primero la spec): «FR-001 solo la pantalla de acceso es pública» admitirá las rutas públicas del modelo de acceso de la 002, y los de trazabilidad pasarán a exigir RN8.
-- **Fuera de este cambio**: los demás hallazgos que el informe asigna a la 001 (S-13 a S-17) y el hallazgo colateral de `src/datos/`. S-05 y S-08 entran en este mismo cambio (ver la sección siguiente).
+- **Fuera de este cambio**: los demás hallazgos que el informe asigna a la 001 (S-13 a S-17), que recoge el segundo cambio. El hallazgo colateral de `src/datos/` ya estaba resuelto en `5ddb0c4` (corregido en el segundo cambio, S-22). S-05 y S-08 entran en este mismo cambio (ver la sección siguiente).
 
 #### S-05 y S-08: operación única de cancelar y puerta de uso con datos reales (mismo cambio)
 
@@ -381,3 +414,27 @@ La 002, la 003 y la 004 ya citaban estos dos conceptos, y la 001 no los definía
 #### S-06: nombre del porcentaje de FR-030 (mismo cambio)
 
 - FR-030 llama a sus cifras «porcentajes de composición de la semilla» y remite a 004/RA3 como única definición de la tasa de no asistencia. HU5 escenario 3 usa el mismo nombre. No cambian los márgenes, las cifras ni los resúmenes.
+
+### 10/11/2026: segundo cambio de la revisión cruzada (pendiente de aprobación)
+
+Aplica lo que la cuarta pasada del informe `specs/000-revision-cruzada-nov2026.md` asigna a la 001, con las decisiones D6 y D7 tomadas por Sara (002) el 10/11/2026, que aceptó las dos recomendaciones del informe, igual que la de D3, que no afecta a esta spec. **Lo propone el agente de la 001 y está pendiente de que lo apruebe su propietario, AntonioLV1999.** No cambia la semilla, sus cifras ni sus resúmenes.
+
+| Hallazgo | Decisión | Cambios en esta spec |
+|----------|----------|----------------------|
+| **S-13** Ficha del paciente | — | FR-013 (dos excepciones fuera del alta: el enlace personal de 002/FR-002 y el correo), FR-041 (nuevo: añadir, corregir o quitar el correo desde una cita), HU2 escenario 6 (nuevo), entidad Paciente |
+| **S-14** Identificadores de los tests | — | FR-035 (convención para todas las specs y cobertura solo por el identificador inicial) |
+| **S-15** Cita sin cerrar y etiquetas | **D6**: «Pendiente de confirmar por la clínica» solo en los canales del paciente, que ve en las canceladas la misma etiqueta que la agenda | FR-040 (nuevo: `inicio <= ahora`), FR-027 (segunda etiqueta y etiquetas del paciente), caso límite «Cita sin cerrar», entidad Cita |
+| **S-16** Dirección pública | — | FR-042 (nuevo: un único ajuste, que crea la primera feature que lo necesite) |
+| **S-17** «Ahora» en la demostración | — | FR-043 (nuevo: un único momento de referencia para el servidor y los procesos, reloj fijado, aviso en recepción), HU5 escenario 5 (nuevo) |
+| **S-18** Rebase de las ramas | — | Matiz en «Cuándo acaba» del primer cambio: las ramas pueden rebasarse para leer la spec, pero no planifican ni tocan `src/` hasta que `master` esté en verde |
+| **S-22** Referencias (parte de la 001) | — | «Fuera de este cambio» del primer cambio ya no da por pendiente el hallazgo de `src/datos/` |
+| **S-24** Validaciones de datos reales | — | FR-039, condición 2: lista cerrada de riesgos que la revisión cubre de forma expresa (a a d). Se añade el riesgo d, la deuda de autenticación de la 001, porque el supuesto «Una sola clave por clínica» fijaba otra condición fuera de FR-039 («debe resolverse antes de usar datos reales»). Ese supuesto y «Sin caducidad de sesión» pasan a citar FR-039 |
+| **S-25** Forma del enlace | **D7**: la de D4, 32 caracteres hexadecimales, igual para los reales y los de demostración | FR-029 recoge la forma de 002/FR-025 y la derivación de los enlaces de demostración, que antes solo estaba en este historial |
+
+- **Semilla**: FR-029 solo pasa a requisito lo que ya decía el historial de D4. El token, la derivación y los resúmenes de FR-030 son los mismos.
+- **Tests que cambiarán** (principio VI, primero la spec):
+  - Trazabilidad: el recuento pasa a RN1 a RN8, 42 escenarios y 13 criterios, y se exigen además HU2 escenario 6 y HU5 escenario 5.
+  - «Todos los tests empiezan por lo que comprueban» admitirá `RP`, `RR`, `RA` y `NNN/FR-nnn`, `NNN/SC-nnn` y `NNN/Hx-Ey` (FR-035).
+  - La cobertura de la 001 solo contará los tests que empiecen por un identificador sin prefijo. La búsqueda actual también encuentra `SC-010` dentro de `002/SC-010`, porque la barra no es letra ni guion, y debe excluirlo.
+- **Implementación**: se recomienda implementar este cambio junto con el primero, en una sola pasada y tras aprobarlo, porque los dos tocan el test de trazabilidad (S-14) y el arranque del servidor y FR-038 (S-17). Así el test se toca una sola vez, como recomendaba el informe. Lo que toca código en la 001 es FR-035 (test de trazabilidad), FR-041 (correo desde la cita) y FR-043 (momento de referencia y aviso). FR-040 y FR-027 no cambian la agenda: la cita sin cerrar ya se ve como «Reservada». FR-042 no se implementa en la 001.
+- **Lo que harán las features** al rebasarse: la 002 escribe D3, D6 y D7, cita FR-040, FR-027, FR-041, FR-042 y FR-043, y pasa a «Recogido» sus filas de FR-013 y FR-027. La 003 cita FR-039 (riesgo c), FR-041, FR-042 y FR-043, y corrige S-22 y S-23. La 004 cita FR-040 y FR-043, y corrige S-22. Las tres adoptan la convención de FR-035. Lo aplica cada propietario en su spec.
