@@ -33,7 +33,7 @@
 
 - Los 3 marcadores se resolvieron el 05/11/2026 (ver «Aclaraciones» en la spec) y la validación se repitió sin incidencias.
 - Los encabezados de la plantilla están traducidos por el principio VIII; ningún script los lee.
-- Propietario registrado en `specs/MAPA.md`; aprobada por ese propietario el 06/11/2026.
+- Propietario registrado en `specs/MAPA.md`; aprobada por ese propietario el 06/11/2026, y el cambio del 10/11/2026 también, el 10/11/2026.
 
 ### Revalidación del 10/11/2026 (cambio pendiente de aprobación: S-01 a S-04, D1 y D2)
 
@@ -52,3 +52,7 @@
 
 - Pasan todos los puntos. Los dos resúmenes de FR-030 se calcularon en un worktree desechable (D4), con las cifras de citas sin cambios y con el mismo resultado en dos ejecuciones. Ya no queda ningún marcador [NEEDS CLARIFICATION] en la spec.
 - El historial fija lo que la implementación debe reproducir: los campos y su orden, y la forma del enlace de demostración. Es un detalle técnico que se mantiene a propósito, porque sin él los resúmenes no se pueden reproducir.
+
+### Aprobación del 10/11/2026 (S-06 incluido)
+
+- FR-030 y HU5-E3 llaman a sus cifras «porcentajes de composición de la semilla» (S-06), sin cambiar márgenes, cifras ni resúmenes. Pasan todos los puntos, y el propietario aprueba el cambio completo el 10/11/2026.

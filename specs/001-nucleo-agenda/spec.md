@@ -4,7 +4,7 @@
 
 **Creada**: 05/11/2026
 
-**Estado**: Aprobada por su propietario el 06/11/2026. **Cambio del 10/11/2026 pendiente de aprobación** (ver [Historial de cambios](#historial-de-cambios)): hasta que el propietario lo apruebe, la versión vigente es la del commit `110b41c`.
+**Estado**: Aprobada por su propietario el 06/11/2026. El cambio del 10/11/2026 (S-01 a S-06, S-08 y S-18; ver [Historial de cambios](#historial-de-cambios)) lo aprobó también su propietario el 10/11/2026, y esta es la versión vigente.
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -117,7 +117,7 @@ Cualquier persona del equipo genera los datos ficticios de Clínica Eleva y obti
 
 1. **Dados** los mismos parámetros de semilla, **cuando** se generan los datos dos veces, **entonces** el resultado es idéntico, sin duplicados.
 2. **Dados** los datos generados, **cuando** se revisa cada profesional, **entonces** ninguna cita reservada o completada solapa otra.
-3. **Dados** los datos generados, **cuando** se cuentan las citas de la historia, **entonces** los porcentajes de no asistencia y de cancelación están dentro de los márgenes de FR-030.
+3. **Dados** los datos generados, **cuando** se cuentan las citas de la historia, **entonces** los porcentajes de composición de no asistidas y de canceladas están dentro de los márgenes de FR-030.
 4. **Dados** los datos generados, **cuando** se revisan, **entonces** la clínica tiene teléfono, cada uno de los 40 pacientes tiene su enlace personal de demostración, y las 37 canceladas de la historia tienen origen «recepción» (FR-029).
 
 ---
@@ -264,7 +264,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
   Además, la semilla DEBE generar el teléfono de la clínica, ficticio (`000 200 000`), y un enlace personal de demostración para cada uno de los 40 pacientes, con la forma que fije el modelo de acceso de la 002. Esos enlaces DEBEN ser deterministas (mismos parámetros, mismos enlaces) y son, como la clave `eleva-demo` (FR-002), ficticios y públicos: pueden aparecer en el código y en la documentación, y NO DEBEN usarse con datos reales. Las 37 citas canceladas de la historia DEBEN nacer con origen «recepción» y con el inicio de la cita como momento de la cancelación (FR-036), de modo que se muestran como «Cancelada».
 
-- **FR-030**: La semilla DEBE generar 8 semanas de historia en estados definitivos, de las que entre el 9 % y el 11 % sean no asistidas, entre el 7 % y el 9 % canceladas y el resto completadas, calculado sobre el total de citas de la historia. Cifras exactas con el lunes por defecto, reproducibles con `npm run semilla`: 40 pacientes; 463 citas de historia, de las que 380 son completadas (82,1 %), 46 no asistidas (9,9 %) y 37 canceladas (8,0 %); y 57 reservas futuras.
+- **FR-030**: La semilla DEBE generar 8 semanas de historia en estados definitivos, de las que entre el 9 % y el 11 % sean no asistidas, entre el 7 % y el 9 % canceladas y el resto completadas, calculado sobre el total de citas de la historia. Son **porcentajes de composición de la semilla**, no tasas: dicen cómo se reparte la historia generada, y nadie debe leer el de no asistidas como una «tasa de no asistencia», cuya única definición en el producto es 004/RA3 (S-06). Cifras exactas con el lunes por defecto, reproducibles con `npm run semilla`: 40 pacientes; 463 citas de historia, de las que 380 son completadas (82,1 %), 46 no asistidas (9,9 %) y 37 canceladas (8,0 %); y 57 reservas futuras.
   - **Cifras de citas**: el cambio del 10/11/2026 (teléfono, enlaces y origen, FR-029) no altera ninguna de esas cifras. Son estas cifras, y no los resúmenes, lo que las demás specs DEBEN proteger cuando digan que no alteran la semilla.
   - **Resúmenes de contenido**: identifican el contenido exacto de la semilla, incluidos los datos de la clínica y de los pacientes, así que el cambio del 10/11/2026 los cambia una sola vez. Resumen de contenido: `ae3ce97082c1ccf185b546cb8665f7267d56768f330d5f23a92ed5492e30334f`. Resumen sin fechas: `0937418925ee10348d05a9541c24107a5098ea82a585ce8c57f5f6b5b85a3329`. Los de la versión `110b41c` eran `f1d7a17b9fa57c74ae6b40814b7f41eacfd084559e412f8a0106857d142b74e8` y `fc363c0bc66969d7090dac873ba44d69a64482470f5d8f7d0d9dee54fd273d40`, y dejan de ser válidos. Cómo se calcularon y qué debe reproducir la implementación está en el [Historial de cambios](#historial-de-cambios) (decisión D4).
   - **Única fuente**: este requisito es la única fuente de los resúmenes. Ninguna otra spec los copia: los citan como «resumen de contenido de FR-030 de la 001».
@@ -325,7 +325,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ## Historial de cambios
 
-### 10/11/2026: resolución de los bloqueantes de la revisión cruzada (pendiente de aprobación)
+### 10/11/2026: resolución de los bloqueantes de la revisión cruzada (aprobado el 10/11/2026)
 
 Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov2026.md` asigna a la 001 en sus cuatro bloqueantes, con las decisiones tomadas por Sara (002) y AntonioLV1999 (001, 003 y 004). La 001 pasa a ser la propietaria de estos conceptos, y las demás specs los citan en lugar de definirlos (constitución: «la decisión queda escrita en las specs afectadas»).
 
@@ -336,7 +336,7 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
 | **S-03** Semilla y resúmenes | — | FR-029 (teléfono, enlaces y origen), FR-030 (cifras protegidas, resúmenes nuevos y única fuente), HU5 escenario 4, entidad Clínica |
 | **S-04** Acceso del paciente | **D2**: dos credenciales, un único modelo de acceso definido por la 002 | FR-001 (única excepción), FR-037 (nuevo), HU4 escenario 5, entidades Paciente y Sesión, SC-012 |
 
-- **Estado**: la spec estaba aprobada el 06/11/2026. Este cambio queda **pendiente de aprobación** por su propietario, y no se implementa hasta entonces (principio I).
+- **Estado**: la spec estaba aprobada el 06/11/2026. Este cambio, con las secciones siguientes (S-05, S-08, S-18 y S-06), lo **aprobó su propietario, AntonioLV1999, el 10/11/2026**, y ya se puede implementar (principio I). Queda pendiente de su decisión qué se hace con la suite en rojo mientras tanto (S-18).
 - **Resúmenes de FR-030 (decisión D4, S-18)**: se calcularon antes de aprobar, sin implementar en el tronco. Así se rompe el círculo de S-18, en el que no se implementaba sin aprobar ni se aprobaba sin los resúmenes. El procedimiento fue este:
   - En un worktree desechable sacado de `master` (`bdc7c26`), se aplicaron solo los datos nuevos de FR-029, con los cambios mínimos de esquema y semilla.
   - Se ejecutó `npm run semilla`, y los resúmenes salieron de la misma función `resumen()` de `src/semilla/carga.js`.
@@ -360,7 +360,7 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
 - **Tests que cambiarán** (principio VI, primero la spec): «FR-001 solo la pantalla de acceso es pública» admitirá las rutas públicas del modelo de acceso de la 002, y los de trazabilidad pasarán a exigir RN8.
 - **Fuera de este cambio**: los demás hallazgos que el informe asigna a la 001 (S-13 a S-17) y el hallazgo colateral de `src/datos/`. S-05 y S-08 entran en este mismo cambio (ver la sección siguiente).
 
-#### S-05 y S-08: operación única de cancelar y puerta de uso con datos reales (mismo cambio, pendiente de aprobación)
+#### S-05 y S-08: operación única de cancelar y puerta de uso con datos reales (mismo cambio)
 
 La 002, la 003 y la 004 ya citaban estos dos conceptos, y la 001 no los definía (informe, S-05 y S-08). Entran en el mismo cambio del 10/11/2026, antes de aprobarlo, como pide la resolución de S-18. No cambian la semilla ni sus cifras.
 
@@ -372,3 +372,7 @@ La 002, la 003 y la 004 ya citaban estos dos conceptos, y la 001 no los definía
 - **Responsable y fecha de FR-039** (decisión del propietario, 10/11/2026): el responsable es AntonioLV1999, y la fecha es la de la comprobación de las condiciones, que se escribirá cuando ocurra. Que falte no impide aprobar: significa que la puerta aún no se cumple, que es el estado actual.
 - **Tests que cambiarán** (principio VI, primero la spec): la cancelación de recepción, que hoy responde con un rechazo a una cita ya cancelada y no recibe canal, pasará por FR-038, y los de trazabilidad exigirán HU6 escenario 9 y SC-013.
 - **Lo que harán las features** al rebasarse sobre la 001 aprobada: sustituir «la operación única de cancelar» por FR-038 (002: RP4, FR-015, FR-017 y HU3 escenarios 6 y 7; 003: RR4, FR-014, casos límite y Dependencias) y «la puerta de uso con datos reales» por FR-039 (002/FR-006, 003/FR-018 y el supuesto «Misma clave, mismas cifras» de la 004). Lo aplica cada propietario en su spec.
+
+#### S-06: nombre del porcentaje de FR-030 (mismo cambio)
+
+- FR-030 llama a sus cifras «porcentajes de composición de la semilla» y remite a 004/RA3 como única definición de la tasa de no asistencia. HU5 escenario 3 usa el mismo nombre. No cambian los márgenes, las cifras ni los resúmenes.
