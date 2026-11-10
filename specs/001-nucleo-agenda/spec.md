@@ -296,7 +296,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
   - **Convención de identificadores, para todas las specs (S-14)**: cada test empieza por el identificador que comprueba.
     - Los de la 001 van sin prefijo: `RN1`, `FR-001`, `SC-001`, `H1-E1` y `CL`.
     - Las reglas de las demás specs usan su letra propia, que no se repite, y van sin prefijo: `RP1` (002), `RR1` (003) y `RA1` (004).
-    - Todo identificador de otra spec que se repita entre specs lleva delante el número de su spec y una barra: `002/FR-017`, `003/SC-001` y `004/H5-E8`.
+    - Todo identificador de otra spec que se repita entre specs lleva delante el número de su spec y una barra: `002/FR-017`, `003/SC-001`, `004/H5-E8` y, para los casos límite, `002/CL`.
   - **Cobertura**: la cobertura de una spec solo la dan los tests que **empiezan** por un identificador de esa spec. Un test de una feature que nombre más adelante una regla de la 001, como RN8, no cuenta como cobertura de la 001, y un identificador con prefijo nunca cuenta como uno de la 001.
   - Cada feature comprueba su propia cobertura, y el test que obliga a empezar por un identificador admite las formas de esta convención.
 
@@ -306,6 +306,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-043 (momento de referencia de la demostración, S-17)**: El servidor y todo proceso del producto, incluido el de recordatorios (003/FR-003), DEBEN poder arrancarse con un momento de referencia, en fecha y hora local de la clínica, que toman como «ahora». Es el mismo ajuste para todos.
   - **Con el ajuste**: el reloj queda fijado en ese momento y no avanza mientras el servidor o el proceso sigan en marcha. RN2, RN5, RN8, FR-038, FR-040, «hoy» en la agenda y la vigencia de los enlaces de la 003 (RR6) usan ese momento.
   - **Sin el ajuste**: «ahora» es la hora real.
+  - **Esperas**: las esperas que se miden por tiempo transcurrido, como la inactividad de una sesión o el bloqueo por intentos con enlaces no válidos (002/FR-004), cuentan siempre el tiempo real que pasa, también con el reloj fijado. Si no, una sesión no caducaría nunca y un bloqueo no terminaría nunca.
   - **Aviso**: mientras el reloj esté fijado, las pantallas de recepción DEBEN indicarlo, con la fecha y la hora, para que nadie lo tome por un fallo (HU5, escenario 5).
   - **Solo con datos de demostración**: NO DEBE usarse con datos reales (FR-039).
   - Cada spec elige el momento de sus ejemplos, pero lo expresa con este ajuste.
@@ -425,7 +426,7 @@ Aplica lo que la cuarta pasada del informe `specs/000-revision-cruzada-nov2026.m
 | **S-14** Identificadores de los tests | — | FR-035 (convención para todas las specs y cobertura solo por el identificador inicial) |
 | **S-15** Cita sin cerrar y etiquetas | **D6**: «Pendiente de confirmar por la clínica» solo en los canales del paciente, que ve en las canceladas la misma etiqueta que la agenda | FR-040 (nuevo: `inicio <= ahora`), FR-027 (segunda etiqueta y etiquetas del paciente), caso límite «Cita sin cerrar», entidad Cita |
 | **S-16** Dirección pública | — | FR-042 (nuevo: un único ajuste, que crea la primera feature que lo necesite) |
-| **S-17** «Ahora» en la demostración | — | FR-043 (nuevo: un único momento de referencia para el servidor y los procesos, reloj fijado, aviso en recepción), HU5 escenario 5 (nuevo) |
+| **S-17** «Ahora» en la demostración | — | FR-043 (nuevo: un único momento de referencia para el servidor y los procesos, reloj fijado, aviso en recepción; las esperas de 002/FR-004 cuentan tiempo real), HU5 escenario 5 (nuevo) |
 | **S-18** Rebase de las ramas | — | Matiz en «Cuándo acaba» del primer cambio: las ramas pueden rebasarse para leer la spec, pero no planifican ni tocan `src/` hasta que `master` esté en verde |
 | **S-22** Referencias (parte de la 001) | — | «Fuera de este cambio» del primer cambio ya no da por pendiente el hallazgo de `src/datos/` |
 | **S-24** Validaciones de datos reales | — | FR-039, condición 2: lista cerrada de riesgos que la revisión cubre de forma expresa (a a d). Se añade el riesgo d, la deuda de autenticación de la 001, porque el supuesto «Una sola clave por clínica» fijaba otra condición fuera de FR-039 («debe resolverse antes de usar datos reales»). Ese supuesto y «Sin caducidad de sesión» pasan a citar FR-039 |
