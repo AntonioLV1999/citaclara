@@ -82,7 +82,7 @@ Recepción marca cada cita reservada como completada, cancelada o no asistida, p
 2. **Dada** una cita reservada cuya hora de inicio ya ha llegado, **cuando** recepción la marca como no asistida, **entonces** queda no asistida y deja de ocupar su tramo.
 3. **Dada** una cita reservada que aún no ha empezado, **cuando** recepción consulta sus acciones, **entonces** solo puede cancelarla; marcarla como completada o no asistida se rechaza aunque se intente fuera de la interfaz.
 4. **Dada** una cita reservada, **cuando** recepción la cancela, **entonces** queda cancelada y su tramo vuelve a estar libre.
-5. **Dada** una cita completada, cancelada o no asistida, **cuando** se intenta cambiar su estado, **entonces** se rechaza con un mensaje que indica el estado en que ya está.
+5. **Dada** una cita completada, cancelada o no asistida, **cuando** recepción intenta cambiar su estado, **entonces** se rechaza con un mensaje que indica el estado en que ya está. Si lo que intenta es cancelar, es el mensaje que recepción elige ante los resultados «ya estaba cancelada» y «no cancelable» de la operación única de cancelar (FR-038). Los canales del paciente tratan «ya estaba cancelada» sin error, con el mensaje que elige cada uno (002/FR-017 y 003/FR-014).
 6. **Dada** cualquier acción de estado, **cuando** recepción la pulsa, **entonces** se le pide confirmación avisando de que no se puede deshacer.
 
 ---
@@ -128,7 +128,7 @@ El paciente cancela una cita por cualquiera de sus canales (el portal de la 002 
 
 **Por qué esta prioridad**: la 001 no abre ningún canal del paciente, pero fija las reglas comunes para que el portal y el correo no se contradigan ante el mismo paciente y la misma cita.
 
-**Prueba independiente**: sobre citas reservadas de los datos de demostración, con el reloj fijado, aplicar la cancelación del paciente antes, en y después del minuto límite, indicando el canal, y comprobar el resultado, el origen registrado y lo que muestra la agenda. Las pantallas de cada canal las prueban la 002 y la 003, citando estos escenarios.
+**Prueba independiente**: sobre citas reservadas de los datos de demostración, con el reloj fijado, aplicar la operación única de cancelar (FR-038) antes, en y después del minuto límite, indicando el canal, y comprobar el resultado, el origen registrado y lo que muestra la agenda. Las pantallas de cada canal las prueban la 002 y la 003, citando estos escenarios.
 
 **Escenarios de aceptación**:
 
@@ -140,6 +140,7 @@ El paciente cancela una cita por cualquiera de sus canales (el portal de la 002 
 6. **Dada** una cita cancelada por el paciente desde el portal o desde el correo el 08/11/2026 a las 19:30, **cuando** recepción abre la agenda, **entonces** la cita aparece como «Cancelada por el paciente» con esa fecha y esa hora, y su tramo cuenta como libre.
 7. **Dada** una cita cancelada por recepción, aunque el paciente lo pidiera por teléfono, **cuando** se muestra la agenda, **entonces** aparece como «Cancelada», sin fecha ni hora.
 8. **Dada** una cita que no se puede cancelar (ya cancelada, completada o no asistida, o fuera de plazo para el paciente), **cuando** se intenta cancelar, **entonces** su origen y su momento de cancelación no cambian.
+9. **Dadas** dos cancelaciones simultáneas de la misma cita reservada y dentro del plazo de RN8, una por el portal y otra por el correo, **cuando** el sistema las procesa, **entonces** exactamente una obtiene «cancelada ahora» y la otra «ya estaba cancelada», con el origen de la primera, y la cita queda con un solo origen y un solo momento, los de la cancelación que prosperó (FR-038).
 
 ---
 
@@ -147,7 +148,7 @@ El paciente cancela una cita por cualquiera de sus canales (el portal de la 002 
 
 - **Agenda desactualizada**: recepción tiene abierta una agenda antigua y reserva un hueco que otra persona acaba de ocupar. El sistema rechaza la reserva y recepción ve los huecos actuales de ese día.
 - **Doble pulsación o reintento**: la misma alta llega dos veces. Solo queda una cita, y la segunda petición se rechaza como cualquier solape.
-- **Dos acciones de estado a la vez** sobre la misma cita (por ejemplo, cancelar y completar): solo una prospera; la otra recibe un mensaje con el estado resultante.
+- **Dos acciones de estado a la vez** sobre la misma cita (por ejemplo, cancelar y completar): solo una prospera; la otra recibe un mensaje con el estado resultante. Si alguna de ellas es cancelar, sea de recepción o del paciente, pasa por la operación única de cancelar (FR-038).
 - **El servicio no cabe en el hueco**: una cita de 60 minutos en un hueco libre de 45 se rechaza por solapar la siguiente o por salirse del horario.
 - **Cita reservada ya pasada sin cerrar**: sigue reservada y ocupando su tramo. El sistema nunca cambia estados por su cuenta; recepción la cierra cuando pueda.
 - **Cancelación registrada tarde**: si el paciente avisó y recepción lo anota después de la hora, se marca como cancelada, no como no asistida, porque «no asistida» significa exclusivamente que no se presentó.
@@ -187,6 +188,15 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **FR-004**: El sistema DEBE limitar cada sesión a los datos de su clínica.
 - **FR-037**: Las sesiones de paciente DEBEN guardarse en un almacén propio y viajar en una cookie propia, distintos de los de la sesión de recepción. Una sesión de paciente NO DEBE dar acceso a la agenda ni a ninguna ruta de recepción ni del panel de analítica (004), por ninguna vía, ni aunque se presente en lugar de la sesión de recepción: se trata igual que la ausencia de sesión. Salir de una sesión no cierra la otra.
 
+**Uso con datos reales**
+
+- **FR-039 (puerta de uso con datos reales, S-08)**: Ningún canal del producto (la agenda y el resto de recepción, el portal de la 002, el correo real de la 003 ni el panel de la 004) DEBE usarse con datos reales de pacientes hasta que se cumplan, a la vez, estas tres condiciones:
+  1. **Conexión cifrada**: la conexión entre el navegador y el servidor va cifrada, y las cookies de sesión, de recepción y de paciente (FR-037), solo viajan por ella.
+  2. **Revisión de protección de datos**: está hecha, e incluye de forma expresa el riesgo aceptado del enlace personal sin caducidad de la 002.
+  3. **Responsable y fecha**: esta spec tiene escritos un responsable y una fecha. Responsable: [NEEDS CLARIFICATION: lo fija el propietario de la 001]. Fecha: [NEEDS CLARIFICATION: la fija el propietario de la 001].
+
+  Mientras no se cumplan las tres, el producto DEBE funcionar solo con los datos ficticios de la semilla (FR-029 a FR-034), y el correo de la 003 solo en modo simulado (003/FR-019), aunque haya servidor de correo configurado. Es la única puerta de uso con datos reales: ninguna otra spec fija otra condición ni la relaja, y las features la citan como «FR-039 de la 001».
+
 **Alta de cita**
 
 - **FR-005**: Recepción DEBE poder crear una cita eligiendo profesional, servicio, paciente, día y hora de inicio.
@@ -210,10 +220,24 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 **Estados**
 
-- **FR-020**: Recepción DEBE poder marcar una cita reservada como completada, cancelada o no asistida, según RN4 y RN5. El sistema DEBE rechazar cualquier otra transición.
+- **FR-020**: Recepción DEBE poder marcar una cita reservada como completada, cancelada o no asistida, según RN4 y RN5. El paciente solo puede cancelar, por cualquiera de sus canales y dentro del plazo de RN8; nunca marca una cita como completada ni como no asistida. Toda cancelación, la haga quien la haga, DEBE pasar por la operación única de cancelar (FR-038). El sistema DEBE rechazar cualquier otra transición.
 - **FR-021**: Cada acción de estado DEBE pedir confirmación y avisar de que no se puede deshacer.
 - **FR-022**: El sistema NO DEBE cambiar el estado de ninguna cita por su cuenta.
 - **FR-036**: Toda cancelación DEBE registrar su origen («recepción», «portal» o «correo») y su momento, en hora local de la clínica, en la misma operación que cambia el estado a cancelada, y como parte indivisible de ella: si la cancelación no prospera, no se registra nada. El origen y el momento NO DEBEN rellenarse ni corregirse después, y una cita que no está cancelada NO DEBE tener origen ni momento de cancelación. El origen es el canal que registró la cancelación: lo que recepción cancela es siempre «recepción», y «portal» y «correo» son los dos orígenes del paciente.
+- **FR-038 (operación única de cancelar, S-05)**: Toda cancelación DEBE registrarse mediante una única operación, la misma para todos los canales. Ninguna pantalla, vía ni spec DEBE cancelar una cita de otra forma.
+  - **Entrada**: la cita y el canal que registra la cancelación: «recepción», «portal» o «correo». El canal es el origen de FR-036.
+  - **Reglas**: aplica siempre RN4 y, si el canal es del paciente («portal» o «correo»), también RN8, con el «ahora» del sistema en el momento de registrar y no el de la pantalla. Con el canal «recepción» no hay plazo (RN5).
+  - **Indivisible**: comprobar el estado y el plazo, cambiar la cita a cancelada y registrar el origen y el momento (FR-036) son una sola operación indivisible. Si llegan a la vez varias cancelaciones de la misma cita, por el mismo canal o por canales distintos, exactamente una la cancela, y las demás obtienen «ya estaba cancelada».
+  - **Resultado**: devuelve siempre uno de estos cuatro, que se comprueban en este orden:
+
+    | Resultado | Cuándo | Devuelve además | Efecto sobre la cita |
+    |-----------|--------|-----------------|----------------------|
+    | **Ya estaba cancelada** | La cita ya está cancelada | El origen y el momento previos, que la 002 necesita para elegir su mensaje (002/FR-017) | Ninguno |
+    | **No cancelable** | La cita está completada o no asistida | Su estado | Ninguno |
+    | **Fuera de plazo** | Canal del paciente, cita reservada y pasado el límite de RN8 | La fecha y la hora del límite de RN8, en hora local de la clínica | Ninguno |
+    | **Cancelada ahora** | Cita reservada y, si el canal es del paciente, dentro de RN8 | El origen y el momento recién registrados | Queda cancelada y su tramo, libre |
+
+  - **Resultado y mensaje**: la 001 define el resultado, no el texto. Cada canal elige el mensaje que ve la persona según el resultado: recepción en la agenda (HU3, escenario 5, y FR-027), el portal según 002/FR-017 y el correo según 003/FR-014. Ningún resultado distinto de «cancelada ahora» cambia la cita, su origen ni su momento (HU6, escenario 8).
 
 **Fechas, horas e importes** (constitución, principio II)
 
@@ -278,6 +302,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **SC-010**: El 100 % de los intentos de cancelación del paciente se resuelve igual por el portal y por el correo: se aceptan hasta el minuto límite de RN8 incluido y se rechazan desde el minuto siguiente, también en semanas a ambos lados de un cambio de hora.
 - **SC-011**: El 100 % de las cancelaciones muestra el origen y la etiqueta correctos (FR-027 y FR-036), y ninguna cita cancelada queda sin origen ni momento.
 - **SC-012**: Cero consultas u operaciones de recepción o del panel de analítica prosperan con una sesión de paciente, en el 100 % de las rutas comprobadas.
+- **SC-013**: El 100 % de las cancelaciones, por cualquier canal, se registra mediante la operación única de cancelar (FR-038): ninguna vía cancela una cita sin pasar por ella. En 1.000 rondas de cancelaciones simultáneas de la misma cita por canales distintos, cada ronda termina con exactamente un «cancelada ahora», un solo origen y un solo momento.
 
 ## Supuestos
 
@@ -292,11 +317,11 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 - **Precio por servicio**: como los servicios no se editan en la 001, la cita toma el precio del servicio. Guardar el precio histórico corresponderá a la spec que permita cambiarlo.
 - **Sin detección de fichas duplicadas**: un teléfono puede repetirse, porque una familia puede compartirlo.
 - **Sin caducidad de sesión**: la sesión dura hasta salir o cerrar el navegador. Forma parte de la deuda de autenticación.
-- **Conexión sin cifrar (deuda consciente)**: la 001 no cifra la conexión, y la clave y los datos viajan en claro entre el navegador y el servidor. Sirve para demostraciones con datos ficticios. Forma parte de la deuda de autenticación: antes de usar datos reales de pacientes, la conexión debe ir cifrada y la cookie de sesión debe limitarse a ella.
+- **Conexión sin cifrar (deuda consciente)**: la 001 no cifra la conexión, y la clave y los datos viajan en claro entre el navegador y el servidor. Sirve para demostraciones con datos ficticios. Forma parte de la deuda de autenticación: antes de usar datos reales de pacientes, la conexión debe ir cifrada y la cookie de sesión debe limitarse a ella. Es la primera condición de la puerta de uso con datos reales (FR-039), que fija además las otras dos.
 - **Teléfono de la clínica en la semilla**: `000 200 000`, de la misma familia ficticia que los teléfonos de los pacientes, para cumplir FR-034.
 - **Momento de las canceladas de la semilla**: la historia no registra cuándo se canceló cada cita, así que se toma su inicio. Es determinista y se desplaza con el lunes de referencia (FR-032), y no se muestra, porque las canceladas por recepción no llevan fecha en la etiqueta.
 - **El plazo se prueba como regla**: la 001 no abre ningún canal del paciente. RN8 y la historia 6 se prueban en la 001 como reglas, indicando el canal y el momento, y la 002 y la 003 prueban además sus pantallas citando estos identificadores.
-- **Fuera de alcance de la 001** (specs propias): las pantallas y el modelo de acceso del paciente (002), los recordatorios (003), la analítica (004) y los pagos online. La 001 solo fija la excepción a la clave (FR-001), la separación de sesiones (FR-037), el plazo (RN8), el origen y la etiqueta de las cancelaciones (FR-027 y FR-036) y los datos de semilla que esas features necesitan (FR-029).
+- **Fuera de alcance de la 001** (specs propias): las pantallas y el modelo de acceso del paciente (002), los recordatorios (003), la analítica (004) y los pagos online. La 001 solo fija la excepción a la clave (FR-001), la separación de sesiones (FR-037), el plazo (RN8), el origen y la etiqueta de las cancelaciones (FR-027 y FR-036), la operación única de cancelar (FR-038), la puerta de uso con datos reales (FR-039) y los datos de semilla que esas features necesitan (FR-029).
 
 ## Historial de cambios
 
@@ -314,4 +339,17 @@ Aplica, en un único cambio, lo que el informe `specs/000-revision-cruzada-nov20
 - **Estado**: la spec estaba aprobada el 06/11/2026. Este cambio queda **pendiente de aprobación** por su propietario, y no se implementa hasta entonces (principio I).
 - **Pendiente antes de aprobar**: los dos resúmenes de FR-030, que solo pueden calcularse al generar la semilla nueva. Decisión del propietario (10/11/2026): se calculan al implementar este cambio y se escriben en FR-030 en ese mismo commit, que sustituye los dos marcadores. La aprobación espera a ese commit, para aprobar la spec ya completa.
 - **Tests que cambiarán** (principio VI, primero la spec): «FR-001 solo la pantalla de acceso es pública» admitirá las rutas públicas del modelo de acceso de la 002, y los de trazabilidad pasarán a exigir RN8.
-- **Fuera de este cambio**: los demás hallazgos que el informe asigna a la 001 (S-05, S-08, S-13 a S-17) y el hallazgo colateral de `src/datos/`.
+- **Fuera de este cambio**: los demás hallazgos que el informe asigna a la 001 (S-13 a S-17) y el hallazgo colateral de `src/datos/`. S-05 y S-08 entran en este mismo cambio (ver la sección siguiente).
+
+#### S-05 y S-08: operación única de cancelar y puerta de uso con datos reales (mismo cambio, pendiente de aprobación)
+
+La 002, la 003 y la 004 ya citaban estos dos conceptos, y la 001 no los definía (informe, S-05 y S-08). Entran en el mismo cambio del 10/11/2026, antes de aprobarlo, como pide la resolución de S-18. No cambian la semilla ni sus cifras.
+
+| Hallazgo | Cambios en esta spec |
+|----------|----------------------|
+| **S-05** Operación única de cancelar | FR-038 (nuevo): canal de entrada, RN4 y RN8, FR-036 en una sola operación indivisible, y cuatro resultados («cancelada ahora», «ya estaba cancelada» con su origen, «fuera de plazo» con el límite y «no cancelable» con el estado). FR-020 (el paciente cancela dentro de RN8, y toda cancelación pasa por FR-038). HU3 escenario 5 (se mantiene para recepción; el paciente trata «ya estaba cancelada» sin error). HU6 escenario 9 (nuevo: portal y correo a la vez). SC-013 (nuevo). Caso límite «Dos acciones de estado a la vez» |
+| **S-08** Puerta de uso con datos reales | FR-039 (nuevo): conexión cifrada con la cookie limitada a ella, revisión de protección de datos con el riesgo del enlace sin caducidad de la 002, y responsable y fecha. Supuesto «Conexión sin cifrar (deuda consciente)», que pasa a citar FR-039 |
+
+- **Pendiente antes de aprobar**: el responsable y la fecha de FR-039, dos marcadores [NEEDS CLARIFICATION] que fija el propietario. Se suman a los dos resúmenes de FR-030.
+- **Tests que cambiarán** (principio VI, primero la spec): la cancelación de recepción, que hoy responde con un rechazo a una cita ya cancelada y no recibe canal, pasará por FR-038, y los de trazabilidad exigirán HU6 escenario 9 y SC-013.
+- **Lo que harán las features** al rebasarse sobre la 001 aprobada: sustituir «la operación única de cancelar» por FR-038 (002: RP4, FR-015, FR-017 y HU3 escenarios 6 y 7; 003: RR4, FR-014, casos límite y Dependencias) y «la puerta de uso con datos reales» por FR-039 (002/FR-006, 003/FR-018 y el supuesto «Misma clave, mismas cifras» de la 004). Lo aplica cada propietario en su spec.
