@@ -286,3 +286,21 @@ test('FR-027 la agenda nunca muestra «Pendiente de confirmar por la clínica»,
   assert.doesNotMatch(texto, /recepcion/);
   assert.doesNotMatch(texto, /portal/);
 });
+
+test('FR-041 cada cita, en cualquier estado, enlaza al correo de la ficha con «Añadir correo» o «Cambiar correo»', async () => {
+  const conCorreo = Number(e.bd.prepare("INSERT INTO paciente (clinica_id, nombre, telefono, email) VALUES (?, 'Eva Ruiz', '600 000 010', 'eva@example.com')")
+    .run(e.a.id).lastInsertRowid);
+  const sinCorreo = [
+    citaDe(`${HOY}T09:00`, 'completada'),
+    citaDe(`${HOY}T10:00`, 'no_asistida'),
+    citaDe(`${HOY}T13:00`, 'cancelada'),
+    citaDe(`${HOY}T15:00`, 'reservada'),
+  ];
+  const otra = citaDe(`${HOY}T17:00`, 'reservada', { paciente: conCorreo });
+  const r = await agenda();
+  for (const id of sinCorreo) {
+    assert.match(r.texto, new RegExp(`href="/citas/${id}/correo">Añadir correo</a>`), String(id));
+  }
+  assert.match(r.texto, new RegExp(`href="/citas/${otra}/correo">Cambiar correo</a>`));
+  assert.doesNotMatch(r.texto, new RegExp(`href="/citas/${otra}/correo">Añadir correo`));
+});

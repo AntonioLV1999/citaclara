@@ -1,5 +1,6 @@
 const CITA_COMPLETA = `
-  SELECT cita.*, paciente.nombre AS paciente_nombre, servicio.nombre AS servicio_nombre
+  SELECT cita.*, paciente.nombre AS paciente_nombre, paciente.telefono AS paciente_telefono,
+    paciente.email AS paciente_email, servicio.nombre AS servicio_nombre
   FROM cita
   JOIN paciente ON paciente.id = cita.paciente_id
   JOIN servicio ON servicio.id = cita.servicio_id

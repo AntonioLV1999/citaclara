@@ -33,9 +33,13 @@ export function validarAlta({ dia, hora, duracionMin, ahora }) {
   return dentroDeHorario ? null : MENSAJES.horario;
 }
 
+/** FR-013: el correo es opcional; si existe, con forma de correo. Lo usan el alta y FR-041. */
+export function validarCorreo(email) {
+  return email && !CORREO.test(email) ? MENSAJES.correo : null;
+}
+
 export function validarPaciente({ nombre, telefono, email }) {
   const digitos = (telefono ?? '').replace(/\D/g, '');
   if (!nombre?.trim() || !TELEFONO.test(telefono ?? '') || digitos.length < 9) return MENSAJES.paciente;
-  if (email && !CORREO.test(email)) return MENSAJES.correo;
-  return null;
+  return validarCorreo(email);
 }

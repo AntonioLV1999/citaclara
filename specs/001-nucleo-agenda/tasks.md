@@ -416,7 +416,7 @@ Cualquier otro fallo es una regresión.
 
 ### Tests de la historia 2 (primero, deben fallar)
 
-- [ ] T109 [P] [US2] Escribir tests/integracion/rutas-correo.test.js según [contracts/interfaz-web.md](contracts/interfaz-web.md):
+- [X] T109 [P] [US2] Escribir tests/integracion/rutas-correo.test.js según [contracts/interfaz-web.md](contracts/interfaz-web.md):
   - `H2-E6`: en una ficha sin correo, `POST /citas/:id/correo` con un correo válido redirige con 303 a la agenda del profesional y del día de la cita, y guarda el correo. Un correo mal escrito también se corrige.
   - `FR-041`: vacío o solo espacios lo quita, con `email` `NULL`.
   - `FR-013`: un correo no válido da 422 con «Ese correo no parece válido. Revísalo o déjalo en blanco.», conserva lo escrito y no cambia la ficha.
@@ -425,16 +425,16 @@ Cualquier otro fallo es una regresión.
   - `FR-041`: funciona en citas reservadas, completadas, canceladas y no asistidas.
   - `FR-004`: una cita de otra clínica o inexistente da 404 en `GET` y en `POST`, sin cambios.
   - El nombre del paciente se escapa.
-- [ ] T110 [P] [US2] Ampliar tests/integracion/rutas-agenda.test.js con `FR-041`: cada cita, en cualquier estado, enlaza a `/citas/:id/correo` con «Añadir correo» si la ficha no tiene correo y «Cambiar correo» si lo tiene. Ampliar «FR-001 están registradas las rutas del contrato» en tests/integracion/rutas-acceso.test.js con `GET /citas/:id/correo` y `POST /citas/:id/correo`
+- [X] T110 [P] [US2] Ampliar tests/integracion/rutas-agenda.test.js con `FR-041`: cada cita, en cualquier estado, enlaza a `/citas/:id/correo` con «Añadir correo» si la ficha no tiene correo y «Cambiar correo» si lo tiene. Ampliar «FR-001 están registradas las rutas del contrato» en tests/integracion/rutas-acceso.test.js con `GET /citas/:id/correo` y `POST /citas/:id/correo`
 
 ### Implementación de la historia 2
 
-- [ ] T111 [US2] Añadir a src/datos/pacientes.js `cambiarCorreo(bd, clinicaId, pacienteId, email)`, que solo actualiza `paciente.email`. Añadir `paciente.email AS paciente_email` a la consulta común de src/datos/citas.js, para que la agenda no haga consultas por cita (SC-004) (depende de T103)
-- [ ] T112 [P] [US2] Extraer de `validarPaciente` en src/dominio/reglas.js una `validarCorreo(texto)` con la misma regla de FR-013, «con forma de correo», y usarla en las dos
-- [ ] T113 [US2] Crear src/servicios/correo-ficha.js con `guardarCorreo(contexto, citaId, texto)`: localiza la cita en la clínica de la sesión; recorta, y un texto vacío es `null`; valida con `validarCorreo`; llama a `cambiarCorreo`. Devuelve `{ ok: true, cita }`, `{ ok: false, motivo: 'no_encontrado' }` o `{ ok: false, motivo: 'rechazo', mensaje }`. No envía nada (depende de T111, T112)
-- [ ] T114 [P] [US2] Crear la vista src/web/vistas/correo.js con los textos literales del contrato, la hora local de la cita (FR-023), `novalidate` y el valor escrito conservado tras un 422
-- [ ] T115 [US2] Crear src/web/rutas/correo.js con `GET /citas/:id/correo` y `POST /citas/:id/correo` (303 a `/agenda?profesional=…&dia=dd/mm/aaaa` del día de la cita; 422; 404), y registrar `rutasCorreo` en src/web/servidor.js (depende de T113, T114)
-- [ ] T116 [US2] Añadir a cada cita de src/web/vistas/agenda.js el enlace «Añadir correo» o «Cambiar correo», según `paciente_email`, con tamaño táctil de al menos 44 × 44 píxeles (depende de T097, T111)
+- [X] T111 [US2] Añadir a src/datos/pacientes.js `cambiarCorreo(bd, clinicaId, pacienteId, email)`, que solo actualiza `paciente.email`. Añadir `paciente.email AS paciente_email` a la consulta común de src/datos/citas.js, para que la agenda no haga consultas por cita (SC-004) (depende de T103)
+- [X] T112 [P] [US2] Extraer de `validarPaciente` en src/dominio/reglas.js una `validarCorreo(texto)` con la misma regla de FR-013, «con forma de correo», y usarla en las dos
+- [X] T113 [US2] Crear src/servicios/correo-ficha.js con `guardarCorreo(contexto, citaId, texto)`: localiza la cita en la clínica de la sesión; recorta, y un texto vacío es `null`; valida con `validarCorreo`; llama a `cambiarCorreo`. Devuelve `{ ok: true, cita }`, `{ ok: false, motivo: 'no_encontrado' }` o `{ ok: false, motivo: 'rechazo', mensaje }`. No envía nada (depende de T111, T112)
+- [X] T114 [P] [US2] Crear la vista src/web/vistas/correo.js con los textos literales del contrato, la hora local de la cita (FR-023), `novalidate` y el valor escrito conservado tras un 422
+- [X] T115 [US2] Crear src/web/rutas/correo.js con `GET /citas/:id/correo` y `POST /citas/:id/correo` (303 a `/agenda?profesional=…&dia=dd/mm/aaaa` del día de la cita; 422; 404), y registrar `rutasCorreo` en src/web/servidor.js (depende de T113, T114)
+- [X] T116 [US2] Añadir a cada cita de src/web/vistas/agenda.js el enlace «Añadir correo» o «Cambiar correo», según `paciente_email`, con tamaño táctil de al menos 44 × 44 píxeles (depende de T097, T111)
 
 **Punto de control**: T109 y T110 en verde. En la trazabilidad ya solo faltan H4-E5 y SC-012.
 

@@ -90,6 +90,7 @@ test('FR-001 están registradas las rutas del contrato', () => {
   for (const ruta of [
     'GET /acceso', 'POST /acceso', 'POST /salir', 'GET /', 'GET /agenda', 'GET /citas/nueva', 'POST /citas/nueva', 'POST /citas',
     'GET /pacientes/buscar', 'GET /citas/:id/confirmar', 'POST /citas/:id/estado',
+    'GET /citas/:id/correo', 'POST /citas/:id/correo',
   ]) {
     assert.ok(rutas.includes(ruta), ruta);
   }

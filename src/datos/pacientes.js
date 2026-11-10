@@ -12,6 +12,11 @@ export function crearPaciente(bd, { clinicaId, nombre, telefono, email, enlace =
   return Number(lastInsertRowid);
 }
 
+/** FR-041: solo cambia el correo de la ficha. Nombre y teléfono no se editan fuera del alta. */
+export function cambiarCorreo(bd, clinicaId, pacienteId, email) {
+  bd.prepare('UPDATE paciente SET email = ? WHERE clinica_id = ? AND id = ?').run(email, clinicaId, pacienteId);
+}
+
 export function pacientePorId(bd, clinicaId, id) {
   return bd.prepare('SELECT * FROM paciente WHERE clinica_id = ? AND id = ?').get(clinicaId, id);
 }

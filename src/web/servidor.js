@@ -7,6 +7,7 @@ import {
 import { rutasAcceso } from './rutas/acceso.js';
 import { rutasAgenda } from './rutas/agenda.js';
 import { rutasCitas } from './rutas/citas.js';
+import { rutasCorreo } from './rutas/correo.js';
 import { rutasEstado } from './rutas/estado.js';
 import { rutasPacientes } from './rutas/pacientes.js';
 
@@ -103,7 +104,7 @@ async function atender({ bd, ahora, momentoFijado, rutas }, req, res) {
 
 export function crearServidor({ bd, ahora, momentoFijado = null, rutasExtra = [] }) {
   const rutas = [
-    ...rutasAcceso, ...rutasAgenda, ...rutasCitas, ...rutasEstado, ...rutasPacientes, ...rutasExtra,
+    ...rutasAcceso, ...rutasAgenda, ...rutasCitas, ...rutasEstado, ...rutasCorreo, ...rutasPacientes, ...rutasExtra,
   ].map(compilarRuta);
   const servidor = createServer((req, res) => {
     atender({ bd, ahora, momentoFijado, rutas }, req, res).catch((error) => {

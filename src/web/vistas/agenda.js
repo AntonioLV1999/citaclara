@@ -27,6 +27,12 @@ function navegacionDias(profesional, dia, hoy) {
   </form>`;
 }
 
+/** FR-041: el correo es de la ficha, no de la cita, así que se ofrece en citas de cualquier estado. */
+function enlaceCorreo(cita) {
+  const texto = cita.paciente_email ? 'Cambiar correo' : 'Añadir correo';
+  return html`<a class="boton boton--secundario" href="/citas/${cita.id}/correo">${texto}</a>`;
+}
+
 function filaCita(cita) {
   const clase = ocupa(cita) ? 'cita' : 'cita cita--libera';
   return html`<li class="${clase}">
@@ -34,9 +40,10 @@ function filaCita(cita) {
     <p class="cita__paciente">${cita.paciente_nombre}</p>
     <p class="cita__servicio">${cita.servicio_nombre}</p>
     <p class="estado estado--${cita.estado.replace('_', '-')}">${etiquetaCita(cita)}</p>
-    ${cita.acciones.length > 0 && html`<div class="acciones">
+    <div class="acciones">
       ${cita.acciones.map((accion) => html`<a class="boton boton--secundario" href="/citas/${cita.id}/confirmar?accion=${accion}">${ACCIONES[accion].texto}</a>`)}
-    </div>`}
+      ${enlaceCorreo(cita)}
+    </div>
   </li>`;
 }
 
