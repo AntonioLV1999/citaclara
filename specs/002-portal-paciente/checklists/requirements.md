@@ -31,6 +31,6 @@
 
 ## Notas
 
-- Quedan 3 marcadores, a propósito: D1 (acceso), D2 (límite de cancelación) y D3 (hueco liberado), a la espera de Sara. Al resolverlos hay que ajustar los casos límite y los escenarios condicionados por esas opciones.
-- Antes de aprobar: registrar el propietario en `specs/MAPA.md` y aprobar los cambios pedidos a la 001.
-- Cifras comprobadas con el generador de la semilla (lunes 02/11/2026, reloj en 04/11/2026 12:00).
+- Las decisiones de la spec se cerraron en la sesión de aclaraciones del 06/11/2026. El 10/11/2026 se resolvieron S-01 a S-04 de la revisión cruzada, con las decisiones D1 y D2.
+- Antes de aprobar: aprobar el cambio de la 001 del 10/11/2026, que esta spec cita (RN8, FR-001, FR-037 y HU6), y los puntos pendientes de «Cambios que se piden a la 001».
+- Cifras comprobadas con el generador de la semilla (lunes 02/11/2026, reloj en 04/11/2026 12:00): 41 de 42 citas futuras cancelables con el plazo de 2 horas.
