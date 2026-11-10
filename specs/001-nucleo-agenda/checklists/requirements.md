@@ -13,7 +13,7 @@
 
 ## Completitud de los requisitos
 
-- [x] No quedan marcadores [NEEDS CLARIFICATION]
+- [ ] No quedan marcadores [NEEDS CLARIFICATION] (cambio del 10/11/2026: quedan 2 en FR-030, los dos resúmenes)
 - [x] Los requisitos se pueden probar y no son ambiguos
 - [x] Los criterios de éxito son medibles
 - [x] Los criterios de éxito no dependen de la tecnología
@@ -34,3 +34,9 @@
 - Los 3 marcadores se resolvieron el 05/11/2026 (ver «Aclaraciones» en la spec) y la validación se repitió sin incidencias.
 - Los encabezados de la plantilla están traducidos por el principio VIII; ningún script los lee.
 - Propietario registrado en `specs/MAPA.md`; aprobada por ese propietario el 06/11/2026.
+
+### Revalidación del 10/11/2026 (cambio pendiente de aprobación: S-01 a S-04, D1 y D2)
+
+- Pasan todos los puntos salvo uno: quedan 2 marcadores [NEEDS CLARIFICATION] en FR-030. Son la misma pregunta: el valor de los dos resúmenes de contenido, que solo se obtiene generando la semilla nueva. No se inventan. Decisión (opción A): se calculan al implementar y se escriben en FR-030 en el mismo commit, antes de aprobar.
+- FR-037 nombra un almacén y una cookie propios para la sesión de paciente. Es un detalle técnico que se mantiene a propósito, porque lo pide la resolución de S-04 y sin él la separación de sesiones no se puede comprobar.
+- Requisitos nuevos o cambiados: RN5, RN8, FR-001, FR-027, FR-029, FR-030, FR-036, FR-037; HU4-E5, HU5-E4, HU6-E1 a E8; SC-008, SC-010 a SC-012; entidades Clínica, Paciente, Cita y Sesión.
