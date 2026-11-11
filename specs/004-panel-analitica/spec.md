@@ -46,6 +46,12 @@
 - **S-22**: se quitan de las notas de S-06 y de S-07 las dos frases que daban por pendiente la 003, que ya cita RA3 en SC-001 y tiene la doble condición.
 - **Dependencias**: se añaden FR-035, FR-040 y FR-043 del segundo cambio de la 001, pendiente de aprobación.
 
+### 11/11/2026: base para planificar
+
+- **Base**: rama rebasada sobre `master` (`f965be1`). El segundo cambio de la 001 está **aprobado** desde el 10/11/2026 (`ab36949`) y es la versión vigente. Su implementación (T074 a T124) tiene la suite en verde: `npm test` (416) y `npm run test:e2e` (66). Se cumple la condición de S-18 para planificar.
+- **Dependencias**: dejan de estar pendientes FR-035, FR-040 y FR-043, y se quita la frase que preveía revisarlas si el cambio no se aprobaba.
+- **Comprobación de las cifras**: con la semilla de `master` cargada en una base temporal, sin tocar `src/`, las cifras del periodo del 07/09/2026 al 01/11/2026 coinciden con las de [Cifras de referencia](#cifras-de-referencia): 220, 40, 82 y 38 completadas por servicio, por 15.380,00 €; 129, 13 y 9 de María, 131, 14 y 13 de Jorge, y 120, 19 y 15 de Lucía; y 6.180, 6.120 y 4.170 minutos completados, es decir, 103 h, 102 h y 69,5 h. Con el lunes 04/01/2027, las mismas. Con el periodo del 14/09/2026 al 08/11/2026, hay 31 citas sin cerrar.
+
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
 Todas las cifras salen de la semilla por defecto (lunes de referencia 02/11/2026), con el reloj fijado en el miércoles 04/11/2026 a las 12:00, hora peninsular, mediante el momento de referencia de la demostración (FR-043 de la 001). Es el mismo momento de la historia 5, escenario 5, de la 001. El periodo analizado es entonces del 07/09/2026 al 01/11/2026, es decir, las 8 semanas de historia. Las cifras que dependen de RA3 o de RA4 están en [Cifras de referencia](#cifras-de-referencia).
@@ -295,4 +301,4 @@ Esta feature no añade entidades. Lee las de la 001 y deriva de ellas, en cada a
 - **Ingresos no son cobros**: la 001 no registra pagos. «Ingresos» significa el valor de las citas completadas según su precio.
 - **Datos ficticios**: las cifras de la semilla sirven para demostrar el producto, no como resultados que enseñar a una clínica real.
 - **Reloj fijado**: el panel es una pantalla de recepción, así que, mientras el reloj esté fijado, muestra con la cabecera común el aviso que exige FR-043 de la 001, con la fecha y la hora. Esta spec no añade ningún requisito propio para ese aviso.
-- **Dependencias**: requiere la 001 (agenda, acceso, semilla, formatos, RN8 y FR-037), y además FR-035 (identificadores de los tests), FR-040 (cita sin cerrar) y FR-043 (momento de referencia de la demostración), del segundo cambio de la 001, que está pendiente de aprobación. Si ese cambio no se aprobara tal como está, RA6, FR-023, SC-008 y las cifras de referencia tendrían que revisarse. El escenario 8 de la historia 5 solo se puede probar con las sesiones de paciente de la 002. Las cancelaciones que el paciente hace por la 002 y la 003 dentro del plazo de RN8 cambian lo que mide la tasa, como explica el aviso de RA3. Ninguna cifra depende del origen de la cancelación.
+- **Dependencias**: requiere la 001 (agenda, acceso, semilla, formatos, RN8 y FR-037), y además FR-035 (identificadores de los tests), FR-040 (cita sin cerrar) y FR-043 (momento de referencia de la demostración), del segundo cambio de la 001, que su propietario aprobó el 10/11/2026 y que está implementado en `master`. El escenario 8 de la historia 5 solo se puede probar con las sesiones de paciente de la 002. Las cancelaciones que el paciente hace por la 002 y la 003 dentro del plazo de RN8 cambian lo que mide la tasa, como explica el aviso de RA3. Ninguna cifra depende del origen de la cancelación.
