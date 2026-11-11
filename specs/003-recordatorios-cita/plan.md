@@ -43,7 +43,7 @@ No queda ningún punto por aclarar: las decisiones están en [research.md](resea
 
 | Principio | Cumplimiento | Estado |
 |-----------|--------------|--------|
-| I. Spec primero | Propietario registrado en `specs/MAPA.md` (AntonioLV1999). La spec está en **Borrador**, y la condición que ella misma ponía para planificar (S-18: `master` en verde con el cambio de la 001) ya se cumple. Planificar no crea comportamiento, así que el plan puede hacerse; **implementar y hacer merge exige antes que su propietario apruebe la spec**. Los cambios en código de la 001 y la 002 son los que sus contratos prevén para la 003 (FR-038, FR-042 y FR-043 de la 001; modelo común de la 002). | Cumple con condición |
+| I. Spec primero | Propietario registrado en `specs/MAPA.md` (AntonioLV1999). Spec **aprobada por su propietario el 12/11/2026**, después de cumplirse la condición que ella misma ponía para planificar (S-18: `master` en verde con el cambio de la 001). Los cambios en código de la 001 y la 002 son los que sus contratos prevén para la 003 (FR-038, FR-042 y FR-043 de la 001; modelo común de la 002). | Cumple |
 | II. Números | Sin importes. Fechas `dd/mm/aaaa`, 24 horas y hora local de la clínica con las funciones de la 001, y la zona indicada en el correo, en la pantalla y en el resumen (FR-008). Días de cambio de hora definidos por RR3, con prueba en las dos zonas (SC-004). | Cumple |
 | III. Solape | La 003 escribe en la agenda (cancela). Cancelar no añade ocupación, y la reserva del tramo liberado pasa por el disparador `cita_solape` de la 001. Prueba con procesos y barrera que reservan el tramo a la vez que se cancela desde el correo (FR-024, [research.md §11](research.md#11-pruebas-de-solape-fr-024-principio-iii)). | Cumple |
 | IV. Simplicidad | Cero dependencias. Sin envío real, que no se puede usar hasta FR-039 ([§5](research.md#5-modo-de-envío-fr-018-a-fr-020-hu3)). Sin tabla de ejecuciones ni programador del sistema operativo ([§2](research.md#2-disparo-diario-fr-001-fr-002-casos-límite-de-ejecución)). Correo en texto plano. Ninguna ruta, respuesta ni contador propios para los enlaces. | Cumple |
@@ -52,11 +52,11 @@ No queda ningún punto por aclarar: las decisiones están en [research.md](resea
 | VII. Interfaz | Mensajes literales en [pantalla-cancelar.md](contracts/pantalla-cancelar.md) y en [correo-recordatorio.md](contracts/correo-recordatorio.md). Criterios de FR-017 comprobados en navegador real. | Cumple |
 | VIII. Español | Correo, pantalla, resumen, documentación y este plan en español de España. | Cumple |
 
-**Repetición tras la fase 1**: sin infracciones nuevas. La condición del principio I sigue abierta, y se añade la dependencia de orden con la 002 (ver «Requisitos previos»). La sección de complejidad queda sin uso.
+**Repetición tras la fase 1**: sin infracciones nuevas. La spec quedó aprobada el 12/11/2026, y se añade la dependencia de orden con la 002 (ver «Requisitos previos»). La sección de complejidad queda sin uso.
 
 ## Requisitos previos
 
-1. **Aprobación de la spec** por su propietario (principio I).
+1. **Aprobación de la spec** por su propietario (principio I): hecha el 12/11/2026.
 2. **El modelo común de acceso de la 002 en `master`**: tabla `enlace_cancelacion`, `GET /e/:token`, la respuesta uniforme, las sesiones de alcance de cita, `CITACLARA_DIRECCION` y el generador único del token ([research.md §1](research.md#1-qué-pone-la-003-y-qué-hereda-de-la-002-rr6-d2)). La 002 está en Borrador y su propietaria es Sara, así que el orden de merge lo acuerdan las dos features. Si al implementar falta en la 002 alguna pieza que este plan usa, como una función exportada, se le pide a la 002 y no se crea aquí (constitución, «Flujo de trabajo»).
 3. **Rebase sobre `master`** cuando entre la 002, para partir de su código.
 
@@ -142,7 +142,7 @@ tests/
 
 ## Riesgos
 
-- **La spec sigue en Borrador**: si su propietario cambia algo al aprobarla, este plan se revisa antes de implementar.
+- **Specs de las que depende, en borrador**: si la 002 o la 004 cambian lo que la 003 cita al aprobarse, se revisan la spec y este plan antes de implementar lo afectado.
 - **Dependencia de la 002**: si la 002 cambia su modelo común al aprobarse, o se retrasa, la 003 se retrasa con ella. La parte del proceso que no toca el enlace (ventana, RR1, modo simulado y resumen) se puede adelantar en las tareas, y la pantalla de cancelación espera.
 - **Número de versión del esquema**: supone que la 002 entra antes y deja la versión 3. Si el orden cambia, se ajusta el número.
 - **Fallo entre la reserva y el envío**: la cita se da por recordada sin correo. Es la consecuencia aceptada de RR1 ([research.md §4](research.md#4-un-recordatorio-como-máximo-rr1-fr-005-sc-003)).

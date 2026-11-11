@@ -4,7 +4,7 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador (revisada el 10/11/2026 tras la revisión cruzada; ver «Historial de cambios»)
+**Estado**: Aprobada por su propietario, AntonioLV1999, el 12/11/2026 (revisada el 10/11/2026 tras la revisión cruzada y el 11/11/2026; ver «Historial de cambios»)
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -297,3 +297,8 @@ Rama rebasada sobre `master`, que contiene el segundo cambio de la 001, **aproba
 
 - **Dependencias**: el segundo cambio de la 001 pasa de «pendiente de aprobación» a aprobado, y se retira el aviso de revisar sus citas si cambiaba antes de aprobarse. Las citas (FR-035, FR-039 riesgo c, FR-041, FR-042 y FR-043) no cambian, porque el texto aprobado es el que citaban.
 - La spec sigue en Borrador hasta que la apruebe su propietario (principio I).
+
+### 12/11/2026: aprobación
+
+- **Estado**: el propietario, AntonioLV1999, **aprueba la spec el 12/11/2026**, en la versión que incluye todas las entradas anteriores de este historial. Ya se puede implementar (principio I).
+- **Dependencias en borrador**: la spec cita la 002 (modelo de acceso, RP6) y la 004 (RA3 y RA4), que siguen en borrador. Si esos textos cambian al aprobarse, hay que revisar estas citas, como dice el aviso de S-19. La implementación de la pantalla de cancelación espera además a que el modelo común de la 002 esté en `master` (plan, «Requisitos previos»).
