@@ -33,6 +33,24 @@ export function euros(centimos) {
   return `${enteros},${String(centimos % 100).padStart(2, '0')} €`;
 }
 
+const millares = (entero) => String(entero).replace(/\B(?=(\d{3})+$)/g, '.');
+
+/**
+ * 004/RA7: un porcentaje a partir de sus dos enteros, redondeado una sola vez a un decimal con la
+ * mitad hacia arriba. Las décimas se calculan con enteros, sin coma flotante.
+ */
+export function porcentaje(numerador, denominador) {
+  if (denominador === 0) return 'Sin datos';
+  const decimas = Math.floor((2000 * numerador + denominador) / (2 * denominador));
+  return `${millares(Math.trunc(decimas / 10))},${decimas % 10} %`;
+}
+
+/** 004/FR-014: horas exactas. Los minutos son múltiplos de 15, así que bastan dos decimales. */
+export function horas(minutos) {
+  const centesimas = String((minutos % 60) * 100 / 60).padStart(2, '0').replace(/0+$/, '');
+  return `${millares(Math.trunc(minutos / 60))}${centesimas ? `,${centesimas}` : ''} h`;
+}
+
 export function etiquetaEstado(estado) {
   return ETIQUETAS_ESTADO[estado];
 }

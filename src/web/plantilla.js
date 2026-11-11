@@ -50,6 +50,7 @@ export function layout({ titulo, clinica, contenido, scripts = [], momentoFijado
     ${clinica && html`<nav class="cabecera__menu" aria-label="Principal">
       <a class="boton boton--claro" href="/agenda">Agenda</a>
       <a class="boton boton--claro" href="/citas/nueva">Nueva cita</a>
+      <a class="boton boton--claro" href="/analitica">Analítica</a>
       <form method="post" action="/salir"><button class="boton boton--claro" type="submit">Salir</button></form>
     </nav>`}
   </header>

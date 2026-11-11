@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  avisoRelojFijado, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora,
+  avisoRelojFijado, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora, horas, porcentaje,
 } from '../../src/dominio/formato.js';
 
 test('FR-024 las fechas se muestran como dd/mm/aaaa', () => {
@@ -78,4 +78,32 @@ test('FR-043 el aviso del reloj fijado lleva el día de la semana en minúscula,
     avisoRelojFijado('2027-03-29T07:05'),
     'Reloj de demostración: la hora está fijada en el lunes 29/03/2027 a las 07:05 y no avanza.',
   );
+});
+
+test('RA7 un porcentaje se redondea una sola vez, a un decimal', () => {
+  assert.equal(porcentaje(13, 142), '9,2 %');
+  assert.equal(porcentaje(46, 426), '10,8 %');
+  assert.equal(porcentaje(50, 50), '100,0 %');
+});
+
+test('RA7 la mitad exacta se redondea hacia arriba', () => {
+  assert.equal(porcentaje(1, 16), '6,3 %');
+  assert.equal(porcentaje(1, 80), '1,3 %');
+  assert.equal(porcentaje(1, 8), '12,5 %');
+});
+
+test('RA7 un cero real es 0,0 % y un denominador cero es «Sin datos»', () => {
+  assert.equal(porcentaje(0, 50), '0,0 %');
+  assert.equal(porcentaje(3, 0), 'Sin datos');
+  assert.equal(porcentaje(0, 0), 'Sin datos');
+});
+
+test('004/FR-014 las horas se escriben exactas, sin redondear y con formato español', () => {
+  assert.equal(horas(6180), '103 h');
+  assert.equal(horas(4170), '69,5 h');
+  assert.equal(horas(79200), '1.320 h');
+  assert.equal(horas(16470), '274,5 h');
+  assert.equal(horas(735), '12,25 h');
+  assert.equal(horas(45), '0,75 h');
+  assert.equal(horas(0), '0 h');
 });
