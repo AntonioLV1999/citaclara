@@ -361,3 +361,45 @@ describe('historia 3: ocupación semanal por profesional con la semilla', () => 
       + 'que son 55 horas por semana y profesional. Las no asistidas, las canceladas y las reservadas no cuentan.');
   });
 });
+
+describe('historia 4: evolución de las últimas 8 semanas con la semilla', () => {
+  let p;
+  let r;
+  before(async () => {
+    p = await panelDeSemilla();
+    r = await p.abrir();
+  });
+  after(() => p.cerrar());
+
+  const etiquetas = SEMANAS.map((s) => `Semana del ${s}`);
+  const conEtiquetas = (cifras) => etiquetas.map((e, i) => [e, cifras[i]]);
+
+  test('004/H4-E1 la evolución muestra 8 semanas en orden, del 07/09/2026 al 26/10/2026', () => {
+    for (const titulo of ['Ocupación de la clínica', 'Tasa de no asistencia de la clínica', 'Ingresos de la clínica']) {
+      assert.deepEqual(filasDeGrafico(r.texto, titulo).map((fila) => fila[0]), etiquetas, titulo);
+    }
+    assert.deepEqual(filasDeTabla(r.texto, 'Citas por semana').slice(0, 8).map((fila) => fila[0]), SEMANAS);
+  });
+
+  test('004/H4-E2 cada semana indica sus recuentos, su tasa, su ocupación y sus ingresos', () => {
+    assert.deepEqual(filasDeTabla(r.texto, 'Citas por semana').slice(0, 8), [
+      ['07/09/2026', '42', '8', '7'], ['14/09/2026', '49', '6', '3'], ['21/09/2026', '50', '4', '4'], ['28/09/2026', '51', '6', '3'],
+      ['05/10/2026', '54', '2', '5'], ['12/10/2026', '49', '6', '4'], ['19/10/2026', '43', '7', '5'], ['26/10/2026', '42', '7', '6'],
+    ]);
+    assert.deepEqual(filasDeGrafico(r.texto, 'Tasa de no asistencia de la clínica'),
+      conEtiquetas(['16,0 %', '10,9 %', '7,4 %', '10,5 %', '3,6 %', '10,9 %', '14,0 %', '14,3 %']));
+    assert.deepEqual(filasDeGrafico(r.texto, 'Ocupación de la clínica'),
+      conEtiquetas(['22,6 %', '23,5 %', '22,0 %', '21,2 %', '22,7 %', '19,8 %', '17,3 %', '17,3 %']));
+    assert.deepEqual(filasDeGrafico(r.texto, 'Ingresos de la clínica'),
+      conEtiquetas(['1.975,00 €', '2.100,00 €', '2.025,00 €', '2.000,00 €', '2.120,00 €', '1.890,00 €', '1.650,00 €', '1.620,00 €']));
+  });
+
+  test('004/H4-E3 004/FR-013 los ingresos de las 8 semanas suman exactamente 15.380,00 €', () => {
+    assert.ok(r.visible.includes('Total de las 8 semanas: 15.380,00 €'));
+    assert.deepEqual(filasDeTabla(r.texto, 'Citas por semana')[8], ['Total', '380', '46', '37']);
+  });
+
+  test('004/H4-E4 RA1 la semana en curso no aparece en la evolución', () => {
+    assert.doesNotMatch(r.visible, /02\/11\/2026/);
+  });
+});

@@ -173,3 +173,44 @@ test('RA7 la ocupación del periodo sale de los minutos del periodo, no de prome
   const { ocupacion } = panel([cita('completada'), cita('completada'), cita('completada', { inicio: '2026-09-15T10:00' })]);
   assert.deepEqual(ocupacion.profesionales[0].periodo.ocupacion, { numerador: 135, denominador: 26400 });
 });
+
+test('RA2 la evolución tiene las 8 semanas en orden, con recuentos, tasa, ocupación e ingresos de la clínica', () => {
+  const { evolucion } = panel([
+    cita('completada'), cita('no_asistida'), cita('cancelada'),
+    cita('completada', { profesional: 2, servicio: 11, inicio: '2026-10-30T18:00' }),
+  ]);
+  assert.equal(evolucion.length, 8);
+  assert.deepEqual(evolucion.map((s) => s.semana.inicio), [
+    '2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26',
+  ]);
+  assert.deepEqual(evolucion[0], {
+    semana: { inicio: '2026-09-07', fin: '2026-09-13' },
+    completadas: 1,
+    noAsistidas: 1,
+    canceladas: 1,
+    tasa: { numerador: 1, denominador: 2 },
+    ocupacion: { numerador: 45, denominador: 6600 },
+    centimos: 4000,
+  });
+  assert.equal(evolucion[7].centimos, 5000);
+});
+
+test('004/FR-013 la suma de los ingresos de las semanas es exactamente el total por servicio', () => {
+  const citas = Array.from({ length: 56 }, (_, i) => cita(i % 5 ? 'completada' : 'no_asistida', {
+    profesional: 1 + (i % 2), servicio: i % 3 ? 10 : 11, inicio: `${['2026-09-08', '2026-10-01', '2026-10-28'][i % 3]}T${String(9 + (i % 10)).padStart(2, '0')}:00`,
+  }));
+  const { ingresos, evolucion, noAsistencia, ocupacion } = panel(citas);
+  assert.equal(evolucion.reduce((suma, s) => suma + s.centimos, 0), ingresos.total);
+  assert.equal(evolucion.reduce((suma, s) => suma + s.completadas, 0), noAsistencia.clinica.completadas);
+  assert.equal(evolucion.reduce((suma, s) => suma + s.ocupacion.numerador, 0), ocupacion.clinica.minutos);
+});
+
+test('004/CL clínica con menos de 8 semanas de datos: las semanas vacías salen igualmente', () => {
+  const { evolucion } = panel([cita('completada', { inicio: '2026-10-27T10:00' })]);
+  assert.equal(evolucion.length, 8);
+  for (const semana of evolucion.slice(0, 7)) {
+    assert.equal(semana.completadas, 0);
+    assert.equal(semana.centimos, 0);
+    assert.deepEqual(semana.tasa, { numerador: 0, denominador: 0 });
+  }
+});

@@ -144,6 +144,32 @@ function apartadoOcupacion({ profesionales, clinica }, periodo, semanal) {
     })}`);
 }
 
+function apartadoEvolucion(evolucion) {
+  const graficoSemanal = (titulo, escala, cifra, valor) => graficoBarras({
+    titulo,
+    escala,
+    filas: evolucion.map((s) => ({ etiqueta: semanaDel(s.semana), cifra: cifra(s), proporcion: escala.proporcion(valor(s)) })),
+  });
+  const suma = (campo) => evolucion.reduce((acumulado, s) => acumulado + s[campo], 0);
+  return apartado('Evolución de las últimas 8 semanas',
+    'Las mismas cifras para toda la clínica, semana a semana, calculadas igual que en los apartados anteriores.',
+    html`${graficoSemanal('Ocupación de la clínica', escalaPorcentaje(evolucion.map((s) => s.ocupacion)),
+      (s) => comoPorcentaje(s.ocupacion), (s) => s.ocupacion)}
+    ${graficoSemanal('Tasa de no asistencia de la clínica', escalaPorcentaje(evolucion.map((s) => s.tasa)),
+      (s) => comoPorcentaje(s.tasa), (s) => s.tasa)}
+    ${graficoSemanal('Ingresos de la clínica', escalaImporte(evolucion.map((s) => s.centimos)),
+      (s) => euros(s.centimos), (s) => s.centimos)}
+    <p class="analitica__total">Total de las 8 semanas: ${euros(suma('centimos'))}</p>
+    ${tabla({
+      titulo: 'Citas por semana',
+      columnas: ['Semana', 'Completadas', 'No asistidas', 'Canceladas'],
+      filas: [
+        ...evolucion.map((s) => ({ celdas: [fecha(s.semana.inicio), s.completadas, s.noAsistidas, s.canceladas] })),
+        { total: true, celdas: ['Total', suma('completadas'), suma('noAsistidas'), suma('canceladas')] },
+      ],
+    })}`);
+}
+
 export function vistaAnalitica({ clinica, panel, momentoFijado }) {
   const { periodo } = panel;
   const contenido = html`<h1>Analítica</h1>
@@ -151,6 +177,7 @@ export function vistaAnalitica({ clinica, panel, momentoFijado }) {
     ${avisoSinCerrar(panel.sinCerrar)}
     ${apartadoIngresos(panel.ingresos)}
     ${apartadoNoAsistencia(panel.noAsistencia)}
-    ${apartadoOcupacion(panel.ocupacion, periodo, panel.capacidadSemanal)}`;
+    ${apartadoOcupacion(panel.ocupacion, periodo, panel.capacidadSemanal)}
+    ${apartadoEvolucion(panel.evolucion)}`;
   return layout({ titulo: 'Analítica', clinica, contenido, momentoFijado });
 }

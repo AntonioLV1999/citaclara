@@ -113,6 +113,28 @@ function calcularOcupacion(profesionales, citas, periodo, semanal) {
   return { profesionales: filas, clinica: { capacidad, minutos, ocupacion: ocupacion(minutos, capacidad) } };
 }
 
+/** FR-009: las cifras de la clínica en conjunto, semana a semana. */
+function calcularEvolucion(citas, periodo, capacidadClinica) {
+  return periodo.semanas.map((semana, i) => {
+    const suyas = citas.filter((cita) => cita.semana === i);
+    return {
+      semana,
+      ...recuentos(suyas),
+      ocupacion: { numerador: minutosCompletados(suyas), denominador: capacidadClinica },
+      centimos: sumar(suyas.filter((cita) => cita.clase === 'completada'), 'precio_centimos'),
+    };
+  });
+}
+
+/** Data-model, invariantes: cada total coincide con sus partes por servicio, por profesional y por semana. */
+function comprobarInvariantes({ ingresos, noAsistencia, ocupacion, evolucion }) {
+  exigirCuadre('ingresos por semana', ingresos.total, sumar(evolucion, 'centimos'));
+  for (const campo of ['completadas', 'noAsistidas', 'canceladas']) {
+    exigirCuadre(`${campo} por semana`, noAsistencia.clinica[campo], sumar(evolucion, campo));
+  }
+  exigirCuadre('minutos por semana', ocupacion.clinica.minutos, evolucion.reduce((suma, s) => suma + s.ocupacion.numerador, 0));
+}
+
 export function calcularPanel({ hoy, ahora, profesionales, servicios, citas }) {
   const periodo = periodoDe(hoy);
   const delPeriodo = citas
@@ -120,12 +142,15 @@ export function calcularPanel({ hoy, ahora, profesionales, servicios, citas }) {
     .filter((cita) => cita.semana !== -1);
   const completadas = delPeriodo.filter((cita) => cita.clase === 'completada');
   const semanal = capacidadSemanal();
-  return {
+  const panel = {
     periodo,
     sinCerrar: delPeriodo.filter((cita) => cita.clase === 'sin_cerrar').length,
     capacidadSemanal: semanal,
     ingresos: calcularIngresos(servicios, completadas),
     noAsistencia: calcularNoAsistencia(profesionales, delPeriodo),
     ocupacion: calcularOcupacion(profesionales, delPeriodo, periodo, semanal),
+    evolucion: calcularEvolucion(delPeriodo, periodo, semanal * profesionales.length),
   };
+  comprobarInvariantes(panel);
+  return panel;
 }
