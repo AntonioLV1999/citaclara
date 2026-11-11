@@ -2,7 +2,7 @@
 
 **Rama**: `004-panel-analitica` | **Fecha**: 11/11/2026 | **Spec**: [spec.md](spec.md)
 
-**Entrada**: especificación de la feature en `specs/004-panel-analitica/spec.md`, en borrador, con la base actualizada el 11/11/2026 ([nota](spec.md#11112026-base-para-planificar))
+**Entrada**: especificación de la feature en `specs/004-panel-analitica/spec.md`, aprobada por su propietario el 12/11/2026, con la base actualizada el 11/11/2026 ([nota](spec.md#11112026-base-para-planificar))
 
 ## Resumen
 
@@ -40,7 +40,7 @@ No queda ninguna incógnita: todo está resuelto en [research.md](research.md).
 
 | Principio | Cumplimiento | Estado |
 |-----------|--------------|--------|
-| I. Spec primero | Propietario registrado en `specs/MAPA.md`. La spec está **en borrador**: se puede planificar, porque ya se cumple su condición de S-18 (`master` en verde), pero **no se integra** hasta que su propietario la apruebe (puerta 1). Las reglas que cita de la 001 (FR-012, FR-016, FR-035, FR-037, FR-040, FR-043 y RN8) están aprobadas. Este plan no añade comportamiento fuera de la spec. | Cumple, con la aprobación como condición de integración |
+| I. Spec primero | Propietario registrado en `specs/MAPA.md`. La spec la **aprobó su propietario el 12/11/2026**, sin cambios respecto a la versión planificada, y se cumple su condición de S-18 (`master` en verde). Las reglas que cita de la 001 (FR-012, FR-016, FR-035, FR-037, FR-040, FR-043 y RN8) están aprobadas. Este plan no añade comportamiento fuera de la spec. | Cumple |
 | II. Números | Céntimos enteros y `euros()` de la 001; porcentajes con aritmética entera y un solo redondeo al mostrar; horas exactas en cuartos. Los tres totales se comprueban en cada apertura y, si no cuadran, la página no se muestra. Fechas en `dd/mm/aaaa`; «hoy» con la zona de la clínica, también en Canarias; sin efecto del cambio de hora, con prueba del 28/03/2027. | Cumple |
 | III. Solape | El panel no escribe en la agenda, así que no puede provocar un solape y no necesita pruebas de solape. La transacción de lectura no toma el turno de escritura y no retrasa ninguna reserva. | No aplica |
 | IV. Simplicidad | Sin dependencias, sin biblioteca de gráficos, sin JavaScript en el navegador, sin índices nuevos y sin selector de fechas ni exportación. Se reutilizan `ahoraLocal`, `sinCerrar`, `euros` y las constantes del horario. Lo único nuevo en módulos compartidos son dos funciones de formato (`porcentaje` y `horas`), para que los formatos sigan teniendo una sola fuente. | Cumple |
@@ -134,7 +134,6 @@ tests/
 
 ## Riesgos
 
-- **Spec en borrador**: el plan se apoya en una spec que su propietario aún no ha aprobado. Si la aprobación cambia una regla RA o una cifra de referencia, hay que revisar este plan antes de implementar.
 - **Menú compartido**: añadir «Analítica» cambia la cabecera de todas las pantallas de recepción. A 360 píxeles, cuatro controles de 44 píxeles deben caber sin desplazamiento. Las pruebas de accesibilidad de la 001 lo vigilan en cada pantalla y deben seguir en verde.
 - **Totales que no cuadran**: si un invariante falla, el panel muestra la página de fallo de la 001 en lugar de las cifras. Es lo que exige el principio II, pero un defecto en el cálculo dejaría a Sara sin panel; las pruebas de las cifras de referencia lo detectan antes.
 - **Cifras que dependen de otras specs**: si otra spec cambia el horario de FR-012, la semilla o los precios, cambian las cifras de referencia de la 004 (supuestos «Capacidad teórica» y «Precio actual del servicio»), y ese cambio debe actualizar la spec y sus tests.

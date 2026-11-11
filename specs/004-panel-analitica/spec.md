@@ -4,7 +4,7 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador
+**Estado**: Aprobada por su propietario el 12/11/2026, en la versión planificada (`f84b8c1`) y sin cambios de contenido
 
 **Propietario**: AntonioLV1999 (registrado en `specs/MAPA.md`)
 
@@ -51,6 +51,10 @@
 - **Base**: rama rebasada sobre `master` (`f965be1`). El segundo cambio de la 001 está **aprobado** desde el 10/11/2026 (`ab36949`) y es la versión vigente. Su implementación (T074 a T124) tiene la suite en verde: `npm test` (416) y `npm run test:e2e` (66). Se cumple la condición de S-18 para planificar.
 - **Dependencias**: dejan de estar pendientes FR-035, FR-040 y FR-043, y se quita la frase que preveía revisarlas si el cambio no se aprobaba.
 - **Comprobación de las cifras**: con la semilla de `master` cargada en una base temporal, sin tocar `src/`, las cifras del periodo del 07/09/2026 al 01/11/2026 coinciden con las de [Cifras de referencia](#cifras-de-referencia): 220, 40, 82 y 38 completadas por servicio, por 15.380,00 €; 129, 13 y 9 de María, 131, 14 y 13 de Jorge, y 120, 19 y 15 de Lucía; y 6.180, 6.120 y 4.170 minutos completados, es decir, 103 h, 102 h y 69,5 h. Con el lunes 04/01/2027, las mismas. Con el periodo del 14/09/2026 al 08/11/2026, hay 31 citas sin cerrar.
+
+### 12/11/2026: aprobación
+
+- **Aprobada** por su propietario, AntonioLV1999, el 12/11/2026, en la versión planificada (`f84b8c1`), sin cambios de reglas, requisitos ni cifras. Ya se puede implementar y, con la suite en verde, integrar (principio I).
 
 ## Escenarios de usuario y pruebas *(obligatorio)*
 
