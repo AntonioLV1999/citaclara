@@ -1,4 +1,5 @@
-import { euros, fecha, porcentaje } from '../../dominio/formato.js';
+import { euros, fecha, horas, porcentaje } from '../../dominio/formato.js';
+import { APERTURA, CIERRE } from '../../dominio/huecos.js';
 import { html, layout } from '../plantilla.js';
 
 /**
@@ -115,12 +116,41 @@ function apartadoNoAsistencia({ profesionales, clinica }) {
     })}`);
 }
 
+const comoPorcentaje = (par) => porcentaje(par.numerador, par.denominador);
+const semanaDel = (semana) => `Semana del ${fecha(semana.inicio)}`;
+
+function apartadoOcupacion({ profesionales, clinica }, periodo, semanal) {
+  // Una sola escala para los tres gráficos, para que se puedan comparar entre sí.
+  const escala = escalaPorcentaje(profesionales.flatMap((fila) => [...fila.semanas.map((s) => s.ocupacion), fila.periodo.ocupacion]));
+  const frase = `Ocupación: tiempo de las citas completadas dividido entre el horario de la clínica, de lunes a viernes de ${APERTURA} a ${CIERRE}, que son ${horas(semanal).replace(/ h$/, ' horas')} por semana y profesional. Las no asistidas, las canceladas y las reservadas no cuentan.`;
+  const filaDeHoras = (nombre, { capacidad, minutos, ocupacion }, total) => ({
+    total, celdas: [nombre, horas(capacidad), horas(minutos), comoPorcentaje(ocupacion)],
+  });
+  return apartado('Ocupación semanal por profesional', frase, html`${profesionales.map((fila) => graficoBarras({
+    titulo: `Ocupación de ${fila.profesional.nombre}`,
+    escala,
+    filas: [
+      ...fila.semanas.map((s, i) => ({ etiqueta: semanaDel(periodo.semanas[i]), cifra: comoPorcentaje(s.ocupacion), proporcion: escala.proporcion(s.ocupacion) })),
+      { etiqueta: 'Las 8 semanas', cifra: comoPorcentaje(fila.periodo.ocupacion), proporcion: escala.proporcion(fila.periodo.ocupacion) },
+    ],
+  }))}
+    ${tabla({
+      titulo: 'Horas del periodo',
+      columnas: ['Profesional', 'Capacidad', 'Horas completadas', 'Ocupación'],
+      filas: [
+        ...profesionales.map((fila) => filaDeHoras(fila.profesional.nombre, fila.periodo, false)),
+        filaDeHoras('Toda la clínica', clinica, true),
+      ],
+    })}`);
+}
+
 export function vistaAnalitica({ clinica, panel, momentoFijado }) {
   const { periodo } = panel;
   const contenido = html`<h1>Analítica</h1>
     <p class="analitica__periodo">Del ${fecha(periodo.inicio)} al ${fecha(periodo.fin)}: las 8 últimas semanas completas. La semana en curso no cuenta hasta que termina.</p>
     ${avisoSinCerrar(panel.sinCerrar)}
     ${apartadoIngresos(panel.ingresos)}
-    ${apartadoNoAsistencia(panel.noAsistencia)}`;
+    ${apartadoNoAsistencia(panel.noAsistencia)}
+    ${apartadoOcupacion(panel.ocupacion, periodo, panel.capacidadSemanal)}`;
   return layout({ titulo: 'Analítica', clinica, contenido, momentoFijado });
 }

@@ -320,3 +320,44 @@ describe('historia 5: dos clínicas', () => {
     assert.doesNotMatch(visible, /María|Jorge|Lucía|15\.380/);
   });
 });
+
+const SEMANAS = ['07/09/2026', '14/09/2026', '21/09/2026', '28/09/2026', '05/10/2026', '12/10/2026', '19/10/2026', '26/10/2026'];
+
+describe('historia 3: ocupación semanal por profesional con la semilla', () => {
+  let p;
+  let r;
+  before(async () => {
+    p = await panelDeSemilla();
+    r = await p.abrir();
+  });
+  after(() => p.cerrar());
+
+  const OCUPACION = {
+    María: ['28,6 %', '27,3 %', '25,5 %', '25,0 %', '23,6 %', '20,5 %', '16,4 %', '20,5 %', '23,4 %'],
+    Jorge: ['21,8 %', '27,3 %', '24,5 %', '20,5 %', '28,6 %', '21,8 %', '20,5 %', '20,5 %', '23,2 %'],
+    Lucía: ['17,3 %', '15,9 %', '15,9 %', '18,2 %', '15,9 %', '17,3 %', '15,0 %', '10,9 %', '15,8 %'],
+  };
+
+  test('004/H3-E1 RA4 cada profesional muestra su ocupación en cada semana y en el periodo', () => {
+    for (const [nombre, cifras] of Object.entries(OCUPACION)) {
+      const etiquetas = [...SEMANAS.map((s) => `Semana del ${s}`), 'Las 8 semanas'];
+      assert.deepEqual(filasDeGrafico(r.texto, `Ocupación de ${nombre}`), etiquetas.map((e, i) => [e, cifras[i]]), nombre);
+      assert.equal(escalaDeGrafico(r.texto, `Ocupación de ${nombre}`), 'Escala de 0 % a 30 %', nombre);
+    }
+  });
+
+  test('004/H3-E2 RA4 la capacidad es el horario de FR-012 de la 001: 55 horas por semana y 440 en el periodo', () => {
+    assert.deepEqual(filasDeTabla(r.texto, 'Horas del periodo'), [
+      ['María', '440 h', '103 h', '23,4 %'],
+      ['Jorge', '440 h', '102 h', '23,2 %'],
+      ['Lucía', '440 h', '69,5 h', '15,8 %'],
+      ['Toda la clínica', '1.320 h', '274,5 h', '20,8 %'],
+    ]);
+  });
+
+  test('004/H3-E3 la ocupación tiene a la vista una frase llana que explica cómo se calcula', () => {
+    assert.equal(fraseDe(r.texto, 'Ocupación semanal por profesional'),
+      'Ocupación: tiempo de las citas completadas dividido entre el horario de la clínica, de lunes a viernes de 09:00 a 20:00, '
+      + 'que son 55 horas por semana y profesional. Las no asistidas, las canceladas y las reservadas no cuentan.');
+  });
+});

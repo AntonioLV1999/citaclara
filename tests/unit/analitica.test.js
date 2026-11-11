@@ -136,3 +136,40 @@ test('RA7 la tasa de la clínica sale de los recuentos totales, no de promediar 
     completadas: 9, noAsistidas: 1, canceladas: 0, tasa: { numerador: 1, denominador: 10 },
   });
 });
+
+test('RA4 la ocupación es el tiempo de las completadas, por la duración de su servicio, entre la capacidad', () => {
+  const { ocupacion } = panel([
+    cita('completada'), cita('completada', { servicio: 11, inicio: '2026-09-15T10:00' }),
+    cita('no_asistida'), cita('cancelada'), cita('reservada'),
+  ]);
+  const [maria] = ocupacion.profesionales;
+  assert.deepEqual(maria.semanas[0], { minutos: 45, ocupacion: { numerador: 45, denominador: 3300 } });
+  assert.deepEqual(maria.semanas[1], { minutos: 60, ocupacion: { numerador: 60, denominador: 3300 } });
+  assert.deepEqual(maria.periodo, { capacidad: 26400, minutos: 105, ocupacion: { numerador: 105, denominador: 26400 } });
+});
+
+test('RA4 el tiempo de una cita es la duración de su servicio, no la resta de sus horas', () => {
+  const { ocupacion } = panel([{ ...cita('completada'), fin: '2026-09-08T12:00' }]);
+  assert.equal(ocupacion.profesionales[0].periodo.minutos, 45);
+});
+
+test('RA4 la capacidad de la clínica es la de un profesional por el número de profesionales', () => {
+  const { ocupacion } = panel([cita('completada'), cita('completada', { profesional: 2 })]);
+  assert.deepEqual(ocupacion.clinica, { capacidad: 52800, minutos: 90, ocupacion: { numerador: 90, denominador: 52800 } });
+});
+
+test('004/CL profesional sin citas en una semana: ocupación 0,0 % y no asistencia sin datos', () => {
+  const { ocupacion, noAsistencia } = panel([cita('completada')]);
+  assert.deepEqual(ocupacion.profesionales[1].semanas[0], { minutos: 0, ocupacion: { numerador: 0, denominador: 3300 } });
+  assert.deepEqual(noAsistencia.profesionales[1].tasa, { numerador: 0, denominador: 0 });
+});
+
+test('004/CL festivos: un lunes festivo cuenta como un día normal y no reduce la capacidad', () => {
+  const { ocupacion } = panel([cita('completada', { inicio: '2026-10-12T10:00' })]);
+  assert.deepEqual(ocupacion.profesionales[0].semanas[5].ocupacion, { numerador: 45, denominador: 3300 });
+});
+
+test('RA7 la ocupación del periodo sale de los minutos del periodo, no de promediar semanas', () => {
+  const { ocupacion } = panel([cita('completada'), cita('completada'), cita('completada', { inicio: '2026-09-15T10:00' })]);
+  assert.deepEqual(ocupacion.profesionales[0].periodo.ocupacion, { numerador: 135, denominador: 26400 });
+});

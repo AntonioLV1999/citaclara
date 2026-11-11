@@ -89,17 +89,43 @@ function calcularNoAsistencia(profesionales, citas) {
   return { profesionales: filas, clinica };
 }
 
+const minutosCompletados = (citas) => sumar(citas.filter((cita) => cita.clase === 'completada'), 'duracion_min');
+
+/**
+ * RA4: tiempo de las completadas, por la duración de su servicio, entre la capacidad del horario.
+ * Las no asistidas, las canceladas y las reservadas no cuentan.
+ */
+function calcularOcupacion(profesionales, citas, periodo, semanal) {
+  const capacidadPeriodo = semanal * periodo.semanas.length;
+  const ocupacion = (minutos, capacidad) => ({ numerador: minutos, denominador: capacidad });
+  const filas = profesionales.map((profesional) => {
+    const suyas = citas.filter((cita) => cita.profesional_id === profesional.id);
+    const semanas = periodo.semanas.map((_, i) => {
+      const minutos = minutosCompletados(suyas.filter((cita) => cita.semana === i));
+      return { minutos, ocupacion: ocupacion(minutos, semanal) };
+    });
+    const minutos = minutosCompletados(suyas);
+    return { profesional, semanas, periodo: { capacidad: capacidadPeriodo, minutos, ocupacion: ocupacion(minutos, capacidadPeriodo) } };
+  });
+  const capacidad = capacidadPeriodo * profesionales.length;
+  const minutos = minutosCompletados(citas);
+  exigirCuadre('minutos por profesional', minutos, filas.reduce((suma, fila) => suma + fila.periodo.minutos, 0));
+  return { profesionales: filas, clinica: { capacidad, minutos, ocupacion: ocupacion(minutos, capacidad) } };
+}
+
 export function calcularPanel({ hoy, ahora, profesionales, servicios, citas }) {
   const periodo = periodoDe(hoy);
   const delPeriodo = citas
-    .filter((cita) => semanaDe(periodo, cita.inicio) !== -1)
-    .map((cita) => ({ ...cita, clase: clasificar(cita, ahora) }));
+    .map((cita) => ({ ...cita, semana: semanaDe(periodo, cita.inicio), clase: clasificar(cita, ahora) }))
+    .filter((cita) => cita.semana !== -1);
   const completadas = delPeriodo.filter((cita) => cita.clase === 'completada');
+  const semanal = capacidadSemanal();
   return {
     periodo,
     sinCerrar: delPeriodo.filter((cita) => cita.clase === 'sin_cerrar').length,
-    capacidadSemanal: capacidadSemanal(),
+    capacidadSemanal: semanal,
     ingresos: calcularIngresos(servicios, completadas),
     noAsistencia: calcularNoAsistencia(profesionales, delPeriodo),
+    ocupacion: calcularOcupacion(profesionales, delPeriodo, periodo, semanal),
   };
 }
