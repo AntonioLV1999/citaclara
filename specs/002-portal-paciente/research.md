@@ -2,7 +2,7 @@
 
 **Feature**: [spec.md](spec.md) | **Fecha**: 11/11/2026 | **Plan**: [plan.md](plan.md)
 
-Punto de partida: el código de `master` (`f965be1`), que ya implementa los dos cambios aprobados de la 001: la operación única de cancelar (`cancelarCita`, FR-038), el plazo de RN8, el origen y el momento de la cancelación (FR-036), `sinCerrar` (FR-040), `etiquetaCita` (FR-027), la tabla `sesion_paciente` (FR-037), el teléfono de la clínica y los enlaces de demostración de la semilla (FR-029), y el momento de referencia `CITACLARA_AHORA` (FR-043). La rama `002-portal-paciente` todavía no los tiene: hay que rebasarla antes de implementar (ver [plan.md](plan.md#requisito-previo-rebase-sobre-master)).
+Punto de partida: el código de `master` (`f965be1`), que ya implementa los dos cambios aprobados de la 001: la operación única de cancelar (`cancelarCita`, FR-038), el plazo de RN8, el origen y el momento de la cancelación (FR-036), `sinCerrar` (FR-040), `etiquetaCita` (FR-027), la tabla `sesion_paciente` (FR-037), el teléfono de la clínica y los enlaces de demostración de la semilla (FR-029), y el momento de referencia `CITACLARA_AHORA` (FR-043). La rama `002-portal-paciente` está rebasada sobre ese commit (ver [plan.md](plan.md#base-de-partida)).
 
 Entorno comprobado: Node 26 y SQLite 3.54.0 dentro de `node:sqlite`.
 

@@ -6,7 +6,7 @@ Esta guía demuestra de punta a punta que la feature funciona, una vez implement
 
 ## Requisitos previos
 
-- La rama rebasada sobre `master`, con la implementación de los dos cambios de la 001 ([plan.md](plan.md#requisito-previo-rebase-sobre-master)).
+- La rama rebasada sobre `master`, con la implementación de los dos cambios de la 001 ([plan.md](plan.md#base-de-partida)).
 - Node 26 o superior, y `npm install`.
 - `npx playwright install chromium`, solo para las pruebas de interfaz.
 - Si existe `datos/citaclara.db` de una versión anterior, el servidor pedirá borrarlo: el esquema pasa a la versión 3.

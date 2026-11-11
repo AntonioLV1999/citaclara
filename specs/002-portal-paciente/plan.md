@@ -49,12 +49,11 @@ No queda ningún punto por aclarar: las decisiones están en [research.md](resea
 
 **Repetición tras la fase 1**: sin infracciones nuevas. La condición del principio I sigue abierta. La sección de complejidad queda sin uso.
 
-## Requisito previo: rebase sobre `master`
+## Base de partida
 
-La rama parte de `4b45dd1`, sin la implementación de los dos cambios de la 001, que está en `master` hasta `f965be1` (T084 a T124 de la 001). Este plan se apoya en ese código: `cancelarCita`, `sinCerrar`, `dentroDePlazo`, `limiteCancelacion`, `etiquetaCita`, `ahoraLocal`, `sesion_paciente`, `clinica.telefono` y `paciente.enlace`. Antes de la primera tarea:
+La rama está rebasada sobre `master` en `f965be1` (12/11/2026), que contiene la implementación de los dos cambios de la 001 (T084 a T124 de la 001). Este plan se apoya en ese código: `cancelarCita`, `sinCerrar`, `dentroDePlazo`, `limiteCancelacion`, `etiquetaCita`, `ahoraLocal`, `sesion_paciente`, `clinica.telefono` y `paciente.enlace`.
 
-1. Rebasar `002-portal-paciente` sobre `master`. La rama ya está publicada en `origin`, así que el rebase exige un push forzado.
-2. Pedir a Sara que actualice el estado de la spec (el segundo cambio de la 001 ya está aprobado) y que la apruebe (principio I).
+Antes de la primera tarea solo falta que Sara actualice el estado de la spec, que todavía dice que el segundo cambio de la 001 está pendiente de aprobación, y que la apruebe (principio I).
 
 ## Trazabilidad de pruebas
 
