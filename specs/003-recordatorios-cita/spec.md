@@ -234,14 +234,12 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
   - La excepción única de FR-001, que remite al modelo de acceso de la 002 (D2).
   - FR-029: teléfono de la clínica.
   - FR-030: cifras de citas protegidas.
-- **Segundo cambio del 10/11/2026 de la 001, pendiente de aprobación por su propietario**. Esta spec cita de él:
+- **Segundo cambio del 10/11/2026 de la 001, aprobado por su propietario el 10/11/2026**. Esta spec cita de él:
   - FR-035, la convención de identificadores de los tests (S-14). FR-023 y SC-007 la citan.
   - FR-039, condición 2, riesgo c: el recordatorio con el servicio y sin baja (S-24). El supuesto «Sin darse de baja» lo cita.
   - FR-041, el correo de la ficha desde una cita (S-13). FR-022 y los supuestos «Sin correo no hay aviso» y «Sin darse de baja» lo citan.
   - FR-042, la dirección pública única (S-16). El supuesto «Dirección del producto» la cita.
   - FR-043, el momento de referencia de la demostración (S-17). FR-003, FR-022, RR6 y HU3-E3 lo citan.
-
-  Si ese cambio cambia antes de aprobarse, hay que revisar estas citas.
 - **002-portal-paciente** (D2, en borrador): define el modelo de acceso del paciente (RP6) que hereda el enlace de cancelación (RR6): 002/FR-025, 002/FR-003, 002/FR-004, 002/FR-005 y RP7. La vigencia que pide 002/FR-003 la fija RR6 (D5). La lista de huecos de 002/FR-019 incluye los cancelados desde el correo. El plazo de cancelación es RN8 de la 001, y RR5 coincide con la 002, que no mueve citas.
   - **D3 (S-12), decidida por Sara: no**. El recordatorio no lleva el enlace personal del portal, solo el de cancelación, para que un correo reenviado solo dé acceso a una cita (RP6). FR-007 no cambia, y FR-010 excluye el enlace personal. En la rama de la 002, D3 aún figura como pregunta abierta.
 - **004-panel-analitica** (en borrador): SC-001 se mide con RA3 y RA4. Si cambian, hay que revisar SC-001.
@@ -292,3 +290,10 @@ Rama rebasada sobre `master`, que contiene el segundo cambio de la 001 (S-13 a S
 - **S-14**: FR-023 y SC-007 adoptan la convención de FR-035 de la 001: `RR1` a `RR6` sin prefijo, y `003/FR-nnn`, `003/SC-nnn`, `003/Hx-Ey` y `003/CL` para lo demás.
 - **FR-007 y FR-010**: FR-010 prohibía «otros datos de la ficha del paciente», y FR-007 exige su nombre. FR-010 dice ahora que, de la ficha, el asunto y el cuerpo solo llevan el nombre, y excluye el teléfono, el correo (que solo figura como destinatario) y cualquier otro dato, como el enlace personal (D3).
 - **Dependencias**: se añade lo que esta spec cita del segundo cambio de la 001: FR-035, FR-039 (riesgo c), FR-041, FR-042 y FR-043.
+
+### 11/11/2026: el segundo cambio de la 001 está aprobado
+
+Rama rebasada sobre `master`, que contiene el segundo cambio de la 001, **aprobado por su propietario el 10/11/2026**, y su implementación, con la suite en verde. Se cumple así la condición de S-18 para planificar.
+
+- **Dependencias**: el segundo cambio de la 001 pasa de «pendiente de aprobación» a aprobado, y se retira el aviso de revisar sus citas si cambiaba antes de aprobarse. Las citas (FR-035, FR-039 riesgo c, FR-041, FR-042 y FR-043) no cambian, porque el texto aprobado es el que citaban.
+- La spec sigue en Borrador hasta que la apruebe su propietario (principio I).
