@@ -4,7 +4,7 @@
 
 **Creada**: 06/11/2026
 
-**Estado**: Borrador. Cambiada el 10/11/2026 por la revisión cruzada, con las decisiones D3, D6 y D7 de Sara (ver [Historial de cambios](#historial-de-cambios)). **Solo podrá aprobarse cuando AntonioLV1999 apruebe el segundo cambio de la 001 del 10/11/2026**, porque esta spec cita requisitos de ese cambio (FR-013, FR-027, FR-029, FR-035, FR-039, FR-040, FR-042 y FR-043 de la 001) y exige que lo que pide a la 001 esté aprobado antes de aprobarse (ver [Cambios que se piden a la 001](#cambios-que-se-piden-a-la-001)).
+**Estado**: Aprobada el 12/11/2026 por AntonioLV1999, que actúa como propietario en nombre de Sara, la propietaria registrada, que es una persona hipotética del curso. Antes la cambiaron la revisión cruzada del 10/11/2026 y las decisiones D3, D6 y D7 de Sara. Lo que pide a la 001 está aprobado en los dos cambios de la 001 del 10/11/2026 (ver [Cambios que se piden a la 001](#cambios-que-se-piden-a-la-001) e [Historial de cambios](#historial-de-cambios)).
 
 **Propietario**: Sara (registrada en `specs/MAPA.md`)
 
@@ -229,7 +229,7 @@ Los tests de esta feature referencian estos identificadores (constitución, prin
 
 ### Cambios que se piden a la 001
 
-La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos cambios, sin aplicarlos por su cuenta (constitución, Flujo de trabajo). Deben estar aprobados antes de aprobar esta spec. Los recogidos sin más indicación lo están en el primer cambio de la 001 del 10/11/2026, aprobado el 10/11/2026. Los recogidos en el segundo cambio de la 001 del 10/11/2026 están pendientes de que lo apruebe AntonioLV1999, y hasta entonces esta spec no puede aprobarse.
+La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos cambios, sin aplicarlos por su cuenta (constitución, Flujo de trabajo). Deben estar aprobados antes de aprobar esta spec. Los recogidos sin más indicación lo están en el primer cambio de la 001 del 10/11/2026, aprobado el 10/11/2026. Los recogidos en el segundo cambio de la 001 del 10/11/2026 lo están en ese cambio, que AntonioLV1999 aprobó también el 10/11/2026.
 
 | Punto de la 001 | Conflicto | Cambio que se pide | Estado |
 |-----------------|-----------|--------------------|--------|
@@ -239,14 +239,14 @@ La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos ca
 | Semilla: Entidad Clínica, FR-029, FR-030 y FR-032 | Teléfono de la clínica, enlaces personales de demostración, origen de las 37 canceladas y resúmenes de contenido (S-03) | Un cambio único de la 001 que añade los datos y actualiza los resúmenes una sola vez. Esta spec no altera la semilla por su cuenta | Remite al cambio único de la 001 (HU5, escenario 4) |
 | Entidad Paciente y Supuestos | «Sin acceso al producto» y acceso del paciente fuera de alcance | Remitir a esta spec | Recogido: entidad Paciente y supuesto «Fuera de alcance de la 001» (S-22) |
 | FR-020, HU3 escenario 5 y Casos límite | Solo recepción cambia estados, y una cita ya cancelada se rechaza, mientras el portal pide que la repetición no dé error (S-05) | Una operación única de cancelar que admita al paciente dentro de RN8, reciba el canal, registre el origen y el momento (FR-036) y distinga «cancelada ahora» de «ya estaba cancelada». La 002 solo elige el mensaje (RP4, FR-015 y FR-017) | Recogido: FR-038 y FR-020 de la 001 |
-| FR-013 | «Fuera del alta de cita no se gestionan pacientes», y recepción copia y anula enlaces desde una cita | Exceptuar el enlace personal (002/FR-002) | Recogido: FR-013 de la 001, segundo cambio (pendiente de aprobación). El mismo cambio añade la otra excepción, el correo de la ficha (FR-041 de la 001) |
+| FR-013 | «Fuera del alta de cita no se gestionan pacientes», y recepción copia y anula enlaces desde una cita | Exceptuar el enlace personal (002/FR-002) | Recogido: FR-013 de la 001, segundo cambio (aprobado el 10/11/2026). El mismo cambio añade la otra excepción, el correo de la ficha (FR-041 de la 001) |
 | Supuestos: conexión sin cifrar y deuda de autenticación | Se aceptaron para datos ficticios, y deben resolverse antes de usar datos reales (S-08) | Un requisito único de puerta de uso con datos reales (conexión cifrada, revisión de protección de datos y responsable con fecha) que citen 002/FR-006, la 003 y la 004 | Recogido: FR-039 de la 001 |
-| FR-027 | La 002 muestra «Pendiente de confirmar por la clínica», que FR-027 no admite, y no dice qué etiqueta ve el paciente en una cita que él canceló (S-15) | Admitir «Pendiente de confirmar por la clínica» para la cita sin cerrar, solo en los canales del paciente, con una única definición de cita sin cerrar, y que el paciente vea en las canceladas la misma etiqueta que la agenda (D6) | Pedido y recogido: FR-027 y FR-040 de la 001, segundo cambio (pendiente de aprobación) |
-| FR-029 | La forma del enlace de demostración estaba solo en el historial de la 001, y FR-029 se la dejaba a la 002 (S-25) | Que FR-029 cite la forma de 002/FR-025 (D7) y recoja la derivación de los enlaces de demostración | Recogido: FR-029 de la 001, segundo cambio (pendiente de aprobación) |
-| FR-035 | Los tests de las features con `RP1` o `002/FR-001` harían fallar la suite, o contarían como cobertura de la 001 (S-14) | Una convención de identificadores para todas las specs | Recogido: FR-035 de la 001, segundo cambio (pendiente de aprobación). Esta spec la adopta en FR-024 y SC-010 |
-| FR-039, condición 2, riesgos a y b | Los supuestos «Enlace sin caducidad» y «Datos de salud» fijaban por su cuenta que la revisión de protección de datos debía confirmarlos (S-24) | Que la condición 2 de la puerta única enumere esos dos riesgos de forma expresa | Recogido: FR-039 de la 001, segundo cambio (pendiente de aprobación) |
-| FR-042 | El supuesto «Portal por clínica» y la 003 necesitaban cada uno una dirección pública, con dos ajustes para lo mismo (S-16) | Un único ajuste de dirección pública del producto | Recogido: FR-042 de la 001, segundo cambio (pendiente de aprobación) |
-| FR-043 | El reloj fijado de los ejemplos no se podía fijar al arrancar el servidor, y cada spec usaba su momento de referencia (S-17) | Un único momento de referencia para el servidor y los procesos, con las esperas de 002/FR-004 en tiempo real | Recogido: FR-043 de la 001, segundo cambio (pendiente de aprobación) |
+| FR-027 | La 002 muestra «Pendiente de confirmar por la clínica», que FR-027 no admite, y no dice qué etiqueta ve el paciente en una cita que él canceló (S-15) | Admitir «Pendiente de confirmar por la clínica» para la cita sin cerrar, solo en los canales del paciente, con una única definición de cita sin cerrar, y que el paciente vea en las canceladas la misma etiqueta que la agenda (D6) | Pedido y recogido: FR-027 y FR-040 de la 001, segundo cambio (aprobado el 10/11/2026) |
+| FR-029 | La forma del enlace de demostración estaba solo en el historial de la 001, y FR-029 se la dejaba a la 002 (S-25) | Que FR-029 cite la forma de 002/FR-025 (D7) y recoja la derivación de los enlaces de demostración | Recogido: FR-029 de la 001, segundo cambio (aprobado el 10/11/2026) |
+| FR-035 | Los tests de las features con `RP1` o `002/FR-001` harían fallar la suite, o contarían como cobertura de la 001 (S-14) | Una convención de identificadores para todas las specs | Recogido: FR-035 de la 001, segundo cambio (aprobado el 10/11/2026). Esta spec la adopta en FR-024 y SC-010 |
+| FR-039, condición 2, riesgos a y b | Los supuestos «Enlace sin caducidad» y «Datos de salud» fijaban por su cuenta que la revisión de protección de datos debía confirmarlos (S-24) | Que la condición 2 de la puerta única enumere esos dos riesgos de forma expresa | Recogido: FR-039 de la 001, segundo cambio (aprobado el 10/11/2026) |
+| FR-042 | El supuesto «Portal por clínica» y la 003 necesitaban cada uno una dirección pública, con dos ajustes para lo mismo (S-16) | Un único ajuste de dirección pública del producto | Recogido: FR-042 de la 001, segundo cambio (aprobado el 10/11/2026) |
+| FR-043 | El reloj fijado de los ejemplos no se podía fijar al arrancar el servidor, y cada spec usaba su momento de referencia (S-17) | Un único momento de referencia para el servidor y los procesos, con las esperas de 002/FR-004 en tiempo real | Recogido: FR-043 de la 001, segundo cambio (aprobado el 10/11/2026) |
 
 ## Criterios de éxito *(obligatorio)*
 
@@ -280,6 +280,13 @@ La 001 tiene propietario propio (AntonioLV1999), y esta feature le pide estos ca
 - **Fuera de alcance de la v1**: reservar o mover citas online, pagos, lista de espera, avisos a otros pacientes y gestión de fichas.
 
 ## Historial de cambios
+
+### 12/11/2026, aprobación de la spec
+
+Aprobada por AntonioLV1999 el 12/11/2026, en nombre de Sara, la propietaria registrada, que es una persona hipotética del curso. La aprobación cubre la spec completa. Ya no queda nada que la bloquee: el segundo cambio de la 001 del 10/11/2026, que cita, lo aprobó su propietario el 10/11/2026, y la rama está rebasada sobre `master`, que lo implementa. No cambia ningún requisito, escenario ni dato.
+
+- **Estado**: pasa de Borrador a Aprobada.
+- **Cambios que se piden a la 001**: la introducción y las siete filas del segundo cambio dejan de darlo por pendiente.
 
 ### 10/11/2026, decisiones D3, D6 y D7 y segundo cambio de la 001: S-12 a S-17, S-24 y S-25
 

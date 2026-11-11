@@ -38,7 +38,7 @@ No queda ningún punto por aclarar: las decisiones están en [research.md](resea
 
 | Principio | Cumplimiento | Estado |
 |-----------|--------------|--------|
-| I. Spec primero | Propietaria registrada en `specs/MAPA.md` (Sara). La spec está en **Borrador**, y su estado dice que espera la aprobación del segundo cambio de la 001, que en `master` ya está aprobado (10/11/2026). Planificar no crea comportamiento, así que el plan puede hacerse; **implementar y hacer merge exige antes que Sara apruebe la spec**. Los cambios de código en módulos de la 001 son los que piden la spec de la 002 y las excepciones ya aprobadas de la 001 (FR-001, FR-013 y FR-042). | Cumple con condición |
+| I. Spec primero | Propietaria registrada en `specs/MAPA.md` (Sara). Spec aprobada el 12/11/2026 por AntonioLV1999 en nombre de Sara, con los dos cambios de la 001 que cita también aprobados. Los cambios de código en módulos de la 001 son los que piden la spec de la 002 y las excepciones ya aprobadas de la 001 (FR-001, FR-013 y FR-042). | Cumple |
 | II. Números | Sin importes en el portal (FR-008). Fechas `dd/mm/aaaa`, 24 horas y hora local de la clínica con las funciones de la 001. El plazo y los días de cambio de hora los resuelve RN8 de la 001, sin cálculo propio. | Cumple |
 | III. Solape | El portal escribe en la agenda (cancela). Cancelar no añade ocupación, y la reserva del tramo liberado pasa por el disparador `cita_solape` de la 001. Pruebas con reservas simultáneas entre sí y con la cancelación, 1.000 rondas con barrera (SC-005). | Cumple |
 | IV. Simplicidad | Cero dependencias. Sin tabla de huecos: una consulta. Contador de intentos en memoria. La tabla `enlace_cancelacion` está justificada por RP6, RP7 y los escenarios de la 002 que la usan, no por la 003. | Cumple |
@@ -47,13 +47,13 @@ No queda ningún punto por aclarar: las decisiones están en [research.md](resea
 | VII. Interfaz | Criterios verificables de FR-021 y FR-022, comprobados en navegador real. Mensajes literales en [portal-web.md](contracts/portal-web.md#mensajes). | Cumple |
 | VIII. Español | Interfaz, mensajes, documentación y este plan en español de España. | Cumple |
 
-**Repetición tras la fase 1**: sin infracciones nuevas. La condición del principio I sigue abierta. La sección de complejidad queda sin uso.
+**Repetición tras la fase 1**: sin infracciones. La sección de complejidad queda sin uso.
 
 ## Base de partida
 
 La rama está rebasada sobre `master` en `f965be1` (12/11/2026), que contiene la implementación de los dos cambios de la 001 (T084 a T124 de la 001). Este plan se apoya en ese código: `cancelarCita`, `sinCerrar`, `dentroDePlazo`, `limiteCancelacion`, `etiquetaCita`, `ahoraLocal`, `sesion_paciente`, `clinica.telefono` y `paciente.enlace`.
 
-Antes de la primera tarea solo falta que Sara actualice el estado de la spec, que todavía dice que el segundo cambio de la 001 está pendiente de aprobación, y que la apruebe (principio I).
+La spec está aprobada desde el 12/11/2026, así que no queda ningún requisito previo para empezar las tareas.
 
 ## Trazabilidad de pruebas
 
@@ -137,7 +137,7 @@ tests/
 
 ## Riesgos
 
-- **La spec sigue en Borrador**: si Sara cambia algo al aprobarla, este plan se revisa antes de implementar.
+- **Cambios en la spec aprobada**: si la spec cambia, este plan se revisa antes de seguir implementando.
 - **Coordinación con la 003**: la 003 todavía no tiene plan. Su plan debe usar [modelo-acceso.md](contracts/modelo-acceso.md) tal cual. Si necesita cambiarlo, lo pide a esta feature (constitución, Flujo de trabajo).
 - **Cambios en módulos de la 001**: esquema, servidor, agenda, semilla y el test de FR-001. Todos están previstos por la 001 (FR-001, FR-013, FR-037, FR-042 y su research §11 y §15), pero tocan código de otro propietario. Las tareas deben dejar en verde toda la suite de la 001.
 - **Copiar al portapapeles sin `https`**: fuera de `localhost`, el navegador no deja copiar. Hay alternativa (texto seleccionado), y FR-039 de la 001 exige la conexión cifrada antes de usar datos reales.
