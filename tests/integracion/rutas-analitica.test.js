@@ -1,6 +1,8 @@
 import { after, before, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { citaDirecta, crearEscenario, detener, escuchar, peticion, relojFijo, sesionDePrueba, textoVisible } from '../ayudas/escenario.js';
+import {
+  citaDirecta, crearEscenario, detener, escuchar, peticion, relojFijo, sesionDePrueba, sesionPacienteDePrueba, textoVisible,
+} from '../ayudas/escenario.js';
 import { panelDeSemilla } from '../ayudas/panel.js';
 import { crearServidor } from '../../src/web/servidor.js';
 
@@ -212,5 +214,109 @@ describe('historia 2: no asistencia por profesional con la semilla', () => {
     assert.equal(fraseDe(r.texto, 'No asistencia por profesional'),
       'Tasa de no asistencia: de las citas que debían atenderse, es decir, las completadas y las no asistidas, '
       + 'qué parte acabó sin que el paciente viniera. Las canceladas no cuentan, sea quien sea quien cancelara.');
+  });
+});
+
+/** Contenido lógico de todas las tablas, fila a fila y en orden (RA8). */
+function volcado(bd) {
+  const tablas = bd.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all();
+  return JSON.stringify(tablas.map(({ name }) => [name, bd.prepare(`SELECT * FROM ${name} ORDER BY rowid`).all()]));
+}
+
+const CIFRAS = /15\.380|8\.800|\d,\d %/;
+
+describe('historia 5: acceso, solo lectura y sin datos de pacientes', () => {
+  let p;
+  before(async () => { p = await panelDeSemilla(); });
+  after(() => p.cerrar());
+
+  test('004/H5-E1 con sesión, «Analítica» del menú abre el panel sin pedir nada más', async () => {
+    const agenda = await p.abrir('/agenda');
+    const enlace = agenda.texto.match(/<a [^>]*href="([^"]+)"[^>]*>Analítica<\/a>/)[1];
+    const r = await p.abrir(enlace);
+    assert.equal(r.estado, 200);
+    assert.ok(r.visible.includes('Total del periodo: 15.380,00 €'));
+  });
+
+  test('004/H5-E2 004/FR-001 sin sesión se rechaza por cualquier vía y no se revela ninguna cifra', async () => {
+    const get = await peticion(p.servidor, { ruta: '/analitica' });
+    assert.equal(get.estado, 303);
+    assert.equal(get.ubicacion, '/acceso');
+    for (const metodo of ['POST', 'PUT', 'DELETE']) {
+      const r = await peticion(p.servidor, { metodo, ruta: '/analitica' });
+      assert.equal(r.estado, 401, metodo);
+      assert.doesNotMatch(r.texto, CIFRAS, metodo);
+    }
+    assert.doesNotMatch(get.texto, CIFRAS);
+    const conClave = await peticion(p.servidor, { ruta: '/analitica', cookie: 'sesion=inventada' });
+    assert.equal(conClave.estado, 303);
+  });
+
+  test('004/H5-E8 una sesión de paciente no abre el panel por ninguna vía', async () => {
+    const token = sesionPacienteDePrueba(p.e.bd, p.e.a.pacientes[0]);
+    for (const cookie of [`sesion_paciente=${token}`, `sesion=${token}`, `sesion_paciente=${token}; sesion=${token}`]) {
+      const r = await peticion(p.servidor, { ruta: '/analitica', cookie });
+      assert.equal(r.estado, 303, cookie);
+      assert.equal(r.ubicacion, '/acceso', cookie);
+      assert.doesNotMatch(r.texto, CIFRAS, cookie);
+      const post = await peticion(p.servidor, { metodo: 'POST', ruta: '/analitica', cookie });
+      assert.equal(post.estado, 401, cookie);
+    }
+  });
+
+  test('004/H5-E4 004/SC-003 RA8 tras abrir el panel 100 veces, los datos almacenados no cambian', async () => {
+    const antes = volcado(p.e.bd);
+    for (let i = 0; i < 100; i += 1) {
+      const r = await p.abrir();
+      assert.equal(r.estado, 200);
+      assert.deepEqual(r.cookies, [], 'el panel no pone cookies');
+    }
+    assert.equal(volcado(p.e.bd), antes);
+  });
+
+  test('004/H5-E5 RA8 el panel no ofrece ninguna acción de escritura y rechaza cualquier intento', async () => {
+    const r = await p.abrir();
+    const principal = r.texto.match(/<main[\s\S]*<\/main>/)[0];
+    assert.doesNotMatch(principal, /<form|<button|<input|<select|<textarea/);
+    const antes = volcado(p.e.bd);
+    for (const [metodo, ruta] of [['POST', '/analitica'], ['PUT', '/analitica'], ['DELETE', '/analitica'], ['POST', '/analitica/exportar']]) {
+      const intento = await p.abrir(ruta, { metodo, formulario: metodo === 'POST' ? { semana: '1' } : undefined });
+      assert.equal(intento.estado, 404, `${metodo} ${ruta}`);
+      assert.doesNotMatch(intento.texto, CIFRAS, `${metodo} ${ruta}`);
+    }
+    assert.equal(volcado(p.e.bd), antes);
+  });
+
+  test('004/H5-E6 004/FR-012 el panel no muestra ningún dato de un paciente concreto', async () => {
+    const r = await p.abrir();
+    const pacientes = p.e.bd.prepare('SELECT nombre, telefono, email, enlace FROM paciente WHERE clinica_id = ?').all(p.clinicaId);
+    assert.equal(pacientes.length, 40);
+    for (const paciente of pacientes) {
+      for (const dato of Object.values(paciente).filter(Boolean)) {
+        assert.ok(!r.texto.includes(dato), `aparece «${dato}»`);
+      }
+    }
+  });
+});
+
+describe('historia 5: dos clínicas', () => {
+  let p;
+  before(async () => {
+    p = await panelDeSemilla();
+    const { b } = p.e;
+    for (const inicio of ['2026-10-05T10:00', '2026-10-06T10:00']) {
+      citaDirecta(p.e.bd, { clinica: b.id, profesional: b.fisio, servicio: b.sesion, paciente: b.pacientes[0], inicio, estado: 'completada' });
+    }
+  });
+  after(() => p.cerrar());
+
+  test('004/H5-E3 004/FR-002 cada clínica ve solo sus cifras', async () => {
+    const eleva = await p.abrir();
+    assert.ok(eleva.visible.includes('Total del periodo: 15.380,00 €'));
+    const sur = await peticion(p.servidor, { ruta: '/analitica', cookie: sesionDePrueba(p.e.bd, p.e.b.id) });
+    const visible = textoVisible(sur.texto);
+    assert.ok(visible.includes('Total del periodo: 80,00 €'), visible);
+    assert.deepEqual(filasDeTabla(sur.texto, 'Citas por profesional').map((fila) => fila[0]), ['Pablo', 'Elena', 'Nora', 'Toda la clínica']);
+    assert.doesNotMatch(visible, /María|Jorge|Lucía|15\.380/);
   });
 });
