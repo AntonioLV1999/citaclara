@@ -81,3 +81,58 @@ test('RA6 las citas sin cerrar del periodo se cuentan para el aviso', () => {
   assert.equal(resultado.capacidadSemanal, 3300);
   assert.equal(resultado.periodo.inicio, '2026-09-07');
 });
+
+test('RA5 los ingresos suman en céntimos el precio de cada cita completada', () => {
+  const { ingresos } = panel([
+    cita('completada'), cita('completada'), cita('completada', { servicio: 11 }),
+    cita('no_asistida'), cita('cancelada'), cita('reservada'), cita('no_asistida', { servicio: 11 }),
+  ]);
+  assert.deepEqual(ingresos.servicios.map(({ servicio, completadas, centimos }) => [servicio.nombre, completadas, centimos]), [
+    ['Sesión', 2, 8000],
+    ['Primera visita', 1, 5000],
+  ]);
+  assert.equal(ingresos.total, 13000);
+});
+
+test('RA5 un servicio sin completadas aparece con 0 citas y 0 céntimos, en orden de servicio', () => {
+  const { ingresos } = panel([cita('completada', { servicio: 11 }), cita('cancelada')]);
+  assert.deepEqual(ingresos.servicios.map((s) => [s.servicio.id, s.completadas, s.centimos]), [[10, 0, 0], [11, 1, 5000]]);
+});
+
+test('RA5 las citas de fuera del periodo no suman', () => {
+  const { ingresos } = panel([cita('completada', { inicio: '2026-11-02T10:00' }), cita('completada', { inicio: '2026-09-04T10:00' })]);
+  assert.equal(ingresos.total, 0);
+});
+
+test('004/FR-013 el total de ingresos es la suma exacta de los servicios', () => {
+  const citas = Array.from({ length: 37 }, (_, i) => cita('completada', { servicio: i % 3 ? 10 : 11, inicio: `2026-09-${String(8 + (i % 20)).padStart(2, '0')}T10:00` }));
+  const { ingresos } = panel(citas);
+  assert.equal(ingresos.total, ingresos.servicios.reduce((suma, s) => suma + s.centimos, 0));
+  assert.equal(ingresos.total, 13 * 5000 + 24 * 4000);
+});
+
+test('RA3 la tasa es no asistidas entre completadas y no asistidas, sin las canceladas', () => {
+  const canceladas = ['recepcion', 'portal', 'correo'].map((origen) => ({ ...cita('cancelada'), origen_cancelacion: origen }));
+  const { noAsistencia } = panel([cita('completada'), cita('completada'), cita('completada'), cita('no_asistida'), ...canceladas]);
+  const [maria, jorge] = noAsistencia.profesionales;
+  assert.equal(maria.profesional.nombre, 'María');
+  assert.deepEqual([maria.completadas, maria.noAsistidas, maria.canceladas], [3, 1, 3]);
+  assert.deepEqual(maria.tasa, { numerador: 1, denominador: 4 });
+  assert.deepEqual(jorge.tasa, { numerador: 0, denominador: 0 });
+});
+
+test('RA3 un profesional con citas y ninguna no asistida tiene una tasa real de cero', () => {
+  const { noAsistencia } = panel([cita('completada', { profesional: 2 }), cita('cancelada', { profesional: 2 })]);
+  assert.deepEqual(noAsistencia.profesionales[1].tasa, { numerador: 0, denominador: 1 });
+});
+
+test('RA7 la tasa de la clínica sale de los recuentos totales, no de promediar tasas', () => {
+  const citas = [
+    cita('completada'), cita('no_asistida'),
+    ...Array.from({ length: 8 }, () => cita('completada', { profesional: 2 })),
+  ];
+  const { noAsistencia } = panel(citas);
+  assert.deepEqual(noAsistencia.clinica, {
+    completadas: 9, noAsistidas: 1, canceladas: 0, tasa: { numerador: 1, denominador: 10 },
+  });
+});

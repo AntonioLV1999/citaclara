@@ -45,12 +45,61 @@ export function clasificar(cita, ahora) {
   return cita.estado;
 }
 
-export function calcularPanel({ hoy, ahora, citas }) {
+/** Principio II: un total que no cuadra con sus partes no se muestra nunca. */
+function exigirCuadre(descripcion, ...sumas) {
+  if (sumas.some((suma) => suma !== sumas[0])) throw new Error(`Las cifras del panel no cuadran: ${descripcion} (${sumas.join(' ≠ ')})`);
+}
+
+const sumar = (filas, campo) => filas.reduce((suma, fila) => suma + fila[campo], 0);
+
+/** RA5: céntimos exactos del precio de cada completada, por servicio y en total. */
+function calcularIngresos(servicios, completadas) {
+  const filas = servicios.map((servicio) => {
+    const suyas = completadas.filter((cita) => cita.servicio_id === servicio.id);
+    return { servicio, completadas: suyas.length, centimos: sumar(suyas, 'precio_centimos') };
+  });
+  const total = sumar(filas, 'centimos');
+  exigirCuadre('ingresos por servicio', total, sumar(completadas, 'precio_centimos'));
+  return { servicios: filas, total };
+}
+
+/** Recuentos por estado de llegada y tasa de RA3 de un grupo de citas ya clasificadas. */
+function recuentos(citas) {
+  const de = (clase) => citas.filter((cita) => cita.clase === clase).length;
+  const completadas = de('completada');
+  const noAsistidas = de('no_asistida');
+  return {
+    completadas,
+    noAsistidas,
+    canceladas: de('cancelada'),
+    tasa: { numerador: noAsistidas, denominador: completadas + noAsistidas },
+  };
+}
+
+/** RA3 y RA7: la tasa de cada profesional y la de la clínica, esta desde los recuentos totales. */
+function calcularNoAsistencia(profesionales, citas) {
+  const filas = profesionales.map((profesional) => ({
+    profesional,
+    ...recuentos(citas.filter((cita) => cita.profesional_id === profesional.id)),
+  }));
+  const clinica = recuentos(citas);
+  for (const campo of ['completadas', 'noAsistidas', 'canceladas']) {
+    exigirCuadre(`${campo} por profesional`, clinica[campo], sumar(filas, campo));
+  }
+  return { profesionales: filas, clinica };
+}
+
+export function calcularPanel({ hoy, ahora, profesionales, servicios, citas }) {
   const periodo = periodoDe(hoy);
-  const delPeriodo = citas.filter((cita) => semanaDe(periodo, cita.inicio) !== -1);
+  const delPeriodo = citas
+    .filter((cita) => semanaDe(periodo, cita.inicio) !== -1)
+    .map((cita) => ({ ...cita, clase: clasificar(cita, ahora) }));
+  const completadas = delPeriodo.filter((cita) => cita.clase === 'completada');
   return {
     periodo,
-    sinCerrar: delPeriodo.filter((cita) => clasificar(cita, ahora) === 'sin_cerrar').length,
+    sinCerrar: delPeriodo.filter((cita) => cita.clase === 'sin_cerrar').length,
     capacidadSemanal: capacidadSemanal(),
+    ingresos: calcularIngresos(servicios, completadas),
+    noAsistencia: calcularNoAsistencia(profesionales, delPeriodo),
   };
 }

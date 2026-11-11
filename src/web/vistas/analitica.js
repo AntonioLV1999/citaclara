@@ -1,4 +1,4 @@
-import { euros, fecha } from '../../dominio/formato.js';
+import { euros, fecha, porcentaje } from '../../dominio/formato.js';
 import { html, layout } from '../plantilla.js';
 
 /**
@@ -49,10 +49,78 @@ function avisoSinCerrar(n) {
   return html`<p class="aviso aviso--info" role="status">${texto} <a class="boton" href="/agenda">Ir a la agenda</a></p>`;
 }
 
+const citas = (n) => (n === 1 ? '1 cita' : `${n} citas`);
+
+function apartado(titulo, frase, cuerpo) {
+  return html`<section class="tarjeta">
+    <h2>${titulo}</h2>
+    <p class="analitica__nota">${frase}</p>
+    ${cuerpo}
+  </section>`;
+}
+
+function apartadoIngresos({ servicios, total }) {
+  const escala = escalaImporte(servicios.map((s) => s.centimos));
+  return apartado('Ingresos por servicio',
+    'Suma del precio de las citas completadas. Las no asistidas, las canceladas y las reservadas no suman.',
+    html`${graficoBarras({
+      titulo: 'Ingresos por servicio',
+      escala,
+      filas: servicios.map((s) => ({
+        etiqueta: s.servicio.nombre,
+        cifra: `${citas(s.completadas)} · ${euros(s.centimos)}`,
+        proporcion: escala.proporcion(s.centimos),
+      })),
+    })}
+    <p class="analitica__total">Total del periodo: ${euros(total)}</p>`);
+}
+
+/** Tabla de cifras exactas: la primera columna nombra la fila; la fila `total` va resaltada. */
+function tabla({ titulo, columnas, filas }) {
+  return html`<table class="tabla">
+    <caption>${titulo}</caption>
+    <thead><tr>${columnas.map((columna) => html`<th scope="col">${columna}</th>`)}</tr></thead>
+    <tbody>
+      ${filas.map(({ celdas, total }) => html`<tr${total ? html` class="tabla__total"` : ''}>
+        <th scope="row">${celdas[0]}</th>${celdas.slice(1).map((celda) => html`<td>${celda}</td>`)}
+      </tr>`)}
+    </tbody>
+  </table>`;
+}
+
+function apartadoNoAsistencia({ profesionales, clinica }) {
+  const filas = [
+    ...profesionales.map((fila) => ({ ...fila, nombre: fila.profesional.nombre })),
+    { ...clinica, nombre: 'Toda la clínica', total: true },
+  ];
+  const escala = escalaPorcentaje(filas.map((fila) => fila.tasa));
+  return apartado('No asistencia por profesional',
+    'Tasa de no asistencia: de las citas que debían atenderse, es decir, las completadas y las no asistidas, qué parte acabó sin que el paciente viniera. Las canceladas no cuentan, sea quien sea quien cancelara.',
+    html`${graficoBarras({
+      titulo: 'Tasa de no asistencia',
+      escala,
+      filas: filas.map((fila) => ({
+        etiqueta: fila.nombre,
+        cifra: porcentaje(fila.tasa.numerador, fila.tasa.denominador),
+        proporcion: escala.proporcion(fila.tasa),
+      })),
+    })}
+    ${tabla({
+      titulo: 'Citas por profesional',
+      columnas: ['Profesional', 'Completadas', 'No asistidas', 'Canceladas', 'Tasa'],
+      filas: filas.map((fila) => ({
+        total: fila.total,
+        celdas: [fila.nombre, fila.completadas, fila.noAsistidas, fila.canceladas, porcentaje(fila.tasa.numerador, fila.tasa.denominador)],
+      })),
+    })}`);
+}
+
 export function vistaAnalitica({ clinica, panel, momentoFijado }) {
   const { periodo } = panel;
   const contenido = html`<h1>Analítica</h1>
     <p class="analitica__periodo">Del ${fecha(periodo.inicio)} al ${fecha(periodo.fin)}: las 8 últimas semanas completas. La semana en curso no cuenta hasta que termina.</p>
-    ${avisoSinCerrar(panel.sinCerrar)}`;
+    ${avisoSinCerrar(panel.sinCerrar)}
+    ${apartadoIngresos(panel.ingresos)}
+    ${apartadoNoAsistencia(panel.noAsistencia)}`;
   return layout({ titulo: 'Analítica', clinica, contenido, momentoFijado });
 }
