@@ -72,7 +72,8 @@ function esUniforme(r) {
 }
 
 const principal = (html) => html.match(/<main[\s\S]*<\/main>/)[0];
-const visible = (r) => textoVisible(principal(r.texto));
+// El texto que se lee: sin el espacio que deja una etiqueta antes de un punto.
+const visible = (r) => textoVisible(principal(r.texto)).replace(/\s+([.,])/g, '$1');
 
 test('003/H2-E1 003/FR-011 003/FR-012 003/FR-013 el enlace muestra la cita, el aviso y el botón, sin datos de la ficha, y no cambia nada', async () => {
   const id = cita(ana, `${MANANA}T12:00`);
@@ -101,7 +102,7 @@ test('003/H2-E2 RR4 003/FR-014 003/FR-016 al confirmar, la cita queda cancelada 
   const r = await confirmar(s, cookie);
 
   assert.equal(r.estado, 200);
-  assert.equal(visible(r), 'Cita cancelada Tu cita del martes 03/11/2026 a las 12:00 está cancelada, y el hueco ha quedado libre para otra persona. Gracias por avisar.');
+  assert.equal(visible(r), 'Cita cancelada Tu cita del martes 03/11/2026 a las 12:00 está cancelada, y el hueco ha quedado libre para otra persona. Gracias por avisar. Horas en hora peninsular');
   assert.deepEqual({ ...fila(id) }, { estado: 'cancelada', origen_cancelacion: 'correo', momento_cancelacion: AHORA });
 });
 
@@ -154,7 +155,7 @@ test('003/H2-E6 RR4 a las 08:01 una cita de las 10:00 ya no se cancela por el co
   const { pantalla } = await abrir(await servidor(`${MANANA}T08:01`), token);
   assert.equal(pantalla.estado, 200);
   assert.equal(visible(pantalla), 'Ya no se puede cancelar desde aquí Se podía cancelar hasta el martes 03/11/2026 a las 08:00. '
-    + 'Si no vas a poder venir, llama a la clínica: 000 300 000.');
+    + 'Si no vas a poder venir, llama a la clínica: 000 300 000. Horas en hora peninsular');
   assert.match(principal(pantalla.texto), /<a[^>]*href="tel:000300000"[^>]*>000 300 000<\/a>/);
   assert.doesNotMatch(principal(pantalla.texto), /<form/);
   assert.deepEqual({ ...fila(id) }, reservada);
@@ -166,7 +167,7 @@ test('003/H2-E6 sin teléfono de la clínica, el mensaje de fuera de plazo termi
   });
   const token = recordatorios().get(id);
   const { pantalla } = await abrir(await servidor(`${MANANA}T08:01`), token);
-  assert.equal(visible(pantalla), 'Ya no se puede cancelar desde aquí Se podía cancelar hasta el martes 03/11/2026 a las 08:00. Si no vas a poder venir, llama a la clínica.');
+  assert.equal(visible(pantalla), 'Ya no se puede cancelar desde aquí Se podía cancelar hasta el martes 03/11/2026 a las 08:00. Si no vas a poder venir, llama a la clínica. Horas en hora de Canarias');
   assert.doesNotMatch(pantalla.texto, /tel:/);
 });
 
@@ -177,7 +178,7 @@ test('003/CL Pantalla abierta mientras vence el plazo: abierta a las 07:55 y con
   assert.match(visible(pantalla), /^Cancelar tu cita /);
   const r = await confirmar(await servidor(`${MANANA}T08:01`), cookie);
   assert.equal(r.estado, 409);
-  assert.equal(visible(r), 'Ya no se puede cancelar desde aquí Se podía cancelar hasta el martes 03/11/2026 a las 08:00. Si no vas a poder venir, llama a la clínica: 000 300 000.');
+  assert.equal(visible(r), 'Ya no se puede cancelar desde aquí Se podía cancelar hasta el martes 03/11/2026 a las 08:00. Si no vas a poder venir, llama a la clínica: 000 300 000. Horas en hora peninsular');
   assert.deepEqual({ ...fila(id) }, reservada);
 });
 

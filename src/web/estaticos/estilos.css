@@ -435,3 +435,13 @@ legend {
   background: var(--exito-fondo);
   color: var(--exito-tinta);
 }
+
+/* 003: el teléfono de la clínica dentro de un mensaje, como enlace de llamada de 44 × 44 (FR-028). */
+.telefono {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: inherit;
+  font-weight: 700;
+}
