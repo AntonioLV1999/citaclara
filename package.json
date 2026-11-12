@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node src/principal.js",
     "semilla": "node src/semilla/comando.js",
+    "recordatorios": "node src/recordatorios.js",
     "test": "node --test \"tests/{unit,integracion,concurrencia}/**/*.test.js\"",
     "test:e2e": "playwright test"
   },

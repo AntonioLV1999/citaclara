@@ -13,6 +13,23 @@ description: "Lista de tareas de implementación de los recordatorios de cita"
 
 **Organización**: las tareas se agrupan por historia de usuario, para implementar y probar cada una por separado. Las tres historias P1 siguen el orden de la spec, porque cada una usa lo anterior: la 2 necesita recordatorios con enlace (historia 1), y la 3 abre ese enlace contra el servidor (historia 2).
 
+## Nombres de la 002
+
+Anotados en T002 sobre `master` en `f2541d0`, con la 002 integrada. Todas las piezas que usan estas tareas existen y se exportan, así que no hay nada que pedir a la 002.
+
+| Pieza | Nombre real |
+|-------|-------------|
+| Generador único del token | No es una función JS: es `lower(hex(randomblob(16)))` de SQLite (contrato `modelo-acceso.md`, «Generador único»). La 003 lo pide al almacén con `SELECT lower(hex(randomblob(16)))`, como `anularEnlace` en `src/datos/pacientes.js` |
+| Respuesta uniforme | `paginaEnlaceNoValido()` de `src/web/plantilla.js`, código 404 |
+| Registro de rutas de paciente con su alcance | Entradas `{ metodo, patron, paciente: true, alcance: 'cita', manejador }` en la lista de rutas de `crearServidor` (`src/web/servidor.js`), que las atiende con `atenderPaciente` y `Referrer-Policy: no-referrer`. Sin sesión: `paginaSesionTerminada()` (401) |
+| Contexto de esas rutas | `{ ...base, paciente, clinica, citaDelAlcance, tokenPaciente, formulario }`, de `sesionDePaciente` en `src/servicios/acceso-paciente.js`. `citaDelAlcance` es la fila de `citaPorId` |
+| Resolución del enlace | `resolverEnlace` en `src/servicios/acceso-paciente.js` y `GET /e/:token` en `src/web/rutas/enlace.js`, que redirige con 303 a `/cancelar` |
+| Plantilla de las páginas del paciente | `layoutPortal({ titulo, clinica, contenido })` y `enlaceLlamada(clinica, clase)` de `src/web/plantilla.js`; `enlaceTelefono` de `src/dominio/formato.js` |
+| Lectura de `CITACLARA_DIRECCION` | En `src/principal.js`, con `esDireccionValida` de `src/dominio/direccion.js` y el mensaje `DIRECCION_NO_VALIDA`; el servidor la recibe como `crearServidor({ direccion })` |
+| Borrado de enlaces en `borrarClinica` | `DELETE FROM enlace_cancelacion WHERE cita_id IN (SELECT id FROM cita WHERE clinica_id = ?)` en `src/semilla/carga.js` |
+| Anulación del enlace personal (RP7) | `anularEnlace(bd, clinicaId, pacienteId)` de `src/datos/pacientes.js` |
+| Huecos liberados (002/FR-019) | `huecosLiberados(bd, clinicaId, ahora)` de `src/datos/portal.js` |
+
 ## Formato: `[ID] [P?] [Historia] Descripción`
 
 - **[P]**: se puede hacer en paralelo (archivos distintos, sin dependencias pendientes)
@@ -34,9 +51,9 @@ description: "Lista de tareas de implementación de los recordatorios de cita"
 
 **Propósito**: comprobar que la base tiene lo que el plan usa
 
-- [ ] T001 Comprobar que el modelo común de acceso de la 002 está en `master` (tabla `enlace_cancelacion`, `GET /e/:token`, respuesta uniforme, sesiones de alcance `cita`, `CITACLARA_DIRECCION` y generador único del token) y rebasar `003-recordatorios-cita` sobre `master`. Si no está, **detenerse**: ninguna tarea siguiente puede empezar (plan, «Requisitos previos»). Después, `npm test` y `npm run test:e2e` en verde antes de tocar nada
-- [ ] T002 Anotar al principio de este archivo, en una sección «Nombres de la 002», los nombres reales que exporta la 002 para: el generador único del token, la respuesta uniforme (función y código), el registro de rutas de paciente con su alcance, el contexto de esas rutas (`citaDelAlcance`), la plantilla `layoutPortal`, la lectura de `CITACLARA_DIRECCION` y el borrado de enlaces en `borrarClinica`. Si alguna pieza que usan estas tareas no se exporta, pedirla a la 002 en lugar de crearla aquí (constitución, «Flujo de trabajo»)
-- [ ] T003 Añadir el script `"recordatorios": "node src/recordatorios.js"` en package.json
+- [X] T001 Comprobar que el modelo común de acceso de la 002 está en `master` (tabla `enlace_cancelacion`, `GET /e/:token`, respuesta uniforme, sesiones de alcance `cita`, `CITACLARA_DIRECCION` y generador único del token) y rebasar `003-recordatorios-cita` sobre `master`. Si no está, **detenerse**: ninguna tarea siguiente puede empezar (plan, «Requisitos previos»). Después, `npm test` y `npm run test:e2e` en verde antes de tocar nada
+- [X] T002 Anotar al principio de este archivo, en una sección «Nombres de la 002», los nombres reales que exporta la 002 para: el generador único del token, la respuesta uniforme (función y código), el registro de rutas de paciente con su alcance, el contexto de esas rutas (`citaDelAlcance`), la plantilla `layoutPortal`, la lectura de `CITACLARA_DIRECCION` y el borrado de enlaces en `borrarClinica`. Si alguna pieza que usan estas tareas no se exporta, pedirla a la 002 en lugar de crearla aquí (constitución, «Flujo de trabajo»)
+- [X] T003 Añadir el script `"recordatorios": "node src/recordatorios.js"` en package.json
 
 ---
 
