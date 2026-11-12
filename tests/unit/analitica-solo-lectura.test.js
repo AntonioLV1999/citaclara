@@ -13,7 +13,8 @@ const leer = (ruta) => readFileSync(new URL(ruta, import.meta.url), 'utf8');
 
 test('RA8 004/FR-018 los módulos del panel no contienen ninguna escritura', () => {
   for (const ruta of MODULOS_DEL_PANEL) {
-    assert.doesNotMatch(leer(ruta), /\b(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER)\b|transaccionInmediata/i, ruta);
+    // El SQL del proyecto va en mayúsculas; `.run(` es como node:sqlite ejecuta una escritura.
+    assert.doesNotMatch(leer(ruta), /\b(INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER)\b|transaccionInmediata|\.run\(/, ruta);
   }
 });
 

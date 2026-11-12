@@ -53,17 +53,17 @@ Gráfico «Ingresos por servicio», con una fila por servicio de la clínica en 
 ### No asistencia por profesional
 
 - Gráfico «Tasa de no asistencia», con una fila por profesional y una última, «Toda la clínica». Cifra: «9,2 %» o «Sin datos».
-- Tabla de recuentos, con columnas «Profesional», «Completadas», «No asistidas», «Canceladas» y «Tasa», y la fila «Toda la clínica»: `María | 129 | 13 | 9 | 9,2 %`.
+- Tabla «Citas por profesional», con columnas «Profesional», «Completadas», «No asistidas», «Canceladas» y «Tasa», y la fila «Toda la clínica»: `María | 129 | 13 | 9 | 9,2 %`.
 
 ### Ocupación semanal por profesional
 
 - Un gráfico por profesional, con título «Ocupación de María» y nueve filas: «Semana del 07/09/2026» a «Semana del 26/10/2026» y «Las 8 semanas». Cifra: «28,6 %». Los tres comparten la escala.
-- Tabla del periodo, con columnas «Profesional», «Capacidad», «Horas completadas» y «Ocupación», y la fila «Toda la clínica»: `María | 440 h | 103 h | 23,4 %` y `Toda la clínica | 1.320 h | 274,5 h | 20,8 %`.
+- Tabla «Horas del periodo», con columnas «Profesional», «Capacidad», «Horas completadas» y «Ocupación», y la fila «Toda la clínica»: `María | 440 h | 103 h | 23,4 %` y `Toda la clínica | 1.320 h | 274,5 h | 20,8 %`.
 
 ### Evolución de las últimas 8 semanas
 
 - Tres gráficos de la clínica en conjunto, cada uno con una fila por semana en orden cronológico («Semana del 07/09/2026»): «Ocupación de la clínica» (`22,6 %`), «Tasa de no asistencia de la clínica» (`16,0 %` o «Sin datos») e «Ingresos de la clínica» (`1.975,00 €`). Bajo el de ingresos: «Total de las 8 semanas: 15.380,00 €».
-- Tabla de recuentos por semana, con columnas «Semana», «Completadas», «No asistidas» y «Canceladas», y una fila final «Total»: `07/09/2026 | 42 | 8 | 7` y `Total | 380 | 46 | 37`.
+- Tabla «Citas por semana», con columnas «Semana», «Completadas», «No asistidas» y «Canceladas», y una fila final «Total»: `07/09/2026 | 42 | 8 | 7` y `Total | 380 | 46 | 37`.
 
 ## Formatos (FR-014, RA7)
 
@@ -81,5 +81,7 @@ Gráfico «Ingresos por servicio», con una fila por servicio de la clínica en 
 
 ## Presentación (FR-020, FR-022)
 
-- Sin desplazamiento horizontal de la página de 360 píxeles al portátil. En pantallas estrechas, la etiqueta de cada fila va encima de su barra.
+- Sin desplazamiento horizontal de la página de 360 píxeles al portátil.
+- Gráficos: por debajo de 40rem, la etiqueta de cada fila va encima de su cifra y de su barra; desde 40rem, etiqueta, cifra y barra van en una sola línea.
+- Tablas: su título es su `<caption>`. Por debajo de 40rem, cada fila es una ficha con el nombre de la fila arriba y cada cifra junto al nombre de su columna (atributo `data-columna`); la cabecera solo se oculta a la vista, y los lectores de pantalla la siguen leyendo.
 - Texto con contraste de al menos 4,5:1, barras con al menos 3:1 sobre su fondo, y controles de al menos 44 × 44 píxeles (el enlace del aviso y los del menú).

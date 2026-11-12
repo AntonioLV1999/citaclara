@@ -403,3 +403,136 @@ describe('historia 4: evolución de las últimas 8 semanas con la semilla', () =
     assert.doesNotMatch(r.visible, /02\/11\/2026/);
   });
 });
+
+describe('cifras de referencia', () => {
+  let p;
+  let r;
+  before(async () => {
+    p = await panelDeSemilla();
+    r = await p.abrir();
+  });
+  after(() => p.cerrar());
+
+  test('004/SC-001 todas las cifras de referencia de la spec aparecen con su valor exacto', () => {
+    // Tasa de no asistencia del periodo (RA3).
+    assert.deepEqual(filasDeTabla(r.texto, 'Citas por profesional'), [
+      ['María', '129', '13', '9', '9,2 %'], ['Jorge', '131', '14', '13', '9,7 %'],
+      ['Lucía', '120', '19', '15', '13,7 %'], ['Toda la clínica', '380', '46', '37', '10,8 %'],
+    ]);
+    // Ocupación del periodo (RA4).
+    assert.deepEqual(filasDeTabla(r.texto, 'Horas del periodo'), [
+      ['María', '440 h', '103 h', '23,4 %'], ['Jorge', '440 h', '102 h', '23,2 %'],
+      ['Lucía', '440 h', '69,5 h', '15,8 %'], ['Toda la clínica', '1.320 h', '274,5 h', '20,8 %'],
+    ]);
+    // Ocupación semanal por profesional (RA4).
+    const semanal = [
+      ['28,6 %', '21,8 %', '17,3 %'], ['27,3 %', '27,3 %', '15,9 %'], ['25,5 %', '24,5 %', '15,9 %'], ['25,0 %', '20,5 %', '18,2 %'],
+      ['23,6 %', '28,6 %', '15,9 %'], ['20,5 %', '21,8 %', '17,3 %'], ['16,4 %', '20,5 %', '15,0 %'], ['20,5 %', '20,5 %', '10,9 %'],
+    ];
+    ['María', 'Jorge', 'Lucía'].forEach((nombre, j) => {
+      const filas = filasDeGrafico(r.texto, `Ocupación de ${nombre}`).slice(0, 8);
+      assert.deepEqual(filas.map((fila) => fila[1]), semanal.map((semana) => semana[j]), nombre);
+    });
+    // Evolución de la clínica.
+    const evolucion = [
+      ['07/09/2026', '42', '8', '7', '16,0 %', '22,6 %', '1.975,00 €'],
+      ['14/09/2026', '49', '6', '3', '10,9 %', '23,5 %', '2.100,00 €'],
+      ['21/09/2026', '50', '4', '4', '7,4 %', '22,0 %', '2.025,00 €'],
+      ['28/09/2026', '51', '6', '3', '10,5 %', '21,2 %', '2.000,00 €'],
+      ['05/10/2026', '54', '2', '5', '3,6 %', '22,7 %', '2.120,00 €'],
+      ['12/10/2026', '49', '6', '4', '10,9 %', '19,8 %', '1.890,00 €'],
+      ['19/10/2026', '43', '7', '5', '14,0 %', '17,3 %', '1.650,00 €'],
+      ['26/10/2026', '42', '7', '6', '14,3 %', '17,3 %', '1.620,00 €'],
+    ];
+    const recuentos = filasDeTabla(r.texto, 'Citas por semana');
+    const tasas = filasDeGrafico(r.texto, 'Tasa de no asistencia de la clínica');
+    const ocupaciones = filasDeGrafico(r.texto, 'Ocupación de la clínica');
+    const ingresos = filasDeGrafico(r.texto, 'Ingresos de la clínica');
+    evolucion.forEach((fila, i) => {
+      assert.deepEqual([...recuentos[i], tasas[i][1], ocupaciones[i][1], ingresos[i][1]], fila, fila[0]);
+    });
+    assert.deepEqual(recuentos[8], ['Total', '380', '46', '37']);
+    assert.ok(r.visible.includes('Total de las 8 semanas: 15.380,00 €'));
+  });
+
+  test('004/FR-021 todas las escalas empiezan en cero', () => {
+    const escalas = [...r.texto.matchAll(/<span class="grafico__escala">([^<]*)<\/span>/g)].map((m) => m[1]);
+    assert.equal(escalas.length, 8);
+    for (const escala of escalas) assert.match(escala, /^(Escala de 0 % a \d+ %|Escala desde 0,00 €)$/);
+  });
+
+  test('004/FR-022 los textos del panel no tienen jerga técnica ni estados en código', () => {
+    assert.doesNotMatch(r.visible, /no_asistida|\breservada\b|\bcompletada\b|sin_cerrar|undefined|null|NaN|\[object/);
+  });
+});
+
+describe('caso límite: citas sin cerrar dentro del periodo', () => {
+  let p;
+  let r;
+  before(async () => {
+    p = await panelDeSemilla({ momentoFijado: '2026-11-11T12:00' });
+    r = await p.abrir();
+  });
+  after(() => p.cerrar());
+
+  test('004/CL citas sin cerrar dentro del periodo: no cuentan, se avisa de 31 y la semana del 02/11 sale vacía', () => {
+    assert.ok(r.visible.includes('Del 14/09/2026 al 08/11/2026'));
+    assert.ok(r.visible.includes(AVISO_31));
+    assert.deepEqual(filasDeTabla(r.texto, 'Citas por semana')[7], ['02/11/2026', '0', '0', '0']);
+    assert.deepEqual(filasDeGrafico(r.texto, 'Ingresos de la clínica')[7], ['Semana del 02/11/2026', '0,00 €']);
+    assert.deepEqual(filasDeGrafico(r.texto, 'Tasa de no asistencia de la clínica')[7], ['Semana del 02/11/2026', 'Sin datos']);
+  });
+});
+
+/** El texto visible con las fechas cambiadas por un marcador, para comparar semillas de otros lunes. */
+const sinFechas = (texto) => texto.replace(/\d{2}\/\d{2}\/\d{4}/g, 'dd/mm/aaaa');
+
+describe('otra fecha de demostración', () => {
+  let referencia;
+  before(async () => {
+    const p = await panelDeSemilla();
+    referencia = (await p.abrir()).visible;
+    await p.cerrar();
+  });
+
+  for (const [lunes, momentoFijado, periodo] of [
+    ['2027-01-04', '2027-01-06T12:00', 'Del 09/11/2026 al 03/01/2027'],
+    ['2027-04-05', '2027-04-07T12:00', 'Del 08/02/2027 al 04/04/2027'],
+  ]) {
+    test(`004/SC-005 004/FR-017 con la semilla del ${lunes}, las cifras son las mismas y solo cambian las fechas`, async () => {
+      const p = await panelDeSemilla({ lunes, momentoFijado });
+      try {
+        const { visible } = await p.abrir();
+        assert.ok(visible.includes(periodo), periodo);
+        assert.equal(sinFechas(visible), sinFechas(referencia));
+      } finally {
+        await p.cerrar();
+      }
+    });
+  }
+});
+
+describe('hora local de la clínica', () => {
+  let e;
+  let servidor;
+  before(async () => {
+    e = crearEscenario();
+    citaDirecta(e.bd, {
+      clinica: e.b.id, profesional: e.b.fisio, servicio: e.b.sesion, paciente: e.b.pacientes[0], inicio: '2026-11-02T09:00', estado: 'completada',
+    });
+    // Lunes 09/11/2026 a las 00:30 en la península, y todavía domingo 08/11 a las 23:30 en Canarias.
+    servidor = await escuchar(crearServidor({ bd: e.bd, ahora: relojFijo('2026-11-08T23:30:00Z') }));
+  });
+  after(async () => {
+    await detener(servidor);
+    e.cerrar();
+  });
+
+  test('004/FR-016 004/CL límite de semana: la semana cambia a las 00:00 del lunes en hora de la clínica, también en Canarias', async () => {
+    const norte = textoVisible((await peticion(servidor, { ruta: '/analitica', cookie: sesionDePrueba(e.bd, e.a.id) })).texto);
+    const sur = textoVisible((await peticion(servidor, { ruta: '/analitica', cookie: sesionDePrueba(e.bd, e.b.id) })).texto);
+    assert.ok(norte.includes('Del 14/09/2026 al 08/11/2026'), norte.slice(0, 300));
+    assert.ok(sur.includes('Del 07/09/2026 al 01/11/2026'), sur.slice(0, 300));
+    assert.ok(sur.includes('Total del periodo: 0,00 €'), 'la cita del lunes 02/11 es de la semana en curso en Canarias');
+  });
+});

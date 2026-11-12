@@ -76,14 +76,17 @@ function apartadoIngresos({ servicios, total }) {
     <p class="analitica__total">Total del periodo: ${euros(total)}</p>`);
 }
 
-/** Tabla de cifras exactas: la primera columna nombra la fila; la fila `total` va resaltada. */
+/**
+ * Tabla de cifras exactas: la primera columna nombra la fila; la fila `total` va resaltada. Cada celda
+ * lleva el nombre de su columna, que en el móvil se escribe a su lado (FR-022).
+ */
 function tabla({ titulo, columnas, filas }) {
   return html`<table class="tabla">
     <caption>${titulo}</caption>
     <thead><tr>${columnas.map((columna) => html`<th scope="col">${columna}</th>`)}</tr></thead>
     <tbody>
       ${filas.map(({ celdas, total }) => html`<tr${total ? html` class="tabla__total"` : ''}>
-        <th scope="row">${celdas[0]}</th>${celdas.slice(1).map((celda) => html`<td>${celda}</td>`)}
+        <th scope="row">${celdas[0]}</th>${celdas.slice(1).map((celda, i) => html`<td data-columna="${columnas[i + 1]}">${celda}</td>`)}
       </tr>`)}
     </tbody>
   </table>`;
