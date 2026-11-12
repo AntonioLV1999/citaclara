@@ -51,49 +51,49 @@ description: "Lista de tareas de implementación del portal del paciente"
 
 ### Tests de la base (primero, deben fallar)
 
-- [ ] T005 [P] Escribir tests del almacén en tests/integracion/esquema-002.test.js, con escritura directa:
+- [X] T005 [P] Escribir tests del almacén en tests/integracion/esquema-002.test.js, con escritura directa:
   - `002/FR-001`: un `INSERT INTO paciente` sin `enlace` recibe uno de 32 caracteres hexadecimales en minúscula, distinto en cada ficha; un `enlace` `NULL` explícito se rechaza (`NOT NULL`).
   - `002/FR-025`: se rechaza un enlace de 31 o 33 caracteres, con mayúsculas o con un carácter no hexadecimal (`CHECK (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*')`), y dos fichas con el mismo enlace (índice único `paciente_enlace`).
   - `RP1`: insertar en `sesion_paciente` una fila con `cita_id` de una cita de otro paciente aborta; con una cita del mismo paciente se acepta; con `cita_id` `NULL` se acepta.
   - `002/FR-004`: `sesion_paciente.ultima_actividad` es obligatoria.
   - `RP6`: `enlace_cancelacion` exige `token_hash` (clave primaria) y `cita_id` existente.
   - `PRAGMA user_version` es 3, y abrir un archivo de la versión 2 lanza `EsquemaAntiguo` sin modificarlo.
-- [ ] T006 [P] Añadir tests a tests/unit/formato.test.js:
+- [X] T006 [P] Añadir tests a tests/unit/formato.test.js:
   - `002/FR-010 nombreDiaCorto`: de 0 a 6, «dom», «lun», «mar», «mié», «jue», «vie» y «sáb».
   - `002/FR-008 tramoCita`: `{ inicio: '2026-11-09T18:00', fin: '2026-11-09T18:45' }` → «lun 09/11/2026, 18:00–18:45», con raya `–` (U+2013).
   - `002/FR-011 enlaceTelefono`: «000 200 000» → `tel:000200000`, y «+34 600 000 003» → `tel:+34600000003`.
-- [ ] T007 [P] Escribir tests del servidor en tests/integracion/servidor-002.test.js, con rutas de prueba en `rutasExtra` (`{ paciente: true, alcance: 'ficha' }`, `{ paciente: true, alcance: 'cita' }` y `{ paciente: true, alcance: 'cualquiera' }`):
+- [X] T007 [P] Escribir tests del servidor en tests/integracion/servidor-002.test.js, con rutas de prueba en `rutasExtra` (`{ paciente: true, alcance: 'ficha' }`, `{ paciente: true, alcance: 'cita' }` y `{ paciente: true, alcance: 'cualquiera' }`):
   - `002/FR-005`: sin cookie, con una cookie `sesion_paciente` inventada, con la sesión de recepción en `sesion` y con la sesión de recepción puesta en `sesion_paciente`, cada ruta de paciente responde 401 con «Tu sesión ha terminado», y su manejador no se llama.
   - `RP6`: una sesión de alcance de cita no abre la ruta de alcance `ficha`, y una de ficha no abre la de alcance `cita`. Las dos abren la de alcance `cualquiera`.
   - `002/FR-004`: con `relojReal` inyectado, una sesión usada hace 29 minutos 59 segundos sigue valiendo y renueva `ultima_actividad`; una usada hace 30 minutos y 1 segundo da 401 y su fila desaparece. Igual con `momentoFijado` puesto (las esperas cuentan tiempo real).
   - `002/FR-025`: las respuestas de las rutas de paciente llevan `referrer-policy: no-referrer` y `cache-control: no-store`.
   - El contexto del manejador recibe `paciente`, `clinica` (la de la ficha), `citaDelAlcance` (`null` en alcance de ficha), `relojReal` y `direccion`.
   - `servidor.rutasRegistradas` expone `paciente` y `alcance` de cada ruta, y una ruta de paciente sale con `publica: true`.
-- [ ] T008 [P] Escribir tests `FR-042` de `esDireccionValida` en tests/unit/direccion.test.js: acepta `http://localhost:3000` y `https://citas.example.com`; rechaza el texto vacío, `ftp://x`, `citas.example.com` sin esquema y `https://citas.example.com/`, con barra final
+- [X] T008 [P] Escribir tests `FR-042` de `esDireccionValida` en tests/unit/direccion.test.js: acepta `http://localhost:3000` y `https://citas.example.com`; rechaza el texto vacío, `ftp://x`, `citas.example.com` sin esquema y `https://citas.example.com/`, con barra final
 
 ### Implementación de la base
 
-- [ ] T009 Pasar src/datos/esquema.sql a la versión 3 ([data-model.md](data-model.md#esquema-versión-3)), y actualizar el comentario de cabecera:
+- [X] T009 Pasar src/datos/esquema.sql a la versión 3 ([data-model.md](data-model.md#esquema-versión-3)), y actualizar el comentario de cabecera:
   - `paciente.enlace`: `TEXT NOT NULL DEFAULT (lower(hex(randomblob(16)))) CHECK (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*')`, conservando el índice único.
   - `sesion_paciente`: añadir `cita_id INTEGER REFERENCES cita (id)` (nulo: alcance de ficha) y `ultima_actividad INTEGER NOT NULL` (milisegundos de tiempo real), y un disparador `BEFORE INSERT` que aborte con `RAISE(ABORT, 'SESION_CITA')` si `cita_id` no es nulo y la cita no es de `paciente_id`.
   - Tabla nueva `enlace_cancelacion (token_hash TEXT PRIMARY KEY, cita_id INTEGER NOT NULL REFERENCES cita (id))`, con índice por `cita_id`.
-- [ ] T010 Cambiar `VERSION_ESQUEMA` a 3 en src/datos/bd.js (depende de T009)
-- [ ] T011 [P] En src/datos/pacientes.js, que `crearPaciente` omita la columna `enlace` del `INSERT` cuando no la recibe, para que actúe el valor por defecto del almacén, y actualizar su comentario (las fichas del alta ya nacen con enlace)
-- [ ] T012 [P] En src/semilla/carga.js, que `borrarClinica` borre, antes que las citas, los `enlace_cancelacion` de las citas de esa clínica, y que el borrado de `sesion_paciente` siga antes que el de `paciente` (002/CL Regenerar la semilla)
-- [ ] T013 [P] Implementar `nombreDiaCorto(numero)`, `tramoCita(cita)` y `enlaceTelefono(telefono)` en src/dominio/formato.js, junto a `nombreDia`
-- [ ] T014 [P] Crear src/dominio/direccion.js con `esDireccionValida(texto)`, que acepta `^https?://[^\s/]+(:\d+)?$` y nada más
-- [ ] T015 [P] Crear src/datos/sesiones-paciente.js con `crearSesionPaciente(bd, { tokenHash, pacienteId, citaId, ahoraReal })`, `sesionPacientePorHash(bd, tokenHash)`, `tocarSesionPaciente(bd, tokenHash, ahoraReal)`, `borrarSesionPaciente(bd, tokenHash)` y `borrarSesionesDeFicha(bd, pacienteId)`
-- [ ] T016 Crear src/servicios/acceso-paciente.js con la parte de sesiones del modelo común ([modelo-acceso.md](contracts/modelo-acceso.md#sesión-de-paciente)): `abrirSesionPaciente(contexto, pacienteId, citaId)` devuelve un token de 32 bytes aleatorios en hexadecimal y guarda su SHA-256; `sesionDePaciente(contexto, token, alcance)` devuelve `{ paciente, clinica, citaDelAlcance }` o `null` si no existe, si han pasado más de 30 minutos de `relojReal()` desde `ultima_actividad` (y entonces la borra) o si el alcance no encaja; si vale, la toca; `cerrarSesionPaciente(contexto, token)` (depende de T015)
-- [ ] T017 Añadir a src/web/plantilla.js `layoutPortal({ titulo, clinica, contenido })`, con el nombre de la clínica, «Llamar a la clínica: {teléfono}» como enlace `tel:` y un botón «Salir» (`POST /portal/salir`), sin el menú de recepción ni el aviso de reloj fijado, y las páginas del paciente con los textos literales del contrato: `paginaSesionTerminada()` (401), `paginaHasSalido()` (200), `paginaEnlaceNoValido()` (404, idéntica byte a byte siempre: sin datos de clínica ni de paciente), `paginaDemasiadosIntentos()` (429) y `paginaCitaNoEncontrada(clinica)` (404) (depende de T013)
-- [ ] T018 Ampliar src/web/servidor.js (depende de T016 y T017):
+- [X] T010 Cambiar `VERSION_ESQUEMA` a 3 en src/datos/bd.js (depende de T009)
+- [X] T011 [P] En src/datos/pacientes.js, que `crearPaciente` omita la columna `enlace` del `INSERT` cuando no la recibe, para que actúe el valor por defecto del almacén, y actualizar su comentario (las fichas del alta ya nacen con enlace)
+- [X] T012 [P] En src/semilla/carga.js, que `borrarClinica` borre, antes que las citas, los `enlace_cancelacion` de las citas de esa clínica, y que el borrado de `sesion_paciente` siga antes que el de `paciente` (002/CL Regenerar la semilla)
+- [X] T013 [P] Implementar `nombreDiaCorto(numero)`, `tramoCita(cita)` y `enlaceTelefono(telefono)` en src/dominio/formato.js, junto a `nombreDia`
+- [X] T014 [P] Crear src/dominio/direccion.js con `esDireccionValida(texto)`, que acepta `^https?://[^\s/]+(:\d+)?$` y nada más
+- [X] T015 [P] Crear src/datos/sesiones-paciente.js con `crearSesionPaciente(bd, { tokenHash, pacienteId, citaId, ahoraReal })`, `sesionPacientePorHash(bd, tokenHash)`, `tocarSesionPaciente(bd, tokenHash, ahoraReal)`, `borrarSesionPaciente(bd, tokenHash)` y `borrarSesionesDeFicha(bd, pacienteId)`
+- [X] T016 Crear src/servicios/acceso-paciente.js con la parte de sesiones del modelo común ([modelo-acceso.md](contracts/modelo-acceso.md#sesión-de-paciente)): `abrirSesionPaciente(contexto, pacienteId, citaId)` devuelve un token de 32 bytes aleatorios en hexadecimal y guarda su SHA-256; `sesionDePaciente(contexto, token, alcance)` devuelve `{ paciente, clinica, citaDelAlcance }` o `null` si no existe, si han pasado más de 30 minutos de `relojReal()` desde `ultima_actividad` (y entonces la borra) o si el alcance no encaja; si vale, la toca; `cerrarSesionPaciente(contexto, token)` (depende de T015)
+- [X] T017 Añadir a src/web/plantilla.js `layoutPortal({ titulo, clinica, contenido })`, con el nombre de la clínica, «Llamar a la clínica: {teléfono}» como enlace `tel:` y un botón «Salir» (`POST /portal/salir`), sin el menú de recepción ni el aviso de reloj fijado, y las páginas del paciente con los textos literales del contrato: `paginaSesionTerminada()` (401), `paginaHasSalido()` (200), `paginaEnlaceNoValido()` (404, idéntica byte a byte siempre: sin datos de clínica ni de paciente), `paginaDemasiadosIntentos()` (429) y `paginaCitaNoEncontrada(clinica)` (404) (depende de T013)
+- [X] T018 Ampliar src/web/servidor.js (depende de T016 y T017):
   - `crearServidor` recibe además `relojReal` (por defecto `Date.now`) y `direccion` (por defecto `http://localhost:3000`), y los pasa en el contexto con `ip` (`req.socket.remoteAddress`).
   - Rutas con `paciente: true`: no pasan por el filtro de recepción, leen solo la cookie `sesion_paciente`, llaman a `sesionDePaciente(contexto, token, ruta.alcance)` y, si da `null`, responden con `paginaSesionTerminada()`. Si vale, el manejador recibe `paciente`, `clinica` y `citaDelAlcance`.
   - El filtro de recepción no cambia: solo lee `sesion` y la tabla `sesion` (FR-037 de la 001).
   - Las respuestas de rutas de paciente y de `GET /e/:token` llevan `referrer-policy: no-referrer`.
   - `rutasRegistradas` incluye `paciente` y `alcance`, y `paciente: true` implica `publica: true`.
-- [ ] T019 Leer `CITACLARA_DIRECCION` en src/principal.js: sin valor, `http://localhost:${puerto}`; con un valor que no cumple `esDireccionValida`, terminar con «La dirección pública CITACLARA_DIRECCION no es válida. Escríbela como http://… o https://…, sin barra al final, por ejemplo https://citas.example.com.»; pasarla a `crearServidor` (depende de T014 y T018)
-- [ ] T020 [P] Actualizar tests/ayudas/escenario.js: `sesionPacienteDePrueba(bd, pacienteId, { citaId = null, ahoraReal = Date.now() } = {})` inserta también `cita_id` y `ultima_actividad`; la clínica `a` de `crearEscenario` lleva `telefono: '000 300 000'`. Comprobar que la suite de la 001 sigue en verde (depende de T009)
-- [ ] T021 [P] Crear tests/ayudas/portal.js con: `escenarioSemilla({ momentoFijado = '2026-11-04T12:00', relojReal } = {})`, que carga la semilla por defecto en una base temporal y levanta el servidor; `fichaPorNombre(bd, nombre)`; `citaDe(bd, pacienteId, inicio)`; `entrarComoPaciente(servidor, enlace)`, que abre `/e/<enlace>` y devuelve la cookie `sesion_paciente`; `enlaceCancelacionDePrueba(bd, citaId)`, que genera un token aleatorio de 32 caracteres hexadecimales e inserta su SHA-256 en `enlace_cancelacion`; y `tokenInventado()` (depende de T020)
+- [X] T019 Leer `CITACLARA_DIRECCION` en src/principal.js: sin valor, `http://localhost:${puerto}`; con un valor que no cumple `esDireccionValida`, terminar con «La dirección pública CITACLARA_DIRECCION no es válida. Escríbela como http://… o https://…, sin barra al final, por ejemplo https://citas.example.com.»; pasarla a `crearServidor` (depende de T014 y T018)
+- [X] T020 [P] Actualizar tests/ayudas/escenario.js: `sesionPacienteDePrueba(bd, pacienteId, { citaId = null, ahoraReal = Date.now() } = {})` inserta también `cita_id` y `ultima_actividad`; la clínica `a` de `crearEscenario` lleva `telefono: '000 300 000'`. Comprobar que la suite de la 001 sigue en verde (depende de T009)
+- [X] T021 [P] Crear tests/ayudas/portal.js con: `escenarioSemilla({ momentoFijado = '2026-11-04T12:00', relojReal } = {})`, que carga la semilla por defecto en una base temporal y levanta el servidor; `fichaPorNombre(bd, nombre)`; `citaDe(bd, pacienteId, inicio)`; `entrarComoPaciente(servidor, enlace)`, que abre `/e/<enlace>` y devuelve la cookie `sesion_paciente`; `enlaceCancelacionDePrueba(bd, citaId)`, que genera un token aleatorio de 32 caracteres hexadecimales e inserta su SHA-256 en `enlace_cancelacion`; y `tokenInventado()` (depende de T020)
 
 **Punto de control**: base lista. `npm test` en verde, salvo los tests nuevos de las historias.
 

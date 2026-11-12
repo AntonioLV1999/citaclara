@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  avisoRelojFijado, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora,
+  avisoRelojFijado, enlaceTelefono, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora, nombreDiaCorto,
+  tramoCita,
 } from '../../src/dominio/formato.js';
 
 test('FR-024 las fechas se muestran como dd/mm/aaaa', () => {
@@ -78,4 +79,18 @@ test('FR-043 el aviso del reloj fijado lleva el día de la semana en minúscula,
     avisoRelojFijado('2027-03-29T07:05'),
     'Reloj de demostración: la hora está fijada en el lunes 29/03/2027 a las 07:05 y no avanza.',
   );
+});
+
+test('002/FR-010 nombreDiaCorto da el nombre corto del día, de domingo a sábado', () => {
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6].map(nombreDiaCorto), ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']);
+});
+
+test('002/FR-008 tramoCita da el día, la fecha y las horas de inicio y fin, con raya', () => {
+  assert.equal(tramoCita({ inicio: '2026-11-09T18:00', fin: '2026-11-09T18:45' }), 'lun 09/11/2026, 18:00\u201318:45');
+  assert.equal(tramoCita({ inicio: '2026-11-11T11:15', fin: '2026-11-11T12:00' }), 'mié 11/11/2026, 11:15–12:00');
+});
+
+test('002/FR-011 enlaceTelefono deja solo los dígitos y el + inicial', () => {
+  assert.equal(enlaceTelefono('000 200 000'), 'tel:000200000');
+  assert.equal(enlaceTelefono('+34 600 000 003'), 'tel:+34600000003');
 });

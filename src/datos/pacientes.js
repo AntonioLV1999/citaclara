@@ -4,8 +4,17 @@ function normalizar(texto) {
 
 const sinEspacios = (texto) => texto.replace(/\s/g, '');
 
-/** Las fichas del alta nacen sin enlace: generarlo es de la 002. La semilla sí lo trae (FR-029). */
-export function crearPaciente(bd, { clinicaId, nombre, telefono, email, enlace = null }) {
+/**
+ * Sin `enlace`, la ficha recibe el del generador único del almacén (002/FR-001): las fichas del alta
+ * ya nacen con enlace. La semilla trae los suyos de demostración (FR-029).
+ */
+export function crearPaciente(bd, { clinicaId, nombre, telefono, email, enlace }) {
+  if (enlace === undefined) {
+    const { lastInsertRowid } = bd
+      .prepare('INSERT INTO paciente (clinica_id, nombre, telefono, email) VALUES (?, ?, ?, ?)')
+      .run(clinicaId, nombre, telefono, email);
+    return Number(lastInsertRowid);
+  }
   const { lastInsertRowid } = bd
     .prepare('INSERT INTO paciente (clinica_id, nombre, telefono, email, enlace) VALUES (?, ?, ?, ?, ?)')
     .run(clinicaId, nombre, telefono, email, enlace);

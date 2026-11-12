@@ -272,14 +272,11 @@ describe('FR-029 teléfono de la clínica y enlace del paciente', () => {
     assert.equal(e.bd.prepare('SELECT enlace FROM paciente WHERE id = ?').get(p).enlace, VALIDO);
   });
 
-  test('FR-029 el enlace es único entre los no nulos y admite varios nulos', () => {
-    const [p1, p2, p3] = e.a.pacientes;
+  // Desde el esquema 3, el enlace es obligatorio (002/FR-001, tests/integracion/esquema-002.test.js).
+  test('FR-029 el enlace es único entre las fichas', () => {
+    const [p1, p2] = e.a.pacientes;
     enlace(p1, VALIDO);
     assert.throws(() => enlace(p2, VALIDO), /UNIQUE/);
-    enlace(p2, null);
-    enlace(p3, null);
-    const nulos = e.bd.prepare('SELECT count(*) AS n FROM paciente WHERE enlace IS NULL').get().n;
-    assert.ok(nulos >= 2);
   });
 
   test('FR-029 la clínica admite teléfono, y también que no lo tenga', () => {
@@ -291,11 +288,12 @@ describe('FR-029 teléfono de la clínica y enlace del paciente', () => {
 
 test('FR-037 las sesiones de paciente tienen su propia tabla, que referencia a paciente', () => {
   const columnas = e.bd.prepare("PRAGMA table_info('sesion_paciente')").all().map((c) => c.name);
-  assert.deepEqual(columnas, ['token_hash', 'paciente_id']);
+  // `cita_id` y `ultima_actividad` son la ampliación de la 002 (esquema 3).
+  assert.deepEqual(columnas, ['token_hash', 'paciente_id', 'cita_id', 'ultima_actividad']);
   const ajenas = e.bd.prepare("PRAGMA foreign_key_list('sesion_paciente')").all();
-  assert.deepEqual(ajenas.map((a) => [a.from, a.table]), [['paciente_id', 'paciente']]);
+  assert.deepEqual(ajenas.map((a) => [a.from, a.table]).sort(), [['cita_id', 'cita'], ['paciente_id', 'paciente']]);
   assert.throws(
-    () => e.bd.prepare("INSERT INTO sesion_paciente (token_hash, paciente_id) VALUES ('x', 999999)").run(),
+    () => e.bd.prepare("INSERT INTO sesion_paciente (token_hash, paciente_id, ultima_actividad) VALUES ('x', 999999, 0)").run(),
     /FOREIGN KEY/,
   );
 });
@@ -305,13 +303,14 @@ describe('FR-032 versión del esquema del archivo de datos', () => {
   beforeEach(() => { carpeta = mkdtempSync(join(tmpdir(), 'citaclara-version-')); });
   afterEach(() => rmSync(carpeta, { recursive: true, force: true }));
 
-  test('FR-032 un archivo nuevo queda en la versión 2 y se reabre sin error', () => {
+  // La versión 3 es la de la 002 (esquema-002.test.js comprueba que la 2 se rechaza).
+  test('FR-032 un archivo nuevo queda en la versión 3 y se reabre sin error', () => {
     const ruta = join(carpeta, 'nuevo.db');
     const bd = abrirBd(ruta);
-    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 2);
+    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 3);
     bd.close();
     const otra = abrirBd(ruta);
-    assert.equal(otra.prepare('PRAGMA user_version').get().user_version, 2);
+    assert.equal(otra.prepare('PRAGMA user_version').get().user_version, 3);
     otra.close();
   });
 

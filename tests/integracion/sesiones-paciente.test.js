@@ -98,10 +98,15 @@ test('CL sesión de recepción y de paciente en el mismo navegador: recepción f
   assert.ok(salida.cookies.some((c) => c.startsWith('sesion=;')), JSON.stringify(salida.cookies));
 });
 
+// El modelo de acceso del paciente es de la 002 (contrato de interfaz web de la 001): su único módulo
+// conoce la cookie y la tabla, y el resto de rutas y servicios los usa a través de él.
+const MODELO_DE_ACCESO_DE_LA_002 = new Set([join('servicios', 'acceso-paciente.js')]);
+
 test('FR-037 ninguna ruta ni servicio de la 001 crea o lee sesiones de paciente', () => {
   const archivos = ['web', 'servicios'].flatMap((carpeta) => readdirSync(join(SRC, carpeta), { recursive: true })
     .filter((a) => a.endsWith('.js'))
-    .map((a) => join(carpeta, a)));
+    .map((a) => join(carpeta, a)))
+    .filter((archivo) => !MODELO_DE_ACCESO_DE_LA_002.has(archivo));
   assert.ok(archivos.length > 10);
   for (const archivo of archivos) {
     assert.doesNotMatch(readFileSync(join(SRC, archivo), 'utf8'), /sesion_paciente/, archivo);

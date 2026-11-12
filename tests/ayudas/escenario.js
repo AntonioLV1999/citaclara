@@ -12,15 +12,18 @@ function insertar(bd, tabla, fila) {
   return Number(bd.prepare(sql).run(...Object.values(fila)).lastInsertRowid);
 }
 
-function poblarClinica(bd, { nombre, clave, zona, profesionales, pacientes }) {
+function poblarClinica(bd, {
+  nombre, clave, zona, telefono = null, profesionales, pacientes,
+}) {
   const clave_sal = `sal-${nombre}`;
   const id = insertar(bd, 'clinica', {
     nombre,
     clave_hash: hashClave(clave, clave_sal),
     clave_sal,
     zona_horaria: zona,
+    telefono,
   });
-  const profesional = (nombreProfesional, especialidad) =>
+  const profesional =(nombreProfesional, especialidad) =>
     insertar(bd, 'profesional', { clinica_id: id, nombre: nombreProfesional, especialidad });
   const servicio = (nombreServicio, especialidad, duracion_min, precio_centimos) =>
     insertar(bd, 'servicio', { clinica_id: id, nombre: nombreServicio, especialidad, duracion_min, precio_centimos });
@@ -29,7 +32,8 @@ function poblarClinica(bd, { nombre, clave, zona, profesionales, pacientes }) {
     nombre,
     clave,
     zona_horaria: zona,
-    fisio: profesional(profesionales[0], 'Fisioterapia'),
+    telefono,
+    fisio:profesional(profesionales[0], 'Fisioterapia'),
     fisio2: profesional(profesionales[1], 'Fisioterapia'),
     nutri: profesional(profesionales[2], 'Nutrición'),
     nombreFisio: profesionales[0],
@@ -52,6 +56,7 @@ export function crearEscenario() {
     nombre: 'Clínica Norte',
     clave: 'clave-norte',
     zona: 'Europe/Madrid',
+    telefono: '000 300 000',
     profesionales: ['María', 'Jorge', 'Lucía'],
     pacientes: [['Ana Núñez', '600 000 001'], ['Óscar Peña', '600 000 002'], ['Luis Gómez', '+34 600 000 003']],
   });
@@ -105,11 +110,15 @@ export function citaDirecta(bd, {
   });
 }
 
-/** Sesión de paciente válida, guardada como la guardará la 002: el SHA-256 del token. */
-export function sesionPacienteDePrueba(bd, pacienteId) {
+/**
+ * Sesión de paciente guardada como la guarda la 002: el SHA-256 del token, su alcance (`citaId` nulo
+ * es toda la ficha) y su última actividad en tiempo real.
+ */
+export function sesionPacienteDePrueba(bd, pacienteId, { citaId = null, ahoraReal = Date.now() } = {}) {
   const token = randomBytes(32).toString('hex');
   const hash = createHash('sha256').update(token).digest('hex');
-  bd.prepare('INSERT INTO sesion_paciente (token_hash, paciente_id) VALUES (?, ?)').run(hash, pacienteId);
+  bd.prepare('INSERT INTO sesion_paciente (token_hash, paciente_id, cita_id, ultima_actividad) VALUES (?, ?, ?, ?)')
+    .run(hash, pacienteId, citaId, ahoraReal);
   return token;
 }
 
@@ -145,6 +154,7 @@ export async function peticion(servidor, { metodo = 'GET', ruta, cookie, formula
     ubicacion: respuesta.headers.get('location'),
     cookies: respuesta.headers.getSetCookie(),
     tipo: respuesta.headers.get('content-type'),
+    cabeceras: respuesta.headers,
   };
 }
 

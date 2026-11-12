@@ -5,8 +5,10 @@ import { crearPaciente } from '../datos/pacientes.js';
 
 function borrarClinica(bd, nombre) {
   for (const { id } of bd.prepare('SELECT id FROM clinica WHERE nombre = ?').all(nombre)) {
-    // También se cierran las sesiones de paciente de sus pacientes (FR-032, FR-037).
+    // También se cierran las sesiones de paciente de sus pacientes (FR-032, FR-037), y caen los
+    // enlaces de cancelación de sus citas, antes que las citas (002/CL Regenerar la semilla).
     bd.prepare('DELETE FROM sesion_paciente WHERE paciente_id IN (SELECT id FROM paciente WHERE clinica_id = ?)').run(id);
+    bd.prepare('DELETE FROM enlace_cancelacion WHERE cita_id IN (SELECT id FROM cita WHERE clinica_id = ?)').run(id);
     for (const tabla of ['cita', 'sesion', 'paciente', 'servicio', 'profesional']) {
       bd.prepare(`DELETE FROM ${tabla} WHERE clinica_id = ?`).run(id);
     }

@@ -1,6 +1,8 @@
 -- Fechas y horas: texto en hora local de la clínica, `AAAA-MM-DDTHH:MM`. Importes: céntimos enteros.
--- Versión 2 del esquema (`PRAGMA user_version`, que fija `abrirBd`). Un archivo de otra versión no
--- se migra: se borra y se regenera con la semilla.
+-- Versión 3 del esquema (`PRAGMA user_version`, que fija `abrirBd`). Un archivo de otra versión no
+-- se migra: se borra y se regenera con la semilla. La 3 es la de la 002: enlace personal obligatorio,
+-- sesiones de paciente con alcance y actividad, y enlaces de cancelación.
+-- Las marcas de tiempo real (`ultima_actividad`) son milisegundos desde 1970, porque miden esperas.
 
 CREATE TABLE IF NOT EXISTS clinica (
   id INTEGER PRIMARY KEY,
@@ -34,11 +36,13 @@ CREATE TABLE IF NOT EXISTS paciente (
   nombre TEXT NOT NULL CHECK (length(trim(nombre)) > 0),
   telefono TEXT NOT NULL,
   email TEXT,
-  -- Enlace personal: solo el token, 32 caracteres hexadecimales en minúscula (FR-029).
-  enlace TEXT CHECK (enlace IS NULL OR (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*'))
+  -- Enlace personal vigente: solo el token, 32 caracteres hexadecimales en minúscula (002/FR-025).
+  -- Toda ficha nace con uno del generador único (002/FR-001); la semilla trae los de demostración (FR-029).
+  enlace TEXT NOT NULL DEFAULT (lower(hex(randomblob(16))))
+    CHECK (length(enlace) = 32 AND enlace NOT GLOB '*[^0-9a-f]*')
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS paciente_enlace ON paciente (enlace) WHERE enlace IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS paciente_enlace ON paciente (enlace);
 
 CREATE TABLE IF NOT EXISTS cita (
   id INTEGER PRIMARY KEY,
@@ -68,11 +72,32 @@ CREATE TABLE IF NOT EXISTS sesion (
   clinica_id INTEGER NOT NULL REFERENCES clinica (id)
 );
 
--- FR-037: las sesiones de paciente viven aparte. La 001 no las crea ni las lee; la 002 amplía la tabla.
+-- FR-037: las sesiones de paciente viven aparte. La 001 no las crea ni las lee: son de la 002.
 CREATE TABLE IF NOT EXISTS sesion_paciente (
   token_hash TEXT PRIMARY KEY,
-  paciente_id INTEGER NOT NULL REFERENCES paciente (id)
+  paciente_id INTEGER NOT NULL REFERENCES paciente (id),
+  -- RP6: nulo es una sesión de toda la ficha; con valor, solo de esa cita (enlace de cancelación).
+  cita_id INTEGER REFERENCES cita (id),
+  -- 002/FR-004: milisegundos de tiempo real de la última petición. Caduca a los 30 minutos.
+  ultima_actividad INTEGER NOT NULL
 );
+
+-- RP6: credencial de una sola cita. El token en claro solo va en el correo de la 003.
+CREATE TABLE IF NOT EXISTS enlace_cancelacion (
+  token_hash TEXT PRIMARY KEY NOT NULL,
+  cita_id INTEGER NOT NULL REFERENCES cita (id)
+);
+
+-- RP7: la anulación en cascada borra por cita.
+CREATE INDEX IF NOT EXISTS enlace_cancelacion_cita ON enlace_cancelacion (cita_id);
+
+-- RP1: una sesión de alcance de cita solo se abre con una cita de su misma ficha.
+CREATE TRIGGER IF NOT EXISTS sesion_paciente_cita BEFORE INSERT ON sesion_paciente
+WHEN NEW.cita_id IS NOT NULL
+  AND (SELECT paciente_id FROM cita WHERE id = NEW.cita_id) IS NOT NEW.paciente_id
+BEGIN
+  SELECT RAISE(ABORT, 'SESION_CITA');
+END;
 
 -- Misma clínica: los cuatro registros de una cita pertenecen a la misma clínica.
 CREATE TRIGGER IF NOT EXISTS cita_misma_clinica BEFORE INSERT ON cita

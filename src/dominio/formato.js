@@ -13,6 +13,7 @@ const ETIQUETAS_ZONA = {
 };
 
 const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const NOMBRES_DIA_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
 
 export function fecha(texto) {
   const [anio, mes, dia] = texto.slice(0, 10).split('-');
@@ -57,6 +58,20 @@ export function etiquetaZona(zona) {
 
 export function nombreDia(numero) {
   return NOMBRES_DIA[numero];
+}
+
+export function nombreDiaCorto(numero) {
+  return NOMBRES_DIA_CORTOS[numero];
+}
+
+/** 002/FR-008: «lun 09/11/2026, 18:00–18:45», con raya entre las horas. */
+export function tramoCita({ inicio, fin }) {
+  return `${nombreDiaCorto(diaDeSemana(inicio))} ${fecha(inicio)}, ${hora(inicio)}–${hora(fin)}`;
+}
+
+/** 002/FR-011: enlace de llamada con los dígitos y el `+` inicial del teléfono. */
+export function enlaceTelefono(telefono) {
+  return `tel:${telefono.replace(/[^\d+]/g, '')}`;
 }
 
 /** FR-043, HU5-E5: aviso de las pantallas de recepción mientras el reloj está fijado. */
