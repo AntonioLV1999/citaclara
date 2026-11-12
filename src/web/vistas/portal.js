@@ -50,3 +50,52 @@ export function vistaPortal({
     </section>`;
   return layoutPortal({ titulo: 'Tus citas', clinica, contenido });
 }
+
+const VOLVER = html`<a class="boton boton--secundario" href="/portal">Volver a mis citas</a>`;
+const ESTADO_EN_TEXTO = { completada: 'completada', no_asistida: 'no asistida' };
+
+function tarjetaSola(cita) {
+  return html`<section class="cita-portal">${datosCita(cita)}</section>`;
+}
+
+/** 002/FR-014: confirmación, o, si la cita ya no es cancelable, el límite de FR-013 sin botón. */
+export function vistaConfirmarCancelacion({ clinica, cita }) {
+  if (!cita.cancelable) {
+    const titulo = 'Ya no se puede cancelar desde aquí';
+    const contenido = html`<h1>${titulo}</h1>
+      ${tarjetaSola(cita)}
+      <p class="aviso aviso--info">Ya no se puede cancelar desde aquí: se podía hasta el ${momento(cita.limite)}. Si no puedes venir, llama a la clínica.</p>
+      <div class="acciones">${enlaceLlamada(clinica, 'boton')} ${VOLVER}</div>`;
+    return layoutPortal({ titulo, clinica, contenido });
+  }
+  const titulo = '¿Cancelar esta cita?';
+  const contenido = html`<h1>${titulo}</h1>
+    ${tarjetaSola(cita)}
+    <p class="aviso aviso--info">Si la cancelas, no se puede deshacer.</p>
+    <form class="acciones" method="post" action="/portal/citas/${cita.id}/cancelar">
+      <button class="boton boton--peligro" type="submit">Sí, cancelar la cita</button>
+      <a class="boton boton--secundario" href="/portal">No, volver a mis citas</a>
+    </form>`;
+  return layoutPortal({ titulo, clinica, contenido });
+}
+
+const RESULTADOS = {
+  hecha: ({ cita }) => ['Cita cancelada', 'status',
+    `Tu cita del ${momento(cita.inicio)} con ${cita.profesional_nombre} está cancelada. Si quieres pedir otra, llama a la clínica.`],
+  fuera_de_plazo: ({ limite }) => ['Ya no se puede cancelar desde aquí', 'alert',
+    `Se podía cancelar hasta el ${momento(limite)}. Si no puedes venir, llama a la clínica.`],
+  no_cancelable: ({ estado }) => ['Esta cita ya no se puede cancelar', 'alert',
+    `Consta como ${ESTADO_EN_TEXTO[estado]}. Si crees que es un error, llama a la clínica.`],
+};
+
+/** 002/FR-016, FR-017: el mensaje de cada resultado de FR-038, siempre con el teléfono. */
+export function vistaResultadoCancelacion({
+  clinica, caso, cita, limite, estado,
+}) {
+  const [titulo, rol, mensaje] = RESULTADOS[caso]({ cita, limite, estado });
+  const contenido = html`<h1>${titulo}</h1>
+    ${tarjetaSola(cita)}
+    <p class="aviso ${rol === 'alert' ? 'aviso--error' : 'aviso--exito'}" role="${rol}">${mensaje}</p>
+    <div class="acciones">${enlaceLlamada(clinica, 'boton')} ${VOLVER}</div>`;
+  return layoutPortal({ titulo, clinica, contenido });
+}

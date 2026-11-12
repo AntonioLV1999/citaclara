@@ -430,3 +430,8 @@ legend {
   width: 100%;
   text-align: left;
 }
+
+.aviso--exito {
+  background: var(--exito-fondo);
+  color: var(--exito-tinta);
+}

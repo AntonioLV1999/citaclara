@@ -23,3 +23,26 @@ test('002/H2-E6 002/FR-022 en 360 × 640, la próxima cita de Isabel Navarro y s
   const ancho = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(ancho).toBeLessThanOrEqual(360);
 });
+
+// Cada proyecto cancela una cita distinta: comparten servidor y datos.
+const CANCELABLE = {
+  'portal-movil': { nombre: 'Javier Peña', tramo: 'vie 06/11/2026, 12:30–13:00' },
+  'portal-portatil': { nombre: 'Isabel Serrano', tramo: 'lun 09/11/2026, 10:30–11:00' },
+};
+
+test('002/H3-E2 desde el móvil, el paciente cancela una cita y la ve en su historial como cancelada por él', async ({ page }, info) => {
+  const { nombre, tramo } = CANCELABLE[info.project.name];
+  await page.goto(enlaceDe(nombre));
+  const tarjeta = page.locator('#proximas .cita-portal').filter({ hasText: tramo });
+  await tarjeta.getByRole('link', { name: 'Cancelar' }).click();
+
+  await expect(page.getByRole('heading', { name: '¿Cancelar esta cita?' })).toBeVisible();
+  await expect(page.getByText('Si la cancelas, no se puede deshacer.')).toBeVisible();
+  await page.getByRole('button', { name: 'Sí, cancelar la cita' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Cita cancelada' })).toBeVisible();
+  await page.getByRole('link', { name: 'Volver a mis citas' }).click();
+  const enHistorial = page.locator('#historial .cita-portal').filter({ hasText: tramo });
+  await expect(enHistorial).toContainText('Cancelada por el paciente el 04/11/2026 a las 12:00');
+  await expect(page.locator('#proximas').getByText(tramo)).toHaveCount(0);
+});

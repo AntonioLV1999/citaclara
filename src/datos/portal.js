@@ -12,3 +12,8 @@ export function citasDeFicha(bd, clinicaId, pacienteId) {
     ORDER BY cita.inicio, cita.id
   `).all(clinicaId, pacienteId);
 }
+
+/** RP1: una cita de la ficha, con los mismos datos que `citasDeFicha`, o `undefined` si no es suya. */
+export function citaDeFicha(bd, clinicaId, pacienteId, citaId) {
+  return citasDeFicha(bd, clinicaId, pacienteId).find((cita) => String(cita.id) === String(citaId));
+}
