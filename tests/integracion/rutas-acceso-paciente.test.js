@@ -63,15 +63,18 @@ test('002/FR-005 la sesión de recepción de eleva-demo no abre la página de ni
 
 test('002/FR-026 las únicas rutas sin clave son la de acceso, la del enlace y las del portal, y estas son de paciente', () => {
   const publicas = s.servidor.rutasRegistradas.filter((r) => r.publica).map((r) => `${r.metodo} ${r.patron}`);
+  // `/cancelar` es la pantalla del enlace de cancelación que pone la 003 (contracts/modelo-acceso.md).
   assert.deepEqual(publicas.sort(), [
-    'GET /acceso', 'GET /e/:token', 'GET /portal', 'GET /portal/citas/:id/cancelar',
-    'POST /acceso', 'POST /portal/citas/:id/cancelar', 'POST /portal/salir',
+    'GET /acceso', 'GET /cancelar', 'GET /e/:token', 'GET /portal', 'GET /portal/citas/:id/cancelar',
+    'POST /acceso', 'POST /cancelar', 'POST /portal/citas/:id/cancelar', 'POST /portal/salir',
   ]);
   for (const ruta of s.servidor.rutasRegistradas.filter((r) => r.patron.startsWith('/portal'))) {
     assert.equal(ruta.paciente, true, ruta.patron);
   }
   const alcances = Object.fromEntries(s.servidor.rutasRegistradas.filter((r) => r.paciente).map((r) => [`${r.metodo} ${r.patron}`, r.alcance]));
   assert.deepEqual(alcances, {
+    'GET /cancelar': 'cita',
+    'POST /cancelar': 'cita',
     'GET /portal': 'ficha',
     'GET /portal/citas/:id/cancelar': 'ficha',
     'POST /portal/citas/:id/cancelar': 'ficha',

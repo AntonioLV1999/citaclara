@@ -110,9 +110,10 @@ describe('002/FR-001 versión 3 del esquema', () => {
   beforeEach(() => { carpeta = mkdtempSync(join(tmpdir(), 'citaclara-version3-')); });
   afterEach(() => rmSync(carpeta, { recursive: true, force: true }));
 
-  test('002/FR-001 un archivo nuevo queda en la versión 3', () => {
+  // La 003 sube el esquema a la versión 4 con la tabla `recordatorio`, sin cambiar lo de la 002.
+  test('002/FR-001 un archivo nuevo queda en la versión 3 o posterior', () => {
     const bd = abrirBd(join(carpeta, 'nuevo.db'));
-    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 3);
+    assert.ok(bd.prepare('PRAGMA user_version').get().user_version >= 3);
     bd.close();
   });
 

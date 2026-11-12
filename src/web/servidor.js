@@ -8,6 +8,7 @@ import {
 import { rutasAcceso } from './rutas/acceso.js';
 import { rutasAgenda } from './rutas/agenda.js';
 import { rutasAnalitica } from './rutas/analitica.js';
+import { rutasCancelar } from './rutas/cancelar.js';
 import { rutasCitas } from './rutas/citas.js';
 import { rutasCorreo } from './rutas/correo.js';
 import { rutasEnlace } from './rutas/enlace.js';
@@ -133,7 +134,7 @@ export function crearServidor({
 }) {
   const rutas = [
     ...rutasAcceso, ...rutasAgenda, ...rutasCitas, ...rutasEstado, ...rutasCorreo, ...rutasPacientes,
-    ...rutasAnalitica, ...rutasEnlaceFicha, ...rutasEnlace, ...rutasPortal, ...rutasExtra,
+    ...rutasAnalitica, ...rutasEnlaceFicha, ...rutasEnlace, ...rutasPortal, ...rutasCancelar, ...rutasExtra,
   ].map(compilarRuta);
   const servidor = createServer((req, res) => {
     atender({

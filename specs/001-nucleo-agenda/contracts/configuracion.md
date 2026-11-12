@@ -27,6 +27,21 @@ $env:CITACLARA_AHORA = '2026-11-04T12:00'; npm start
 
 En el código, el valor llega a rutas y servicios como `contexto.momentoFijado`, y se lee siempre con `ahoraLocal(contexto, zona)`, nunca directamente.
 
+### Proceso de recordatorios (003)
+
+`npm run recordatorios` (`src/recordatorios.js`) lanza a mano el proceso de recordatorios de la 003 (003/FR-002). Lee `CITACLARA_AHORA`, `CITACLARA_DIRECCION`, `PORT` y `CITACLARA_SMTP` con el mismo módulo que el servidor, `src/configuracion.js`, con los mismos mensajes (003/FR-003). Para que el enlace del correo funcione contra el servidor en marcha, los dos se lanzan con el mismo momento de referencia:
+
+```text
+# Git Bash, macOS o Linux
+CITACLARA_AHORA=2026-11-02T08:00 npm run recordatorios
+CITACLARA_AHORA=2026-11-02T08:00 npm start
+
+# PowerShell
+$env:CITACLARA_AHORA = '2026-11-02T08:00'; npm run recordatorios
+```
+
+El servidor también lanza el proceso solo, a las 08:00 locales de cada clínica (003/FR-001). Esa espera se mide con el tiempo real, también con el reloj fijado.
+
 ## Dirección pública del producto (FR-042)
 
 Lo crea la 002, la primera feature que construye enlaces para el paciente, con la definición de FR-042: un único ajuste con la dirección pública ([modelo-acceso.md de la 002](../../002-portal-paciente/contracts/modelo-acceso.md#dirección-pública-fr-042-de-la-001)).
@@ -51,3 +66,14 @@ $env:CITACLARA_DIRECCION = 'http://192.168.1.20:3000'; npm start
 ```
 
 En el código, el valor llega a las rutas como `contexto.direccion`.
+
+## Servidor de correo (003/FR-018)
+
+Lo crea la 003, la primera feature que envía correo ([proceso-recordatorios.md de la 003](../../003-recordatorios-cita/contracts/proceso-recordatorios.md)).
+
+| Variable de entorno | Valor | Por defecto |
+|---------------------|-------|-------------|
+| `CITACLARA_SMTP` | Dirección del servidor de correo, por ejemplo `smtp://correo.example.com:587` | Sin definir: no hay servidor de correo |
+
+- **Mientras no se cumpla FR-039**, el envío es siempre el simulado: cada recordatorio se escribe como un fichero `.eml` en `datos/salida-correo/`, y el producto no abre ninguna conexión de red. Con valor, el resumen de cada ejecución lo avisa: «Hay un servidor de correo configurado, pero el envío real está desactivado hasta que se cumplan las condiciones para usar datos reales. Los recordatorios se han escrito en datos/salida-correo/.»
+- **No se valida** su forma, porque hoy no se usa para conectar. La validación la fijará el cambio que diseñe el envío real.

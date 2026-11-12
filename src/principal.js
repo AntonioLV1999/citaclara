@@ -1,28 +1,28 @@
 import { mkdirSync } from 'node:fs';
+import { ConfiguracionNoValida, leerConfiguracion } from './configuracion.js';
 import { abrirBd, EsquemaAntiguo } from './datos/bd.js';
-import { esDireccionValida } from './dominio/direccion.js';
-import { esMomentoValido } from './dominio/tiempo.js';
+import { todasLasClinicas } from './datos/catalogo.js';
+import { programarRecordatorios } from './servicios/programador.js';
+import { ejecutarRecordatorios } from './servicios/recordatorios.js';
+import { crearEscritorEml } from './servicios/salida-correo.js';
 import { crearServidor } from './web/servidor.js';
-
-const MOMENTO_NO_VALIDO = 'El momento de referencia CITACLARA_AHORA no es válido. '
-  + 'Escríbelo como AAAA-MM-DDTHH:MM, por ejemplo 2026-11-04T12:00.';
-const DIRECCION_NO_VALIDA = 'La dirección pública CITACLARA_DIRECCION no es válida. '
-  + 'Escríbela como http://… o https://…, sin barra al final, por ejemplo https://citas.example.com.';
 
 function terminar(mensaje) {
   console.error(mensaje);
   process.exit(1);
 }
 
-const puerto = Number(process.env.PORT ?? 3000);
-
-// FR-043: se comprueba antes de tocar nada; con un valor mal escrito el servidor no arranca.
-const momentoFijado = process.env.CITACLARA_AHORA || null;
-if (momentoFijado !== null && !esMomentoValido(momentoFijado)) terminar(MOMENTO_NO_VALIDO);
-
-// FR-042: dirección pública de la que cuelgan los enlaces de paciente. Igual que el momento.
-const direccion = process.env.CITACLARA_DIRECCION || `http://localhost:${puerto}`;
-if (!esDireccionValida(direccion)) terminar(DIRECCION_NO_VALIDA);
+// FR-042 y FR-043: se comprueba antes de tocar nada; con un valor mal escrito el servidor no arranca.
+let configuracion;
+try {
+  configuracion = leerConfiguracion(process.env);
+} catch (error) {
+  if (error instanceof ConfiguracionNoValida) terminar(error.message);
+  throw error;
+}
+const {
+  momentoFijado, direccion, puerto, smtpConfigurado,
+} = configuracion;
 
 mkdirSync('datos', { recursive: true });
 let bd;
@@ -33,6 +33,19 @@ try {
   throw error;
 }
 
-crearServidor({ bd, ahora: () => new Date(), momentoFijado, direccion }).listen(puerto, () => {
+const contexto = { bd, ahora: () => new Date(), momentoFijado };
+crearServidor({ ...contexto, direccion }).listen(puerto, () => {
   console.log(`CitaClara en http://localhost:${puerto}`);
+});
+
+// 003/FR-001: los recordatorios salen solos a las 08:00 de cada clínica. Solo los arranca este archivo:
+// los servidores de los tests no tienen programador.
+const enviar = crearEscritorEml();
+programarRecordatorios({
+  contexto,
+  clinicas: () => todasLasClinicas(bd),
+  relojReal: () => new Date(),
+  ejecutar: (ctx, clinica) => ejecutarRecordatorios(ctx, {
+    clinicas: [clinica], direccion, enviar, smtpConfigurado,
+  }),
 });
