@@ -1,7 +1,7 @@
 -- Fechas y horas: texto en hora local de la clínica, `AAAA-MM-DDTHH:MM`. Importes: céntimos enteros.
--- Versión 3 del esquema (`PRAGMA user_version`, que fija `abrirBd`). Un archivo de otra versión no
+-- Versión 4 del esquema (`PRAGMA user_version`, que fija `abrirBd`). Un archivo de otra versión no
 -- se migra: se borra y se regenera con la semilla. La 3 es la de la 002: enlace personal obligatorio,
--- sesiones de paciente con alcance y actividad, y enlaces de cancelación.
+-- sesiones de paciente con alcance y actividad, y enlaces de cancelación. La 4, la de la 003: recordatorios.
 -- Las marcas de tiempo real (`ultima_actividad`) son milisegundos desde 1970, porque miden esperas.
 
 CREATE TABLE IF NOT EXISTS clinica (
@@ -90,6 +90,15 @@ CREATE TABLE IF NOT EXISTS enlace_cancelacion (
 
 -- RP7: la anulación en cascada borra por cita.
 CREATE INDEX IF NOT EXISTS enlace_cancelacion_cita ON enlace_cancelacion (cita_id);
+
+-- RR1, 003/FR-020: una cita tiene como máximo un recordatorio, y lo garantiza la clave primaria.
+-- `enviado_en` es el «ahora» local de la ejecución y `direccion`, el correo de la ficha al enviar (RR2).
+CREATE TABLE IF NOT EXISTS recordatorio (
+  cita_id INTEGER PRIMARY KEY REFERENCES cita (id),
+  enviado_en TEXT NOT NULL,
+  direccion TEXT NOT NULL,
+  modo TEXT NOT NULL CHECK (modo IN ('simulado', 'real'))
+);
 
 -- RP1: una sesión de alcance de cita solo se abre con una cita de su misma ficha.
 CREATE TRIGGER IF NOT EXISTS sesion_paciente_cita BEFORE INSERT ON sesion_paciente

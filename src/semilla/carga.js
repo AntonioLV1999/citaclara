@@ -9,6 +9,8 @@ function borrarClinica(bd, nombre) {
     // enlaces de cancelación de sus citas, antes que las citas (002/CL Regenerar la semilla).
     bd.prepare('DELETE FROM sesion_paciente WHERE paciente_id IN (SELECT id FROM paciente WHERE clinica_id = ?)').run(id);
     bd.prepare('DELETE FROM enlace_cancelacion WHERE cita_id IN (SELECT id FROM cita WHERE clinica_id = ?)').run(id);
+    // 003/CL Regenerar los datos de demostración: los recordatorios caen con sus citas.
+    bd.prepare('DELETE FROM recordatorio WHERE cita_id IN (SELECT id FROM cita WHERE clinica_id = ?)').run(id);
     for (const tabla of ['cita', 'sesion', 'paciente', 'servicio', 'profesional']) {
       bd.prepare(`DELETE FROM ${tabla} WHERE clinica_id = ?`).run(id);
     }

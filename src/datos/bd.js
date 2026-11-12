@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 
 const ESQUEMA = readFileSync(new URL('./esquema.sql', import.meta.url), 'utf8');
-export const VERSION_ESQUEMA = 3;
+export const VERSION_ESQUEMA = 4;
 
 /** El archivo de datos es de otra versión del esquema: no se migra, se regenera con la semilla. */
 export class EsquemaAntiguo extends Error {

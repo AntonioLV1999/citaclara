@@ -303,14 +303,14 @@ describe('FR-032 versión del esquema del archivo de datos', () => {
   beforeEach(() => { carpeta = mkdtempSync(join(tmpdir(), 'citaclara-version-')); });
   afterEach(() => rmSync(carpeta, { recursive: true, force: true }));
 
-  // La versión 3 es la de la 002 (esquema-002.test.js comprueba que la 2 se rechaza).
-  test('FR-032 un archivo nuevo queda en la versión 3 y se reabre sin error', () => {
+  // La versión 4 es la de la 003; la 3 era la de la 002 (esquema-002.test.js comprueba que la 2 se rechaza).
+  test('FR-032 un archivo nuevo queda en la versión 4 y se reabre sin error', () => {
     const ruta = join(carpeta, 'nuevo.db');
     const bd = abrirBd(ruta);
-    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 3);
+    assert.equal(bd.prepare('PRAGMA user_version').get().user_version, 4);
     bd.close();
     const otra = abrirBd(ruta);
-    assert.equal(otra.prepare('PRAGMA user_version').get().user_version, 3);
+    assert.equal(otra.prepare('PRAGMA user_version').get().user_version, 4);
     otra.close();
   });
 
@@ -330,5 +330,37 @@ describe('FR-032 versión del esquema del archivo de datos', () => {
     });
     assert.deepEqual(readFileSync(ruta), antes);
     assert.equal(existsSync(`${ruta}-wal`), false);
+  });
+});
+
+describe('003/FR-020 tabla recordatorio', () => {
+  const insertar = (citaId, { modo = 'simulado', enviadoEn = `${DIA}T08:00`, direccion = 'ana@example.com' } = {}) => e.bd
+    .prepare('INSERT INTO recordatorio (cita_id, enviado_en, direccion, modo) VALUES (?, ?, ?, ?)')
+    .run(citaId, enviadoEn, direccion, modo);
+
+  test('003/FR-020 la tabla recordatorio existe con cita_id como clave primaria', () => {
+    const columnas = e.bd.prepare("PRAGMA table_info('recordatorio')").all();
+    assert.deepEqual(columnas.map((c) => c.name), ['cita_id', 'enviado_en', 'direccion', 'modo']);
+    assert.deepEqual(columnas.filter((c) => c.pk).map((c) => c.name), ['cita_id']);
+    assert.deepEqual(columnas.filter((c) => c.notnull).map((c) => c.name), ['enviado_en', 'direccion', 'modo']);
+  });
+
+  test('RR1 el almacén rechaza un segundo recordatorio de la misma cita', () => {
+    const cita = alta({ inicio: `${DIA}T10:00` });
+    insertar(cita);
+    assert.throws(() => insertar(cita, { modo: 'real' }), /UNIQUE|PRIMARY KEY/);
+    assert.equal(e.bd.prepare('SELECT count(*) AS n FROM recordatorio').get().n, 1);
+  });
+
+  test('003/FR-020 el modo solo admite simulado o real', () => {
+    insertar(alta({ inicio: `${DIA}T10:00` }), { modo: 'simulado' });
+    insertar(alta({ inicio: `${DIA}T11:00` }), { modo: 'real' });
+    assert.throws(() => insertar(alta({ inicio: `${DIA}T12:00` }), { modo: 'sms' }), /CHECK/);
+  });
+
+  test('003/FR-020 el recordatorio referencia una cita que existe', () => {
+    assert.throws(() => insertar(999999), /FOREIGN KEY/);
+    const ajenas = e.bd.prepare("PRAGMA foreign_key_list('recordatorio')").all();
+    assert.deepEqual(ajenas.map((a) => [a.from, a.table, a.to]), [['cita_id', 'cita', 'id']]);
   });
 });
