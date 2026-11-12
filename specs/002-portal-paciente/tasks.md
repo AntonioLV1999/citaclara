@@ -236,7 +236,7 @@ description: "Lista de tareas de implementación del portal del paciente"
 
 ### Tests de la historia 4 (primero, deben fallar)
 
-- [ ] T051 [P] [US4] Escribir tests en tests/integracion/huecos-liberados.test.js, con `escenarioSemilla` y la sesión de `eleva-demo`:
+- [X] T051 [P] [US4] Escribir tests en tests/integracion/huecos-liberados.test.js, con `escenarioSemilla` y la sesión de `eleva-demo`:
   - `002/H4-E1 002/FR-018`: tras cancelar desde el portal la cita de Cristina Ortega del 11/11/2026 de 11:15 a 12:00 con Lucía, la agenda de Lucía de ese día muestra «Libre» de 10:00 a 13:15 y la cita cancelada sigue visible.
   - `002/H4-E2`: recepción reserva una consulta a las 11:15 por `POST /citas`, se acepta, y la agenda muestra la cancelada y la nueva sin confundirlas.
   - `002/H4-E5 002/FR-019`: en la agenda de María y en la de Jorge, de cualquier día, la sección «Huecos liberados por pacientes» muestra «mié 11/11/2026, 11:15–12:00, Lucía» como enlace a `/agenda?profesional=<id de Lucía>&dia=2026-11-11`.
@@ -246,14 +246,14 @@ description: "Lista de tareas de implementación del portal del paciente"
   - `002/FR-019`: un hueco liberado por el correo (cita cancelada con `cancelarCita(…, 'correo')`) también entra; la lista va del más cercano al más lejano; un mismo tramo cancelado dos veces sale una sola vez; las canceladas de la historia de la semilla (origen `recepcion`) no salen; sin huecos, «Ningún paciente ha liberado huecos próximos.».
   - `002/FR-020`: cargar la agenda no crea, mueve ni cambia ninguna cita.
   - `002/CL Huecos con poco margen`: un hueco cuya cita empieza a las 12:15 con `momentoFijado` 12:00 sale en la lista, y con 12:15 ya no.
-- [ ] T052 [P] [US4] Escribir tests de concurrencia en tests/concurrencia/hueco-liberado.test.js, con el patrón de barrera de tests/concurrencia/solape.test.js y los trabajadores existentes tests/concurrencia/trabajador.js y tests/concurrencia/trabajador-cancelar.js (canal `portal`), en bloques posteriores al 09/11/2026 a las 08:00, el «ahora» de trabajador.js:
+- [X] T052 [P] [US4] Escribir tests de concurrencia en tests/concurrencia/hueco-liberado.test.js, con el patrón de barrera de tests/concurrencia/solape.test.js y los trabajadores existentes tests/concurrencia/trabajador.js y tests/concurrencia/trabajador-cancelar.js (canal `portal`), en bloques posteriores al 09/11/2026 a las 08:00, el «ahora» de trabajador.js:
   - `002/SC-005 002/H4-E3 RN1`: 1.000 rondas; en cada una se cancela por el portal una cita reservada y 4 procesos reservan a la vez su tramo exacto o uno que se cruza. Exactamente una reserva prospera, las demás reciben el rechazo de solape, y al final no hay ningún par de citas `reservada` o `completada` del mismo profesional que se crucen.
   - `002/SC-005 002/H4-E4`: 1.000 rondas; en cada una, un proceso cancela por el portal y otros 3 reservan el mismo tramo a la vez. Cero solapes, y si una reserva prospera, la cancelación ya está registrada en la base.
 
 ### Implementación de la historia 4
 
-- [ ] T053 [US4] Añadir `huecosLiberados(bd, clinicaId, ahora)` a src/datos/portal.js, según [data-model.md](data-model.md#hueco-liberado): citas `cancelada` con `origen_cancelacion IN ('portal', 'correo')` y `inicio > ahora`, sin ninguna cita `reservada` o `completada` del mismo profesional con `inicio < fin_hueco AND inicio_hueco < fin`; una fila por profesional, inicio y fin; orden por inicio; con el id y el nombre del profesional
-- [ ] T054 [US4] En src/web/rutas/agenda.js, pasar `huecosLiberados(bd, clinica.id, momento)` a la vista; en src/web/vistas/agenda.js, pintar la sección «Huecos liberados por pacientes» encima de la agenda del día, con `tramoCita` y el nombre del profesional, cada hueco como enlace a su agenda, o el texto sin huecos (depende de T053)
+- [X] T053 [US4] Añadir `huecosLiberados(bd, clinicaId, ahora)` a src/datos/portal.js, según [data-model.md](data-model.md#hueco-liberado): citas `cancelada` con `origen_cancelacion IN ('portal', 'correo')` y `inicio > ahora`, sin ninguna cita `reservada` o `completada` del mismo profesional con `inicio < fin_hueco AND inicio_hueco < fin`; una fila por profesional, inicio y fin; orden por inicio; con el id y el nombre del profesional
+- [X] T054 [US4] En src/web/rutas/agenda.js, pasar `huecosLiberados(bd, clinica.id, momento)` a la vista; en src/web/vistas/agenda.js, pintar la sección «Huecos liberados por pacientes» encima de la agenda del día, con `tramoCita` y el nombre del profesional, cada hueco como enlace a su agenda, o el texto sin huecos (depende de T053)
 
 **Punto de control**: todas las historias funcionan por separado; los tests de concurrencia, con cero solapes.
 

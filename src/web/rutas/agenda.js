@@ -1,5 +1,6 @@
 import { profesionales, profesionalPorId, serviciosDeEspecialidad } from '../../datos/catalogo.js';
 import { citasDelDia } from '../../datos/citas.js';
+import { huecosLiberados } from '../../datos/portal.js';
 import { accionesPermitidas } from '../../dominio/estados.js';
 import { calcularHuecos } from '../../dominio/huecos.js';
 import { MENSAJES } from '../../dominio/reglas.js';
@@ -27,6 +28,7 @@ function agenda(contexto) {
     hoy,
     citas: citas.map((cita) => ({ ...cita, acciones: accionesPermitidas(cita, momento) })),
     huecos: calcularHuecos({ dia, citas, ahora: momento }),
+    huecosLiberados: huecosLiberados(bd, clinica.id, momento),
     duracionMinima: Math.min(...servicios.map((s) => s.duracion_min)),
     momentoFijado,
   }));

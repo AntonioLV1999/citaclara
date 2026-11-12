@@ -1,5 +1,7 @@
 import { ACCIONES } from '../../dominio/estados.js';
-import { etiquetaCita, etiquetaZona, fecha, hora, nombreDia } from '../../dominio/formato.js';
+import {
+  etiquetaCita, etiquetaZona, fecha, hora, nombreDia, tramoCita,
+} from '../../dominio/formato.js';
 import { diaDeSemana, esDiaLaborable, minutosEntre, sumarDias } from '../../dominio/tiempo.js';
 import { html, layout } from '../plantilla.js';
 
@@ -61,6 +63,16 @@ function filaHueco(hueco, profesional, duracionMinima) {
   </li>`;
 }
 
+/** 002/FR-019: huecos liberados por pacientes, de cualquier profesional, cada uno hacia su agenda. */
+function listaHuecosLiberados(huecos) {
+  return html`<section class="huecos-liberados" aria-labelledby="titulo-huecos-liberados">
+    <h2 id="titulo-huecos-liberados">Huecos liberados por pacientes</h2>
+    ${huecos.length
+      ? html`<ul class="lista-simple">${huecos.map((hueco) => html`<li><a class="boton boton--secundario" href="/agenda?profesional=${hueco.profesional_id}&amp;dia=${hueco.inicio.slice(0, 10)}">${tramoCita(hueco)}, ${hueco.profesional_nombre}</a></li>`)}</ul>`
+      : html`<p>Ningún paciente ha liberado huecos próximos.</p>`}
+  </section>`;
+}
+
 function entradasEnOrden(citas, huecos) {
   const entradas = [
     ...citas.map((cita) => ({ inicio: cita.inicio, orden: 0, cita })),
@@ -70,7 +82,7 @@ function entradasEnOrden(citas, huecos) {
 }
 
 export function vistaAgenda({
-  clinica, profesionales, profesional, dia, hoy, citas, huecos, duracionMinima, momentoFijado,
+  clinica, profesionales, profesional, dia, hoy, citas, huecos, huecosLiberados = [], duracionMinima, momentoFijado,
 }) {
   const contenido = html`<h1>Agenda de ${profesional.nombre}</h1>
     <p class="agenda__dia">${nombreDia(diaDeSemana(dia))} ${fecha(dia)}</p>
@@ -80,6 +92,7 @@ export function vistaAgenda({
     </nav>
     ${navegacionDias(profesional, dia, hoy)}
     ${!esDiaLaborable(dia) && html`<p class="aviso aviso--info">La clínica no abre este día.</p>`}
+    ${listaHuecosLiberados(huecosLiberados)}
     <ul class="agenda lista-simple">
       ${entradasEnOrden(citas, huecos).map(({ cita, hueco }) => (cita ? filaCita(cita) : filaHueco(hueco, profesional, duracionMinima)))}
     </ul>`;
