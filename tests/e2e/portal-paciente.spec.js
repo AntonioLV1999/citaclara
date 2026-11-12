@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { LUNES_POR_DEFECTO, SEMILLA } from '../../src/semilla/datos-base.js';
 import { generar } from '../../src/semilla/generador.js';
+import { entrar } from './ayudas.js';
 
 // Servidor del portal: semilla por defecto y reloj del 04/11/2026 a las 12:00 (servidor-portal-e2e.js).
 const { pacientes } = generar({ semilla: SEMILLA, lunes: LUNES_POR_DEFECTO });
@@ -45,4 +46,21 @@ test('002/H3-E2 desde el móvil, el paciente cancela una cita y la ve en su hist
   const enHistorial = page.locator('#historial .cita-portal').filter({ hasText: tramo });
   await expect(enHistorial).toContainText('Cancelada por el paciente el 04/11/2026 a las 12:00');
   await expect(page.locator('#proximas').getByText(tramo)).toHaveCount(0);
+});
+
+test('002/SC-001 desde la agenda de María, recepción copia el enlace de un paciente en menos de 30 segundos', async ({ browser }) => {
+  const contexto = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'] });
+  const page = await contexto.newPage();
+  const inicio = Date.now();
+  await entrar(page);
+  await expect(page.getByRole('heading', { name: 'Agenda de María' })).toBeVisible();
+  await page.getByRole('link', { name: 'Enlace del paciente' }).first().click();
+  await expect(page.getByRole('heading', { name: /^Enlace de / })).toBeVisible();
+  await page.getByRole('button', { name: 'Copiar enlace' }).click();
+  await expect(page.getByText('Enlace copiado.')).toBeVisible();
+  const copiado = await page.evaluate(() => navigator.clipboard.readText());
+  expect(Date.now() - inicio).toBeLessThan(30_000);
+  expect(copiado).toMatch(/^http:\/\/127\.0\.0\.1:3101\/e\/[0-9a-f]{32}$/);
+  expect(copiado).toBe(await page.getByLabel('Enlace personal').inputValue());
+  await contexto.close();
 });

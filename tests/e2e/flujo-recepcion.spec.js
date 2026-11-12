@@ -191,8 +191,9 @@ test('RN4 H3-E6 escenario 8: una cita pasada se marca como no asistida con confi
 
   const cerrada = page.locator('.cita', { hasText: tramo });
   await expect(cerrada).toContainText('No asistida');
-  // RN4: ya no tiene acciones de estado. Solo queda el correo de la ficha, que FR-041 ofrece en cualquier estado.
-  await expect(cerrada.getByRole('link')).toHaveText([/^(Añadir|Cambiar) correo$/]);
+  // RN4: ya no tiene acciones de estado. Solo quedan el correo de la ficha, que FR-041 ofrece en cualquier
+  // estado, y su enlace personal, que la 002 ofrece igual (002/FR-002).
+  await expect(cerrada.getByRole('link')).toHaveText([/^(Añadir|Cambiar) correo$/, 'Enlace del paciente']);
 
   const respuesta = await page.request.post(`/citas/${id}/estado`, { form: { accion: 'completar' } });
   expect(respuesta.status()).toBe(409);

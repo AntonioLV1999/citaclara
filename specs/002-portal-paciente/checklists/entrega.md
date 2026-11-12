@@ -85,26 +85,30 @@ Solo se puede medir en una clínica real, y por tanto después de cumplir FR-039
 
 Se recorren los 12 escenarios de [quickstart.md](../quickstart.md#escenarios-manuales) con `CITACLARA_AHORA=2026-11-04T12:00`.
 
+Recorrido del 12/11/2026, hecho por el agente de implementación sobre `npm run semilla` y `npm start` en `http://localhost:3000`, con peticiones HTTP a la aplicación real y no con un navegador a mano. Lo visual (360 píxeles, otra zona horaria) lo cubren las pruebas de Playwright citadas. **Queda pendiente** que una persona lo recorra en un navegador antes de integrar.
+
 | # | Resultado | Observaciones |
 |---|-----------|---------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
-| 6 | | |
-| 7 | | |
-| 8 | | |
-| 9 | | |
-| 10 | | |
-| 11 | | |
-| 12 | | |
+| 1 | Cumple | Enlace `…/e/<32 caracteres>` copiado de la página «Enlace de Isabel Navarro», sin alta. **Error de la guía**: el 05/11/2026 Isabel Navarro tiene cita con Jorge, no con María. Se hizo desde la agenda de Jorge |
+| 2 | Cumple | 303 a `/portal` con su nombre. La vista a 360 × 640 la comprueba `002/H2-E6` en Playwright |
+| 3 | Cumple | Próximas: 18:00–18:45 con María y 19:00–19:30 con Lucía. Historial de 11, y la del 02/11 a las 15:15 «Pendiente de confirmar por la clínica», sin «Cancelar» |
+| 4 | Cumple | Abrir la confirmación no cambia nada; al confirmar, «Cita cancelada» con el teléfono, la etiqueta en el historial, y la de las 19:00 sigue reservada |
+| 5 | Cumple | «lun 09/11/2026, 18:00–18:45, María», con enlace a esa agenda, y la cita marcada como cancelada por el paciente |
+| 6 | Cumple | Alta aceptada en el tramo; la lista queda vacía y se ven la cancelada y la nueva |
+| 7 | Cumple | Sin «Cancelar», con el límite de las 10:15 y el teléfono |
+| 8 | Cumple | Las dos respuestas son idénticas byte a byte |
+| 9 | Cumple | Al décimo fallo se bloquea; el undécimo y el enlace válido dan «Demasiados intentos» |
+| 10 | Cumple | La sesión abierta da 401, el enlace anterior la respuesta uniforme y el nuevo entra |
+| 11 | Cumple | `/agenda` con la sesión de paciente redirige a `/acceso`; salir del portal no cierra recepción |
+| 12 | Cumple (automático) | `002/SC-007 002/FR-010 002/CL Reloj del móvil equivocado…` en Playwright, con tres zonas horarias del navegador |
+
+- [ ] Recorrido en navegador por una persona.
 
 ## Puertas de integración
 
-- [ ] **VI. Tests**: `npm test` y `npm run test:e2e` en verde, sin tests desactivados ni relajados (T059).
-- [ ] **III. Solape**: `tests/concurrencia/hueco-liberado.test.js` sin ningún solape en 1.000 rondas (T052, SC-005).
-- [ ] **SC-010**: `tests/unit/trazabilidad-002.test.js` en verde (T057).
+- [x] **VI. Tests**: `npm test` (518) y `npm run test:e2e` (88) en verde el 12/11/2026, sin tests desactivados ni relajados (T059).
+- [x] **III. Solape**: `tests/concurrencia/hueco-liberado.test.js` sin ningún solape en 1.000 rondas de cada tipo (T052, SC-005).
+- [x] **SC-010**: `tests/unit/trazabilidad-002.test.js` en verde (T057).
 
 ## Uso con datos reales (002/FR-006)
 

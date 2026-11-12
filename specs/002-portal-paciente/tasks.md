@@ -263,17 +263,17 @@ description: "Lista de tareas de implementación del portal del paciente"
 
 **Propósito**: interfaz en navegador real, trazabilidad, documentación y validación de punta a punta
 
-- [ ] T055 [P] Crear tests/e2e/portal-accesibilidad.spec.js con `auditarPantalla` de tests/e2e/ayudas.js, en los proyectos `portal-movil` y `portal-portatil`:
+- [X] T055 [P] Crear tests/e2e/portal-accesibilidad.spec.js con `auditarPantalla` de tests/e2e/ayudas.js, en los proyectos `portal-movil` y `portal-portatil`:
   - `002/FR-021 002/SC-007`: sin desplazamiento horizontal, contraste de al menos 4,5:1 y controles de al menos 44 × 44 píxeles en «Tus citas», la confirmación, cada resultado de cancelar, «Este enlace no funciona», «Demasiados intentos», «Tu sesión ha terminado» y «Has salido», y en las pantallas de recepción «Enlace de…», su anulación y la agenda con la lista de huecos.
   - `002/SC-007 002/FR-010 002/CL Reloj del móvil equivocado o paciente en otra zona horaria`: la página de David Gil muestra las mismas horas con `timezoneId` `Europe/Madrid`, `Atlantic/Canary` y `America/New_York`.
   - `002/FR-023`: con el navegador en inglés (`locale: 'en-US'`), los textos del portal siguen en español.
-- [ ] T056 [P] Añadir a tests/e2e/portal-paciente.spec.js el test `002/SC-001` en el portátil: desde la agenda de María, abrir «Enlace del paciente» de una cita y pulsar «Copiar enlace» (con el permiso `clipboard-write` concedido); el portapapeles contiene `http://127.0.0.1:3101/e/<32 caracteres>`, y el recorrido completo dura menos de 30 segundos
-- [ ] T057 Crear tests/unit/trazabilidad-002.test.js, con el patrón de tests/unit/trazabilidad.test.js sobre specs/002-portal-paciente/spec.md:
+- [X] T056 [P] Añadir a tests/e2e/portal-paciente.spec.js el test `002/SC-001` en el portátil: desde la agenda de María, abrir «Enlace del paciente» de una cita y pulsar «Copiar enlace» (con el permiso `clipboard-write` concedido); el portapapeles contiene `http://127.0.0.1:3101/e/<32 caracteres>`, y el recorrido completo dura menos de 30 segundos
+- [X] T057 Crear tests/unit/trazabilidad-002.test.js, con el patrón de tests/unit/trazabilidad.test.js sobre specs/002-portal-paciente/spec.md:
   - `002/SC-010 la spec tiene las reglas, escenarios y criterios esperados`: reglas `RP1` a `RP7`, 30 escenarios (8, 7, 7 y 8 por historia) y 10 criterios.
   - `002/SC-010 cada regla, escenario y criterio tiene un test que empieza por él`: `RPn` sin prefijo, y escenarios y criterios como `002/Hx-Ey` y `002/SC-nnn`, salvo 002/SC-002, 002/SC-003, 002/SC-008 y 002/SC-009.
   - `002/SC-010 los criterios medidos a mano tienen protocolo` en specs/002-portal-paciente/checklists/entrega.md.
-- [ ] T058 [P] Completar el apartado «Dirección pública del producto (FR-042)» de specs/001-nucleo-agenda/contracts/configuracion.md con la tabla de `CITACLARA_DIRECCION`, su valor por defecto, el mensaje de error y que la leen el servidor y la 003, tal como reserva ese contrato para la primera feature que construya enlaces
-- [ ] T059 Ejecutar `npm test` y `npm run test:e2e` completos: la suite de la 001 y la de la 002 en verde, sin ningún test desactivado ni relajado (principio VI). Si aparece un solape en cualquier prueba, parar: bloquea la entrega (principio III)
+- [X] T058 [P] Completar el apartado «Dirección pública del producto (FR-042)» de specs/001-nucleo-agenda/contracts/configuracion.md con la tabla de `CITACLARA_DIRECCION`, su valor por defecto, el mensaje de error y que la leen el servidor y la 003, tal como reserva ese contrato para la primera feature que construya enlaces
+- [X] T059 Ejecutar `npm test` y `npm run test:e2e` completos: la suite de la 001 y la de la 002 en verde, sin ningún test desactivado ni relajado (principio VI). Si aparece un solape en cualquier prueba, parar: bloquea la entrega (principio III)
 - [ ] T060 Recorrer a mano los 12 escenarios de specs/002-portal-paciente/quickstart.md con `CITACLARA_AHORA=2026-11-04T12:00`, y anotar el resultado en specs/002-portal-paciente/checklists/entrega.md
 
 ---

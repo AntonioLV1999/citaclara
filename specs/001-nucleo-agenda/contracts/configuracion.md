@@ -29,4 +29,25 @@ En el código, el valor llega a rutas y servicios como `contexto.momentoFijado`,
 
 ## Dirección pública del producto (FR-042)
 
-Reservado, sin implementar en la 001. Lo crea la primera feature que construya enlaces para el paciente (002 o 003), con la definición de FR-042: un único ajuste con la dirección pública. Ese mismo cambio lo añade a este contrato.
+Lo crea la 002, la primera feature que construye enlaces para el paciente, con la definición de FR-042: un único ajuste con la dirección pública ([modelo-acceso.md de la 002](../../002-portal-paciente/contracts/modelo-acceso.md#dirección-pública-fr-042-de-la-001)).
+
+| Variable de entorno | Valor | Por defecto |
+|---------------------|-------|-------------|
+| `CITACLARA_DIRECCION` | `http://…` o `https://…`, con servidor y puerto opcional, sin ruta ni barra final | Sin definir: `http://localhost:<PORT>` |
+
+- **Lo leen** el servidor (`src/principal.js`), que construye con él los enlaces personales que copia recepción (002/FR-002), y la 003, que construirá igual los enlaces de cancelación de los recordatorios. Es el mismo ajuste para los dos tipos de enlace; ninguna feature crea otro.
+- **Forma del enlace**: `<CITACLARA_DIRECCION>/e/<token>`, igual para los dos tipos (002/FR-025).
+- **Valor mal escrito**: el proceso no arranca y escribe en español: «La dirección pública CITACLARA_DIRECCION no es válida. Escríbela como http://… o https://…, sin barra al final, por ejemplo https://citas.example.com.»
+- **Solo con datos de demostración** (FR-039): el navegador solo deja copiar al portapapeles en `https` o en `localhost`, y FR-039 exige la conexión cifrada antes de usar datos reales.
+
+### Cómo arrancar con otra dirección
+
+```text
+# Git Bash, macOS o Linux
+CITACLARA_DIRECCION=http://192.168.1.20:3000 npm start
+
+# PowerShell
+$env:CITACLARA_DIRECCION = 'http://192.168.1.20:3000'; npm start
+```
+
+En el código, el valor llega a las rutas como `contexto.direccion`.

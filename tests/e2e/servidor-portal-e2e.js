@@ -12,6 +12,10 @@ import { crearServidor } from '../../src/web/servidor.js';
 const bd = abrirBd(join(mkdtempSync(join(tmpdir(), 'citaclara-portal-e2e-')), 'e2e.db'));
 cargar(bd, generar({ semilla: SEMILLA, lunes: LUNES_POR_DEFECTO }));
 
-crearServidor({
+const opciones = {
   bd, ahora: () => new Date(), momentoFijado: '2026-11-04T12:00', direccion: 'http://127.0.0.1:3101',
-}).listen(Number(process.env.PORT), '127.0.0.1');
+};
+crearServidor(opciones).listen(Number(process.env.PORT), '127.0.0.1');
+// La misma base en [::1]: otra dirección de origen para probar el bloqueo por intentos (002/FR-004)
+// sin bloquear al resto de pruebas, que llegan desde 127.0.0.1.
+crearServidor(opciones).listen(Number(process.env.PORT), '::1');
