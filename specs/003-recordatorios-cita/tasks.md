@@ -206,11 +206,11 @@ La etiqueta ya la da `etiquetaCita` de la 001 (FR-027), y la lista de huecos, la
 
 **Propósito**: trazabilidad, entrega y validación de extremo a extremo
 
-- [ ] T043 [P] Crear tests/unit/trazabilidad-003.test.js ([research.md §10](research.md#10-trazabilidad-fr-023-sc-007)): `003/SC-007 la spec tiene las reglas, escenarios y criterios esperados` (RR1 a RR6; 27 escenarios: 10, 10, 5 y 2 por historia; SC-001 a SC-007) y `003/SC-007 cada regla, escenario y criterio aparece en un nombre de test`, contando solo los nombres que empiezan por un identificador de la 003 (`RR\d` o `003/…`) y dejando fuera SC-001 y SC-005, medidos a mano. Un `003/H1-E1` no debe contar como `H1-E1` de la 001, ni al revés
-- [ ] T044 [P] Crear specs/003-recordatorios-cita/checklists/entrega.md con el formato de la de la 001: el protocolo de SC-005 (al menos 10 personas sin ayuda, cancelación desde el correo en menos de 1 minuto, también en móvil, umbral 9 de cada 10) y el de SC-001 (tasa de no asistencia con RA3 y ocupación con RA4 de la 004 durante 3 meses, frente a las dos cifras de partida que aporta la clínica), sin rellenar; y las puertas de calidad de la constitución para esta feature
-- [ ] T045 [P] Añadir `CITACLARA_SMTP` y el uso del proceso de recordatorios a specs/001-nucleo-agenda/contracts/configuracion.md, en el apartado que ya cita a la 003, sin cambiar lo demás
-- [ ] T046 Ejecutar `npm test` y `npm run test:e2e` y dejarlos en verde, incluidas las trazabilidades de la 001, la 002 y la 003. Ningún test se desactiva ni se relaja (principio VI)
-- [ ] T047 Recorrer [quickstart.md](quickstart.md) de principio a fin y corregir en el producto, o en la guía si estaba mal, cualquier diferencia
+- [X] T043 [P] Crear tests/unit/trazabilidad-003.test.js ([research.md §10](research.md#10-trazabilidad-fr-023-sc-007)): `003/SC-007 la spec tiene las reglas, escenarios y criterios esperados` (RR1 a RR6; 27 escenarios: 10, 10, 5 y 2 por historia; SC-001 a SC-007) y `003/SC-007 cada regla, escenario y criterio aparece en un nombre de test`, contando solo los nombres que empiezan por un identificador de la 003 (`RR\d` o `003/…`) y dejando fuera SC-001 y SC-005, medidos a mano. Un `003/H1-E1` no debe contar como `H1-E1` de la 001, ni al revés
+- [X] T044 [P] Crear specs/003-recordatorios-cita/checklists/entrega.md con el formato de la de la 001: el protocolo de SC-005 (al menos 10 personas sin ayuda, cancelación desde el correo en menos de 1 minuto, también en móvil, umbral 9 de cada 10) y el de SC-001 (tasa de no asistencia con RA3 y ocupación con RA4 de la 004 durante 3 meses, frente a las dos cifras de partida que aporta la clínica), sin rellenar; y las puertas de calidad de la constitución para esta feature
+- [X] T045 [P] Añadir `CITACLARA_SMTP` y el uso del proceso de recordatorios a specs/001-nucleo-agenda/contracts/configuracion.md, en el apartado que ya cita a la 003, sin cambiar lo demás
+- [X] T046 Ejecutar `npm test` y `npm run test:e2e` y dejarlos en verde, incluidas las trazabilidades de la 001, la 002 y la 003. Ningún test se desactiva ni se relaja (principio VI)
+- [X] T047 Recorrer [quickstart.md](quickstart.md) de principio a fin y corregir en el producto, o en la guía si estaba mal, cualquier diferencia
 
 ---
 
