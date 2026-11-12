@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  avisoRelojFijado, enlaceTelefono, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora, nombreDiaCorto,
-  tramoCita,
+  avisoRelojFijado, enlaceTelefono, etiquetaCita, etiquetaEstado, etiquetaZona, euros, fecha, hora, horas,
+  nombreDiaCorto, porcentaje, tramoCita,
 } from '../../src/dominio/formato.js';
 
 test('FR-024 las fechas se muestran como dd/mm/aaaa', () => {
@@ -93,4 +93,32 @@ test('002/FR-008 tramoCita da el día, la fecha y las horas de inicio y fin, con
 test('002/FR-011 enlaceTelefono deja solo los dígitos y el + inicial', () => {
   assert.equal(enlaceTelefono('000 200 000'), 'tel:000200000');
   assert.equal(enlaceTelefono('+34 600 000 003'), 'tel:+34600000003');
+});
+
+test('RA7 un porcentaje se redondea una sola vez, a un decimal', () => {
+  assert.equal(porcentaje(13, 142), '9,2 %');
+  assert.equal(porcentaje(46, 426), '10,8 %');
+  assert.equal(porcentaje(50, 50), '100,0 %');
+});
+
+test('RA7 la mitad exacta se redondea hacia arriba', () => {
+  assert.equal(porcentaje(1, 16), '6,3 %');
+  assert.equal(porcentaje(1, 80), '1,3 %');
+  assert.equal(porcentaje(1, 8), '12,5 %');
+});
+
+test('RA7 un cero real es 0,0 % y un denominador cero es «Sin datos»', () => {
+  assert.equal(porcentaje(0, 50), '0,0 %');
+  assert.equal(porcentaje(3, 0), 'Sin datos');
+  assert.equal(porcentaje(0, 0), 'Sin datos');
+});
+
+test('004/FR-014 las horas se escriben exactas, sin redondear y con formato español', () => {
+  assert.equal(horas(6180), '103 h');
+  assert.equal(horas(4170), '69,5 h');
+  assert.equal(horas(79200), '1.320 h');
+  assert.equal(horas(16470), '274,5 h');
+  assert.equal(horas(735), '12,25 h');
+  assert.equal(horas(45), '0,75 h');
+  assert.equal(horas(0), '0 h');
 });
