@@ -160,14 +160,14 @@ description: "Lista de tareas de implementación del portal del paciente"
 
 ### Tests de la historia 2 (primero, deben fallar)
 
-- [ ] T037 [P] [US2] Escribir tests del dominio en tests/unit/portal.test.js, con citas construidas a mano y `ahora = '2026-11-04T12:00'`:
+- [X] T037 [P] [US2] Escribir tests del dominio en tests/unit/portal.test.js, con citas construidas a mano y `ahora = '2026-11-04T12:00'`:
   - `RP2`: una reservada con inicio a las 12:01 va a próximas; con inicio a las 12:00 (`sinCerrar`) y a las 11:45, al historial; completadas, no asistidas y canceladas, al historial, también la cancelada de fecha futura (`002/CL Cita cancelada de fecha futura`).
   - `002/FR-007`: próximas de la más cercana a la más lejana, e historial de la más reciente a la más antigua.
   - `002/FR-009`: una sin cerrar se etiqueta «Pendiente de confirmar por la clínica»; una cancelada con origen `portal` o `correo` y momento `2026-11-04T12:00`, «Cancelada por el paciente el 04/11/2026 a las 12:00»; con origen `recepcion`, «Cancelada»; una reservada futura, «Reservada».
   - `RP3 002/FR-013`: una próxima a las 14:00 es cancelable; una a las 13:59 no lo es y lleva `limite` `2026-11-04T11:59`, el que da `limiteCancelacion` de la 001, sin cifra propia.
   - `002/CL Cita que empieza justo ahora`: con `ahora` igual a su inicio, deja de ser próxima y se etiqueta como sin cerrar.
   - `002/CL Días de cambio de hora`: una cita del 29/03/2027 a las 09:00 conserva «09:00», y su límite es `2027-03-29T07:00`.
-- [ ] T038 [P] [US2] Escribir tests de `GET /portal` en tests/integracion/rutas-portal.test.js, con `escenarioSemilla` y entrando por el enlace de cada paciente:
+- [X] T038 [P] [US2] Escribir tests de `GET /portal` en tests/integracion/rutas-portal.test.js, con `escenarioSemilla` y entrando por el enlace de cada paciente:
   - `002/H2-E1`: David Gil ve en «Próximas citas», en este orden, «lun 09/11/2026, 18:00–18:45» con «Sesión de fisioterapia con María» y «lun 09/11/2026, 19:00–19:30» con «Consulta de nutrición con Lucía», y la página dice «Horas en hora peninsular».
   - `002/H2-E2`: su historial tiene 11 citas, de la más reciente a la más antigua, y la del 23/09/2026 con Lucía aparece como «No asistida».
   - `002/H2-E3`: su cita del 02/11/2026 a las 15:15 aparece en el historial como «Pendiente de confirmar por la clínica», sin enlace «Cancelar».
@@ -178,15 +178,15 @@ description: "Lista de tareas de implementación del portal del paciente"
   - `002/FR-011`: la cabecera muestra «Clínica Eleva» y un enlace `href="tel:000200000"`.
   - `002/FR-013`: Javier Peña ve en su cita de las 12:15 «Ya no se puede cancelar desde aquí: se podía hasta el mié 04/11/2026 a las 10:15. Si no puedes venir, llama a la clínica.», con el enlace de llamada, y sin «Cancelar».
   - `002/SC-006`: la página de Isabel Navarro, con 19 citas, responde en menos de 2.000 ms, medido 10 veces.
-- [ ] T039 [P] [US2] Escribir en tests/e2e/portal-paciente.spec.js el test `002/H2-E6 002/FR-022`: en una ventana de 360 × 640, la página de Isabel Navarro muestra la primera próxima cita y su botón «Cancelar» dentro de la ventana sin desplazarse, y `document.documentElement.scrollWidth` no supera 360
+- [X] T039 [P] [US2] Escribir en tests/e2e/portal-paciente.spec.js el test `002/H2-E6 002/FR-022`: en una ventana de 360 × 640, la página de Isabel Navarro muestra la primera próxima cita y su botón «Cancelar» dentro de la ventana sin desplazarse, y `document.documentElement.scrollWidth` no supera 360
 
 ### Implementación de la historia 2
 
-- [ ] T040 [P] [US2] Crear src/datos/portal.js con `citasDeFicha(bd, clinicaId, pacienteId)`: `inicio`, `fin`, `estado`, `origen_cancelacion`, `momento_cancelacion`, nombre del servicio y nombre del profesional, filtrado por clínica y paciente, sin leer `precio_centimos`
-- [ ] T041 [P] [US2] Crear src/dominio/portal.js con `citasDelPaciente(citas, ahora)` → `{ proximas, historial }`, donde cada cita lleva `etiqueta`, `cancelable` y, si es próxima y no cancelable, `limite`, usando solo `sinCerrar`, `dentroDePlazo` y `limiteCancelacion` de src/dominio/estados.js y `etiquetaCita` de src/dominio/formato.js
-- [ ] T042 [US2] Crear src/web/vistas/portal.js con `vistaPortal({ clinica, paciente, proximas, historial, aviso })` según [portal-web.md](contracts/portal-web.md#presentación-del-portal): título «Tus citas», nombre, `etiquetaZona`, «Próximas citas» (con «Cancelar» → `/portal/citas/:id/cancelar`, o el texto del límite con el enlace de llamada) o el mensaje sin citas, e «Historial». Estado siempre en texto, con una clase por estado (depende de T013)
-- [ ] T043 [US2] Completar `GET /portal` en src/web/rutas/portal.js con `citasDeFicha`, `citasDelPaciente` y `vistaPortal`, con `ahoraLocal(contexto, clinica.zona_horaria)` (depende de T040, T041 y T042)
-- [ ] T044 [P] [US2] Añadir los estilos del portal a src/web/estaticos/estilos.css: una columna desde 360 píxeles, tarjetas de cita compactas para que la primera entre en 360 × 640 con su botón, controles de al menos 44 × 44 píxeles y contraste de al menos 4,5:1, reutilizando las variables y clases de estado de la 001
+- [X] T040 [P] [US2] Crear src/datos/portal.js con `citasDeFicha(bd, clinicaId, pacienteId)`: `inicio`, `fin`, `estado`, `origen_cancelacion`, `momento_cancelacion`, nombre del servicio y nombre del profesional, filtrado por clínica y paciente, sin leer `precio_centimos`
+- [X] T041 [P] [US2] Crear src/dominio/portal.js con `citasDelPaciente(citas, ahora)` → `{ proximas, historial }`, donde cada cita lleva `etiqueta`, `cancelable` y, si es próxima y no cancelable, `limite`, usando solo `sinCerrar`, `dentroDePlazo` y `limiteCancelacion` de src/dominio/estados.js y `etiquetaCita` de src/dominio/formato.js
+- [X] T042 [US2] Crear src/web/vistas/portal.js con `vistaPortal({ clinica, paciente, proximas, historial, aviso })` según [portal-web.md](contracts/portal-web.md#presentación-del-portal): título «Tus citas», nombre, `etiquetaZona`, «Próximas citas» (con «Cancelar» → `/portal/citas/:id/cancelar`, o el texto del límite con el enlace de llamada) o el mensaje sin citas, e «Historial». Estado siempre en texto, con una clase por estado (depende de T013)
+- [X] T043 [US2] Completar `GET /portal` en src/web/rutas/portal.js con `citasDeFicha`, `citasDelPaciente` y `vistaPortal`, con `ahoraLocal(contexto, clinica.zona_horaria)` (depende de T040, T041 y T042)
+- [X] T044 [P] [US2] Añadir los estilos del portal a src/web/estaticos/estilos.css: una columna desde 360 píxeles, tarjetas de cita compactas para que la primera entre en 360 × 640 con su botón, controles de al menos 44 × 44 píxeles y contraste de al menos 4,5:1, reutilizando las variables y clases de estado de la 001
 
 **Punto de control**: cada paciente de la tabla ve sus citas como dice la spec; los tests de las historias 1 y 2 en verde.
 

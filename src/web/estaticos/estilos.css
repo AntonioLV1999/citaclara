@@ -349,3 +349,84 @@ legend {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+
+/* Portal del paciente (002/FR-021, FR-022): una columna desde 360 píxeles, y tarjetas compactas para
+   que la primera próxima cita y su «Cancelar» entren en 360 × 640 sin desplazarse. */
+.portal .cabecera {
+  padding: 0.5rem 1rem;
+}
+
+.portal .contenido {
+  max-width: 36rem;
+}
+
+.portal h1 {
+  margin-bottom: 0.25rem;
+}
+
+.portal__paciente {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.portal__zona {
+  color: var(--tinta-suave);
+  font-size: 0.9375rem;
+}
+
+.portal__seccion h2 {
+  margin-top: 1rem;
+}
+
+.cita-portal {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borde);
+  border-left: 6px solid var(--marca);
+  border-radius: 0.5rem;
+  background: var(--superficie);
+}
+
+.cita-portal p {
+  margin: 0;
+}
+
+.cita-portal .boton {
+  margin-top: 0.5rem;
+}
+
+.cita-portal__tramo {
+  font-weight: 700;
+}
+
+.cita-portal__servicio {
+  color: var(--tinta-suave);
+}
+
+.cita-portal__nota {
+  margin-top: 0.5rem !important;
+}
+
+#historial .cita-portal {
+  border-left-color: var(--neutro-tinta);
+}
+
+.estado--pendiente {
+  background: var(--reloj-fondo);
+  color: var(--reloj-tinta);
+}
+
+/* Recepción (002/FR-019): huecos liberados por pacientes, encima de la agenda del día. */
+.huecos-liberados {
+  margin-top: 1rem;
+}
+
+.huecos-liberados h2 {
+  margin-top: 0;
+}
+
+.huecos-liberados .boton {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
