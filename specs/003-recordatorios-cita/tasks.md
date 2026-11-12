@@ -195,8 +195,8 @@ La etiqueta ya la da `etiquetaCita` de la 001 (FR-027), y la lista de huecos, la
 
 ### Tests de la historia 4
 
-- [ ] T041 [P] [US4] Tests de la agenda en tests/integracion/agenda-cancelada-correo.test.js: `003/H4-E1 003/FR-016` la cita cancelada desde el correo con el reloj fijado en `2026-11-02T08:00` se muestra como «Cancelada por el paciente el 02/11/2026 a las 08:00», igual que una cancelada desde el portal; `003/H4-E2` la cancelada por recepción, como «Cancelada»; y el tramo cancelado desde el correo aparece en la lista de huecos liberados de la 002
-- [ ] T042 [US4] Si T041 falla, corregir solo el código de la 003 que lo cause. Si la causa está en `etiquetaCita` o en la lista de huecos, pedir el cambio a la 001 o a la 002
+- [X] T041 [P] [US4] Tests de la agenda en tests/integracion/agenda-cancelada-correo.test.js: `003/H4-E1 003/FR-016` la cita cancelada desde el correo con el reloj fijado en `2026-11-02T08:00` se muestra como «Cancelada por el paciente el 02/11/2026 a las 08:00», igual que una cancelada desde el portal; `003/H4-E2` la cancelada por recepción, como «Cancelada»; y el tramo cancelado desde el correo aparece en la lista de huecos liberados de la 002
+- [X] T042 [US4] Si T041 falla, corregir solo el código de la 003 que lo cause. Si la causa está en `etiquetaCita` o en la lista de huecos, pedir el cambio a la 001 o a la 002
 
 **Punto de control**: todas las historias funcionan
 
