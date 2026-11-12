@@ -43,6 +43,7 @@ function filaCita(cita) {
     <div class="acciones">
       ${cita.acciones.map((accion) => html`<a class="boton boton--secundario" href="/citas/${cita.id}/confirmar?accion=${accion}">${ACCIONES[accion].texto}</a>`)}
       ${enlaceCorreo(cita)}
+      <a class="boton boton--secundario" href="/citas/${cita.id}/enlace">Enlace del paciente</a>
     </div>
   </li>`;
 }

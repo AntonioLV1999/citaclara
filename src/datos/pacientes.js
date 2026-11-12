@@ -1,3 +1,6 @@
+import { transaccionInmediata } from './bd.js';
+import { borrarSesionesDeFicha } from './sesiones-paciente.js';
+
 function normalizar(texto) {
   return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 }
@@ -41,4 +44,20 @@ export function buscarPacientes(bd, clinicaId, texto) {
   const telefono = sinEspacios(buscado);
   return pacientesDeClinica(bd, clinicaId).filter((paciente) =>
     normalizar(paciente.nombre).includes(buscado) || sinEspacios(paciente.telefono).includes(telefono));
+}
+
+/**
+ * 002/FR-002: sustituye el enlace personal de la ficha por uno nuevo del generador único y lo devuelve,
+ * o `undefined` si la ficha no es de la clínica. No cambia ninguna cita.
+ */
+export function anularEnlace(bd, clinicaId, pacienteId) {
+  return transaccionInmediata(bd, () => {
+    const { changes } = bd.prepare('UPDATE paciente SET enlace = lower(hex(randomblob(16))) WHERE clinica_id = ? AND id = ?')
+      .run(clinicaId, pacienteId);
+    if (changes === 0) return undefined;
+    // RP7: el enlace anterior, los de cancelación y las sesiones caen a la vez.
+    bd.prepare('DELETE FROM enlace_cancelacion WHERE cita_id IN (SELECT id FROM cita WHERE paciente_id = ?)').run(pacienteId);
+    borrarSesionesDeFicha(bd, pacienteId);
+    return pacientePorId(bd, clinicaId, pacienteId).enlace;
+  });
 }

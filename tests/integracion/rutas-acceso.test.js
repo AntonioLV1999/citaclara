@@ -80,9 +80,14 @@ test('H4-E3 FR-001 sin sesión se rechazan todas las rutas registradas', async (
   assert.equal(e.bd.prepare('SELECT count(*) AS n FROM cita').get().n, 1);
 });
 
+// Ampliado, como prevé FR-001, con las rutas públicas del modelo de acceso de la 002 y solo con ellas:
+// la del enlace y las de paciente (contracts/portal-web.md de la 002).
 test('FR-001 solo la pantalla de acceso es pública', () => {
   const publicas = servidor.rutasRegistradas.filter((ruta) => ruta.publica).map((r) => `${r.metodo} ${r.patron}`);
-  assert.deepEqual(publicas.sort(), ['GET /acceso', 'POST /acceso']);
+  assert.deepEqual(publicas.sort(), [
+    'GET /acceso', 'GET /e/:token', 'GET /portal', 'GET /portal/citas/:id/cancelar',
+    'POST /acceso', 'POST /portal/citas/:id/cancelar', 'POST /portal/salir',
+  ]);
 });
 
 test('FR-001 están registradas las rutas del contrato', () => {
